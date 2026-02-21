@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../../../core/config/api_config.dart';
+import '../../../../core/network/api_client.dart';
+import '../../../../data/models/music_model.dart';
+import '../../../../data/models/artist_model.dart';
 
 class BrowsePage extends StatefulWidget {
   const BrowsePage({Key? key}) : super(key: key);
@@ -8,20 +13,98 @@ class BrowsePage extends StatefulWidget {
 }
 
 class _BrowsePageState extends State<BrowsePage> {
-  final List<String> _categories = [
-    'All',
-    'Pop',
-    'Rock',
-    'Hip-Hop',
-    'Jazz',
-    'Classical',
-    'Electronic',
-    'Country',
-    'R&B',
-    'Reggae',
-  ];
+  List<Map<String, dynamic>> _genres = [];
+  List<MusicModel> _searchResults = [];
+  List<ArtistModel> _artistResults = [];
+  List<MusicModel> _newReleases = [];
+  bool _isSearching = false;
+  bool _isLoading = true;
+  String _searchQuery = '';
 
+  final TextEditingController _searchController = TextEditingController();
   int _selectedCategoryIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadData());
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadData() async {
+    final apiClient = context.read<ApiClient>();
+    setState(() => _isLoading = true);
+    try {
+      final genreRes = await apiClient.dio.get(ApiConfig.genres);
+      final genreBody = genreRes.data;
+      final genreItems = genreBody['data'] ?? genreBody['genres'] ?? [];
+
+      final songRes = await apiClient.dio.get(
+        ApiConfig.songs,
+        queryParameters: {'limit': 10, 'sort': '-createdAt'},
+      );
+      final songBody = songRes.data;
+      final songItems = songBody['data'] ?? songBody['songs'] ?? [];
+
+      if (mounted) {
+        setState(() {
+          _genres = List<Map<String, dynamic>>.from(genreItems);
+          _newReleases = (songItems as List)
+              .map((json) => MusicModel.fromJson(json as Map<String, dynamic>))
+              .toList();
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _performSearch(String query) async {
+    if (query.trim().isEmpty) {
+      setState(() {
+        _isSearching = false;
+        _searchResults = [];
+        _artistResults = [];
+      });
+      return;
+    }
+
+    setState(() => _isSearching = true);
+
+    final apiClient = context.read<ApiClient>();
+    try {
+      final res = await apiClient.dio.get(
+        ApiConfig.search,
+        queryParameters: {'q': query},
+      );
+      final body = res.data;
+      final data = body['data'] ?? body;
+
+      final songs = data['songs'] ?? [];
+      final artists = data['artists'] ?? [];
+
+      if (mounted) {
+        setState(() {
+          _searchResults = (songs as List)
+              .map((j) => MusicModel.fromJson(j as Map<String, dynamic>))
+              .toList();
+          _artistResults = (artists as List)
+              .map((j) => ArtistModel.fromJson(j as Map<String, dynamic>))
+              .toList();
+          _isSearching = false;
+          _searchQuery = query;
+        });
+      }
+    } catch (e) {
+      if (mounted) setState(() => _isSearching = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,14 +120,23 @@ class _BrowsePageState extends State<BrowsePage> {
                 const SizedBox(height: 20),
                 _buildSearchBar(),
                 const SizedBox(height: 24),
-                _buildCategoryTabs(),
-                const SizedBox(height: 32),
-                _buildFeaturedSection(),
-                const SizedBox(height: 32),
-                _buildGenresGrid(),
-                const SizedBox(height: 32),
-                _buildNewReleases(),
-                const SizedBox(height: 100),
+                if (_searchQuery.isNotEmpty) ...[
+                  _buildSearchResultsSection(),
+                ] else if (_isLoading) ...[
+                  const SizedBox(height: 100),
+                  const Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF10B981)),
+                    ),
+                  ),
+                ] else ...[
+                  _buildCategoryTabs(),
+                  const SizedBox(height: 32),
+                  _buildGenresGrid(),
+                  const SizedBox(height: 32),
+                  _buildNewReleases(),
+                  const SizedBox(height: 100),
+                ],
               ],
             ),
           ),
@@ -68,10 +160,6 @@ class _BrowsePageState extends State<BrowsePage> {
         ),
       ),
       actions: [
-        IconButton(
-          onPressed: () {},
-          icon: const Icon(Icons.search, color: Colors.white),
-        ),
         IconButton(
           onPressed: () {},
           icon: const Icon(Icons.filter_list, color: Colors.white),
@@ -101,7 +189,9 @@ class _BrowsePageState extends State<BrowsePage> {
           ),
         ),
         child: TextField(
+          controller: _searchController,
           style: const TextStyle(color: Colors.white),
+          onSubmitted: _performSearch,
           decoration: InputDecoration(
             hintText: 'Search for songs, artists, albums...',
             hintStyle: TextStyle(
@@ -112,6 +202,15 @@ class _BrowsePageState extends State<BrowsePage> {
               Icons.search,
               color: Colors.white.withOpacity(0.6),
             ),
+            suffixIcon: _searchQuery.isNotEmpty
+                ? IconButton(
+                    icon: Icon(Icons.clear, color: Colors.white.withOpacity(0.6)),
+                    onPressed: () {
+                      _searchController.clear();
+                      _performSearch('');
+                    },
+                  )
+                : null,
             border: InputBorder.none,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 20,
@@ -123,13 +222,94 @@ class _BrowsePageState extends State<BrowsePage> {
     );
   }
 
+  Widget _buildSearchResultsSection() {
+    if (_isSearching) {
+      return const Padding(
+        padding: EdgeInsets.only(top: 60),
+        child: Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF10B981)),
+          ),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (_artistResults.isNotEmpty) ...[
+            Text(
+              'Artists (${_artistResults.length})',
+              style: const TextStyle(
+                color: Colors.white, fontSize: 20, fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 12),
+            ...(_artistResults.take(5).map((a) => ListTile(
+                  leading: CircleAvatar(
+                    backgroundImage: a.imageUrl.isNotEmpty ? NetworkImage(a.imageUrl) : null,
+                    child: a.imageUrl.isEmpty ? const Icon(Icons.person) : null,
+                  ),
+                  title: Text(a.name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                  subtitle: Text(a.genres.join(', '), style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 13)),
+                ))),
+            const SizedBox(height: 24),
+          ],
+          if (_searchResults.isNotEmpty) ...[
+            Text(
+              'Songs (${_searchResults.length})',
+              style: const TextStyle(
+                color: Colors.white, fontSize: 20, fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 12),
+            ...(_searchResults.take(10).map((s) => ListTile(
+                  leading: Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      color: const Color(0xFF10B981).withOpacity(0.2),
+                    ),
+                    child: s.imageUrl.isNotEmpty
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.network(s.imageUrl, fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => const Icon(Icons.music_note, color: Colors.white)),
+                          )
+                        : const Icon(Icons.music_note, color: Colors.white),
+                  ),
+                  title: Text(s.title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                  subtitle: Text(s.artist, style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 13)),
+                  trailing: const Icon(Icons.play_circle_outline, color: Color(0xFF10B981)),
+                ))),
+          ],
+          if (_searchResults.isEmpty && _artistResults.isEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 60),
+              child: Center(
+                child: Text(
+                  'No results for "$_searchQuery"',
+                  style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 16),
+                ),
+              ),
+            ),
+          const SizedBox(height: 100),
+        ],
+      ),
+    );
+  }
+
   Widget _buildCategoryTabs() {
+    final categories = ['All', ..._genres.map((g) => g['name']?.toString() ?? '').where((n) => n.isNotEmpty).take(8)];
     return SizedBox(
       height: 45,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: _categories.length,
+        itemCount: categories.length,
         itemBuilder: (context, index) {
           final isSelected = _selectedCategoryIndex == index;
           return GestureDetector(
@@ -158,7 +338,7 @@ class _BrowsePageState extends State<BrowsePage> {
               ),
               child: Center(
                 child: Text(
-                  _categories[index],
+                  categories[index],
                   style: TextStyle(
                     color: isSelected ? Colors.white : Colors.white.withOpacity(0.7),
                     fontSize: 14,
@@ -173,97 +353,32 @@ class _BrowsePageState extends State<BrowsePage> {
     );
   }
 
-  Widget _buildFeaturedSection() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Featured Playlists',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.5,
-            ),
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            height: 180,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: 5,
-              itemBuilder: (context, index) {
-                return Container(
-                  width: 160,
-                  margin: const EdgeInsets.only(right: 16),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        _getGradientColor(index)[0],
-                        _getGradientColor(index)[1],
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: _getGradientColor(index)[0].withOpacity(0.3),
-                        blurRadius: 12,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: Stack(
-                    children: [
-                      Positioned(
-                        bottom: 16,
-                        left: 16,
-                        right: 16,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Playlist ${index + 1}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '${20 + index * 5} songs',
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.8),
-                                fontSize: 13,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildGenresGrid() {
-    final genres = [
-      {'name': 'Pop', 'icon': Icons.star, 'color': const Color(0xFFEC4899)},
-      {'name': 'Rock', 'icon': Icons.music_note, 'color': const Color(0xFFEF4444)},
-      {'name': 'Hip-Hop', 'icon': Icons.headphones, 'color': const Color(0xFF8B5CF6)},
-      {'name': 'Jazz', 'icon': Icons.piano, 'color': const Color(0xFF3B82F6)},
-      {'name': 'Classical', 'icon': Icons.library_music, 'color': const Color(0xFF10B981)},
-      {'name': 'Electronic', 'icon': Icons.waves, 'color': const Color(0xFFF59E0B)},
+    final genreIcons = <String, IconData>{
+      'pop': Icons.star,
+      'rock': Icons.music_note,
+      'hip-hop': Icons.headphones,
+      'jazz': Icons.piano,
+      'classical': Icons.library_music,
+      'electronic': Icons.waves,
+      'r&b': Icons.favorite,
+      'reggae': Icons.surround_sound,
+      'dancehall': Icons.nightlife,
+      'afrobeats': Icons.music_video,
+    };
+
+    final genreColors = [
+      const Color(0xFFEC4899),
+      const Color(0xFFEF4444),
+      const Color(0xFF8B5CF6),
+      const Color(0xFF3B82F6),
+      const Color(0xFF10B981),
+      const Color(0xFFF59E0B),
+      const Color(0xFF06B6D4),
+      const Color(0xFFE11D48),
     ];
+
+    final displayGenres = _genres.take(8).toList();
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -289,23 +404,26 @@ class _BrowsePageState extends State<BrowsePage> {
               crossAxisSpacing: 16,
               childAspectRatio: 1.5,
             ),
-            itemCount: genres.length,
+            itemCount: displayGenres.length,
             itemBuilder: (context, index) {
-              final genre = genres[index];
+              final genre = displayGenres[index];
+              final name = genre['name']?.toString() ?? 'Unknown';
+              final color = genreColors[index % genreColors.length];
+              final icon = genreIcons[name.toLowerCase()] ?? Icons.music_note;
               return Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      (genre['color'] as Color).withOpacity(0.8),
-                      (genre['color'] as Color).withOpacity(0.5),
+                      color.withOpacity(0.8),
+                      color.withOpacity(0.5),
                     ],
                   ),
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: (genre['color'] as Color).withOpacity(0.3),
+                      color: color.withOpacity(0.3),
                       blurRadius: 12,
                       offset: const Offset(0, 6),
                     ),
@@ -322,13 +440,9 @@ class _BrowsePageState extends State<BrowsePage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Icon(
-                            genre['icon'] as IconData,
-                            color: Colors.white,
-                            size: 32,
-                          ),
+                          Icon(icon, color: Colors.white, size: 32),
                           Text(
-                            genre['name'] as String,
+                            name,
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 18,
@@ -349,6 +463,8 @@ class _BrowsePageState extends State<BrowsePage> {
   }
 
   Widget _buildNewReleases() {
+    if (_newReleases.isEmpty) return const SizedBox.shrink();
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
@@ -367,8 +483,9 @@ class _BrowsePageState extends State<BrowsePage> {
           ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: 3,
+            itemCount: _newReleases.length.clamp(0, 5),
             itemBuilder: (context, index) {
+              final song = _newReleases[index];
               return Container(
                 margin: const EdgeInsets.only(bottom: 12),
                 padding: const EdgeInsets.all(12),
@@ -393,19 +510,17 @@ class _BrowsePageState extends State<BrowsePage> {
                       width: 60,
                       height: 60,
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            _getGradientColor(index)[0],
-                            _getGradientColor(index)[1],
-                          ],
-                        ),
                         borderRadius: BorderRadius.circular(8),
+                        color: const Color(0xFF10B981).withOpacity(0.2),
                       ),
-                      child: const Icon(
-                        Icons.album,
-                        color: Colors.white,
-                        size: 30,
-                      ),
+                      child: song.imageUrl.isNotEmpty
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.network(song.imageUrl, fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) =>
+                                      const Icon(Icons.album, color: Colors.white, size: 30)),
+                            )
+                          : const Icon(Icons.album, color: Colors.white, size: 30),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -413,7 +528,7 @@ class _BrowsePageState extends State<BrowsePage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'New Album ${index + 1}',
+                            song.title,
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 16,
@@ -422,7 +537,7 @@ class _BrowsePageState extends State<BrowsePage> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Various Artists',
+                            song.artist,
                             style: TextStyle(
                               color: Colors.white.withOpacity(0.6),
                               fontSize: 14,
@@ -448,17 +563,4 @@ class _BrowsePageState extends State<BrowsePage> {
       ),
     );
   }
-
-  List<Color> _getGradientColor(int index) {
-    final colors = [
-      [const Color(0xFFEC4899), const Color(0xFFDB2777)],
-      [const Color(0xFF8B5CF6), const Color(0xFF7C3AED)],
-      [const Color(0xFF10B981), const Color(0xFF059669)],
-      [const Color(0xFF3B82F6), const Color(0xFF2563EB)],
-      [const Color(0xFFF59E0B), const Color(0xFFD97706)],
-    ];
-    return colors[index % colors.length];
-  }
 }
-
-

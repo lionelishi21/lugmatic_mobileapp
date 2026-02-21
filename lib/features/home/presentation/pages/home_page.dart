@@ -1,8 +1,11 @@
 // lib/features/home/presentation/pages/home_page.dart
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:lugmatic_flutter/core/network/api_client.dart';
 import 'package:lugmatic_flutter/data/models/music_model.dart';
 import 'package:lugmatic_flutter/data/models/artist_model.dart';
 import 'package:lugmatic_flutter/data/models/podcast_model.dart';
+import 'package:lugmatic_flutter/data/services/home_service.dart';
 import 'package:lugmatic_flutter/features/home/presentation/widgets/custom_app_bar.dart';
 import 'package:lugmatic_flutter/features/home/presentation/widgets/playlist_card.dart';
 import 'package:lugmatic_flutter/features/home/presentation/widgets/playlist_list_item.dart';
@@ -12,7 +15,6 @@ import 'package:lugmatic_flutter/features/home/presentation/widgets/artist_card.
 import 'package:lugmatic_flutter/features/home/presentation/widgets/podcast_card.dart';
 import 'package:lugmatic_flutter/ui/widgets/music_player_widget.dart';
 import 'package:lugmatic_flutter/features/home/presentation/pages/create_playlist_screen.dart';
-import 'package:lugmatic_flutter/features/home/presentation/pages/live_artist_screen.dart';
 import 'package:lugmatic_flutter/features/home/presentation/pages/browse_page.dart';
 import 'package:lugmatic_flutter/features/home/presentation/pages/radio_page.dart';
 import 'package:lugmatic_flutter/features/home/presentation/pages/library_page.dart';
@@ -24,6 +26,8 @@ import 'package:lugmatic_flutter/features/home/data/models/playlist_model.dart';
 import 'package:lugmatic_flutter/features/live_stream/presentation/pages/tiktok_live_page.dart';
 
 class HomePage extends StatefulWidget {
+  const HomePage({Key? key}) : super(key: key);
+
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -32,146 +36,59 @@ class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
   final PageController _pageController = PageController();
 
+  late HomeService _homeService;
+  bool _isLoading = true;
 
-  // Sample data - in a real app, this would come from your data layer
-  final List<MusicModel> _trendingSongs = [
-    MusicModel(
-      id: '4',
-      title: 'Under The Influence',
-      artist: 'Chris Brown',
-      album: 'Breezy',
-      imageUrl: 'assets/images/onboarding_guy.png',
-      audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3',
-      duration: const Duration(minutes: 3, seconds: 4),
-      genre: 'R&B',
-      releaseDate: DateTime.now().subtract(const Duration(days: 2)),
-    ),
-    MusicModel(
-      id: '1',
-      title: 'Midnight Dreams',
-      artist: 'Luna Nova',
-      album: 'Cosmic Vibes',
-      imageUrl: 'assets/images/music_background_1.jpg',
-      audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
-      duration: const Duration(minutes: 3, seconds: 45),
-      genre: 'Electronic',
-      releaseDate: DateTime.now().subtract(const Duration(days: 5)),
-    ),
-    MusicModel(
-      id: '2',
-      title: 'Ocean Waves',
-      artist: 'Marine Sounds',
-      album: 'Nature Therapy',
-      imageUrl: 'assets/images/music_background_2.jpg',
-      audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
-      duration: const Duration(minutes: 4, seconds: 12),
-      genre: 'Ambient',
-      releaseDate: DateTime.now().subtract(const Duration(days: 3)),
-    ),
-    MusicModel(
-      id: '3',
-      title: 'City Lights',
-      artist: 'Urban Beats',
-      album: 'Metropolitan',
-      imageUrl: 'assets/images/music_background_3.jpg',
-      audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
-      duration: const Duration(minutes: 3, seconds: 28),
-      genre: 'Hip-Hop',
-      releaseDate: DateTime.now().subtract(const Duration(days: 1)),
-    ),
-  ];
+  List<MusicModel> _trendingSongs = [];
+  List<ArtistModel> _featuredArtists = [];
+  List<PodcastModel> _featuredPodcasts = [];
 
-  final List<ArtistModel> _featuredArtists = [
-    ArtistModel(
-      id: '4',
-      name: 'Chris Brown',
-      imageUrl: 'assets/images/onboarding_guy.png',
-      bio: 'Multi-platinum R&B and hip-hop artist, dancer, and actor',
-      followers: 45000000,
-      genres: ['R&B', 'Hip-Hop', 'Pop'],
-      isVerified: true,
-      location: 'Tappahannock, VA',
-      totalSongs: 200,
-      totalAlbums: 15,
-      rating: 4.9,
-    ),
-    ArtistModel(
-      id: '1',
-      name: 'Luna Nova',
-      imageUrl: 'assets/images/icon.png',
-      bio: 'Electronic music producer creating cosmic soundscapes',
-      followers: 125000,
-      genres: ['Electronic', 'Ambient', 'Synthwave'],
-      isVerified: true,
-      location: 'Los Angeles, CA',
-      totalSongs: 45,
-      totalAlbums: 8,
-      rating: 4.8,
-    ),
-    ArtistModel(
-      id: '2',
-      name: 'Marine Sounds',
-      imageUrl: 'assets/images/icon.png',
-      bio: 'Nature-inspired ambient music for relaxation',
-      followers: 89000,
-      genres: ['Ambient', 'Nature', 'Meditation'],
-      isVerified: true,
-      location: 'Portland, OR',
-      totalSongs: 32,
-      totalAlbums: 6,
-      rating: 4.9,
-    ),
-    ArtistModel(
-      id: '3',
-      name: 'Urban Beats',
-      imageUrl: 'assets/images/icon.png',
-      bio: 'Hip-hop artist bringing fresh urban vibes',
-      followers: 156000,
-      genres: ['Hip-Hop', 'Rap', 'Urban'],
-      isVerified: true,
-      location: 'New York, NY',
-      totalSongs: 67,
-      totalAlbums: 12,
-      rating: 4.7,
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _homeService = HomeService(
+        apiClient: context.read<ApiClient>(),
+      );
+      _loadData();
+    });
+  }
 
-  final List<PodcastModel> _featuredPodcasts = [
-    PodcastModel(
-      id: '1',
-      title: 'The Future of Music Technology',
-      description: 'Exploring how AI and technology are reshaping the music industry',
-      host: 'Tech Music Podcast',
-      imageUrl: 'assets/images/placeholder_bg.jpg',
-      audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3',
-      duration: const Duration(minutes: 45, seconds: 30),
-      category: 'Technology',
-      publishDate: DateTime.now().subtract(const Duration(days: 2)),
-      episodeNumber: 15,
-      totalEpisodes: 50,
-      seriesId: 'tech-music',
-      seriesTitle: 'Tech Music Podcast',
-    ),
-    PodcastModel(
-      id: '2',
-      title: 'Artist Stories: Behind the Music',
-      description: 'Intimate conversations with rising artists about their creative process',
-      host: 'Music Stories',
-      imageUrl: 'assets/images/placeholder_bg.jpg',
-      audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3',
-      duration: const Duration(minutes: 38, seconds: 15),
-      category: 'Interviews',
-      publishDate: DateTime.now().subtract(const Duration(days: 1)),
-      episodeNumber: 23,
-      totalEpisodes: 75,
-      seriesId: 'artist-stories',
-      seriesTitle: 'Artist Stories',
-    ),
-  ];
+  Future<void> _loadData() async {
+    setState(() => _isLoading = true);
+    try {
+      final results = await Future.wait([
+        _homeService.getTrendingSongs(),
+        _homeService.getFeaturedArtists(),
+        _homeService.getFeaturedPodcasts(),
+      ]);
+      if (mounted) {
+        setState(() {
+          _trendingSongs = results[0] as List<MusicModel>;
+          _featuredArtists = results[1] as List<ArtistModel>;
+          _featuredPodcasts = results[2] as List<PodcastModel>;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
 
   Widget _buildHomePage() {
-    return SingleChildScrollView(
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF10B981)),
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: _loadData,
+      color: const Color(0xFF10B981),
+      child: SingleChildScrollView(
       padding: const EdgeInsets.only(left: 16, right: 16, bottom: 100),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -222,6 +139,7 @@ class _HomePageState extends State<HomePage> {
           _buildRecentlyPlayed(),
         ],
       ),
+    ),
     );
   }
 
@@ -395,7 +313,7 @@ class _HomePageState extends State<HomePage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => LiveArtistScreen(artist: _featuredArtists[0]),
+                          builder: (context) => const TikTokLivePage(),
                         ),
                       );
                     }
@@ -655,7 +573,7 @@ class _HomePageState extends State<HomePage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => LiveArtistScreen(artist: artist),
+                  builder: (context) => const TikTokLivePage(),
                 ),
               );
             },
@@ -874,7 +792,7 @@ class _HomePageState extends State<HomePage> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => TikTokLivePage(artist: artist),
+              builder: (context) => const TikTokLivePage(),
             ),
           );
         }

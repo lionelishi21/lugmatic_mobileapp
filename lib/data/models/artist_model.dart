@@ -30,18 +30,41 @@ class ArtistModel {
   });
 
   factory ArtistModel.fromJson(Map<String, dynamic> json) {
+    // Handle location: backend sends {city, country} object
+    String locationStr = '';
+    if (json['location'] is Map) {
+      final loc = json['location'] as Map;
+      final parts = <String>[
+        if (loc['city'] != null && loc['city'].toString().isNotEmpty) loc['city'].toString(),
+        if (loc['country'] != null && loc['country'].toString().isNotEmpty) loc['country'].toString(),
+      ];
+      locationStr = parts.join(', ');
+    } else if (json['location'] is String) {
+      locationStr = json['location'] ?? '';
+    }
+
+    // Handle followers: backend sends array of ObjectIds, use followerCount for count
+    int followerCount = 0;
+    if (json['followerCount'] != null) {
+      followerCount = json['followerCount'] is int ? json['followerCount'] : (json['followerCount'] as num).toInt();
+    } else if (json['followers'] is int) {
+      followerCount = json['followers'];
+    } else if (json['followers'] is List) {
+      followerCount = (json['followers'] as List).length;
+    }
+
     return ArtistModel(
-      id: json['id'],
-      name: json['name'],
-      imageUrl: json['imageUrl'],
-      bio: json['bio'],
-      followers: json['followers'] ?? 0,
+      id: json['_id'] ?? json['id'] ?? '',
+      name: json['name'] ?? '',
+      imageUrl: json['image'] ?? json['imageUrl'] ?? '',
+      bio: json['bio'] ?? '',
+      followers: followerCount,
       genres: List<String>.from(json['genres'] ?? []),
       isVerified: json['isVerified'] ?? false,
-      location: json['location'],
-      socialLinks: List<String>.from(json['socialLinks'] ?? []),
-      totalSongs: json['totalSongs'] ?? 0,
-      totalAlbums: json['totalAlbums'] ?? 0,
+      location: locationStr,
+      socialLinks: const [],
+      totalSongs: json['songCount'] ?? json['totalSongs'] ?? 0,
+      totalAlbums: json['albumCount'] ?? json['totalAlbums'] ?? 0,
       rating: (json['rating'] ?? 0.0).toDouble(),
       isFollowing: json['isFollowing'] ?? false,
     );

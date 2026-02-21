@@ -7,6 +7,7 @@ import '../widgets/auth_header.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/auth_button.dart';
 import '../widgets/social_login_button.dart';
+import '../../../../ui/widgets/custom_preloader.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key}) : super(key: key);
@@ -268,6 +269,9 @@ class _SignUpScreenState extends State<SignUpScreen>
               ),
             ),
           ),
+          
+          if (_isLoading)
+            const CustomPreloader(text: 'Setting the stage...'),
         ],
       ),
     );

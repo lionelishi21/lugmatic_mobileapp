@@ -33,20 +33,20 @@ class GiftModel {
 
   factory GiftModel.fromJson(Map<String, dynamic> json) {
     return GiftModel(
-      id: json['id'],
-      name: json['name'],
-      description: json['description'],
-      imageUrl: json['imageUrl'],
-      price: (json['price'] ?? 0.0).toDouble(),
-      currency: json['currency'] ?? 'USD',
-      category: json['category'],
-      isPopular: json['isPopular'] ?? false,
-      isLimited: json['isLimited'] ?? false,
+      id: json['_id'] ?? json['id'] ?? '',
+      name: json['name'] ?? '',
+      description: json['description'] ?? '',
+      imageUrl: json['image'] ?? json['imageUrl'] ?? '',
+      price: (json['coinCost'] ?? json['value'] ?? json['price'] ?? 0).toDouble(),
+      currency: json['currency'] ?? 'coins',
+      category: json['category'] ?? json['type'] ?? 'support',
+      isPopular: json['rarity'] == 'legendary' || json['rarity'] == 'epic' || (json['isPopular'] ?? false),
+      isLimited: json['isSeasonal'] ?? json['isLimited'] ?? false,
       quantity: json['quantity'] ?? 1,
-      artistId: json['artistId'],
-      artistName: json['artistName'],
-      createdAt: DateTime.parse(json['createdAt']),
-      expiresAt: json['expiresAt'] != null ? DateTime.parse(json['expiresAt']) : null,
+      artistId: json['artistId'] ?? '',
+      artistName: json['artistName'] ?? '',
+      createdAt: json['createdAt'] != null ? DateTime.tryParse(json['createdAt'].toString()) ?? DateTime.now() : DateTime.now(),
+      expiresAt: json['seasonalEnd'] != null ? DateTime.tryParse(json['seasonalEnd'].toString()) : json['expiresAt'] != null ? DateTime.tryParse(json['expiresAt'].toString()) : null,
     );
   }
 

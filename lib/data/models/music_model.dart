@@ -26,18 +26,39 @@ class MusicModel {
   });
 
   factory MusicModel.fromJson(Map<String, dynamic> json) {
+    // Handle populated artist (object with name) or plain string
+    String artistName;
+    if (json['artist'] is Map) {
+      artistName = json['artist']['name'] ?? '';
+    } else {
+      artistName = json['artist']?.toString() ?? '';
+    }
+
+    // Handle populated album (object with name) or plain string
+    String albumName;
+    String albumCoverArt = '';
+    if (json['album'] is Map) {
+      albumName = json['album']['name'] ?? '';
+      albumCoverArt = json['album']['coverArt'] ?? '';
+    } else {
+      albumName = json['album']?.toString() ?? '';
+    }
+
+    // Image: prefer coverArt on the song, then album coverArt
+    final imageUrl = json['coverArt'] ?? albumCoverArt;
+
     return MusicModel(
-      id: json['id'],
-      title: json['title'],
-      artist: json['artist'],
-      album: json['album'],
-      imageUrl: json['imageUrl'],
-      audioUrl: json['audioUrl'],
-      duration: Duration(seconds: json['duration']),
-      genre: json['genre'],
+      id: json['_id'] ?? json['id'] ?? '',
+      title: json['name'] ?? json['title'] ?? '',
+      artist: artistName,
+      album: albumName,
+      imageUrl: imageUrl is String ? imageUrl : '',
+      audioUrl: json['audioFile'] ?? json['audioUrl'] ?? '',
+      duration: Duration(seconds: (json['duration'] ?? 0) is int ? json['duration'] : (json['duration'] as num).toInt()),
+      genre: json['genre'] ?? '',
       isLiked: json['isLiked'] ?? false,
       playCount: json['playCount'] ?? 0,
-      releaseDate: DateTime.parse(json['releaseDate']),
+      releaseDate: json['releaseDate'] != null ? DateTime.tryParse(json['releaseDate'].toString()) ?? DateTime.now() : DateTime.now(),
     );
   }
 

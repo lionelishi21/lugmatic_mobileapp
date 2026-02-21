@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import 'core/network/api_client.dart';
+import 'core/network/token_storage.dart';
+import 'data/providers/auth_provider.dart';
+import 'data/services/auth_service.dart';
 import 'features/auth/presentation/pages/login_screen.dart';
+import 'features/home/presentation/pages/home_page.dart';
 import 'features/onboarding/presentation/pages/onboarding_screen.dart';
 
 void main() {
@@ -11,7 +17,30 @@ void main() {
       statusBarIconBrightness: Brightness.light,
     ),
   );
-  runApp(const LugmaticApp());
+
+  // Core dependencies
+  final tokenStorage = TokenStorage();
+  final apiClient = ApiClient(tokenStorage: tokenStorage);
+  final authService = AuthService(
+    apiClient: apiClient,
+    tokenStorage: tokenStorage,
+  );
+
+  runApp(
+    MultiProvider(
+      providers: [
+        Provider<TokenStorage>.value(value: tokenStorage),
+        Provider<ApiClient>.value(value: apiClient),
+        ChangeNotifierProvider(
+          create: (_) => AuthProvider(
+            authService: authService,
+            tokenStorage: tokenStorage,
+          ),
+        ),
+      ],
+      child: const LugmaticApp(),
+    ),
+  );
 }
 
 class LugmaticApp extends StatelessWidget {
@@ -28,7 +57,7 @@ class LugmaticApp extends StatelessWidget {
       ),
       home: const SplashScreen(),
       routes: {
-        '/home': (context) => const LoginScreen(),
+        '/home': (context) => const HomePage(),
         '/login': (context) => const LoginScreen(),
       },
     );
@@ -43,7 +72,7 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen>
-with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
@@ -52,7 +81,7 @@ with SingleTickerProviderStateMixin {
   void initState() {
     super.initState();
     _initializeAnimations();
-    _navigateToOnboarding();
+    _checkAuthAndNavigate();
   }
 
   void _initializeAnimations() {
@@ -78,21 +107,34 @@ with SingleTickerProviderStateMixin {
     _animationController.forward();
   }
 
-  Future<void> _navigateToOnboarding() async {
-    await Future.delayed(const Duration(seconds: 3));
-    if (mounted) {
-      Navigator.pushReplacement(
-        context,
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) =>
-              const OnboardingScreen(),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return FadeTransition(opacity: animation, child: child);
-          },
-          transitionDuration: const Duration(milliseconds: 800),
-        ),
-      );
+  /// Check stored auth and navigate accordingly.
+  Future<void> _checkAuthAndNavigate() async {
+    // Show splash for at least 2 seconds
+    final authProvider = context.read<AuthProvider>();
+    await Future.wait([
+      authProvider.checkAuthStatus(),
+      Future.delayed(const Duration(seconds: 2)),
+    ]);
+
+    if (!mounted) return;
+
+    final Widget destination;
+    if (authProvider.isAuthenticated) {
+      destination = const HomePage();
+    } else {
+      destination = const OnboardingScreen();
     }
+
+    Navigator.pushReplacement(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => destination,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+        transitionDuration: const Duration(milliseconds: 800),
+      ),
+    );
   }
 
   @override
@@ -163,9 +205,9 @@ with SingleTickerProviderStateMixin {
                     );
                   },
                 ),
-                
+
                 const SizedBox(height: 32),
-                
+
                 // App name with animation
                 FadeTransition(
                   opacity: _fadeAnimation,
@@ -179,9 +221,9 @@ with SingleTickerProviderStateMixin {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Tagline
                 Text(
                   'Your Music Universe',
@@ -192,9 +234,9 @@ with SingleTickerProviderStateMixin {
                     letterSpacing: 1,
                   ),
                 ),
-                
+
                 const SizedBox(height: 60),
-                
+
                 // Loading indicator
                 SizedBox(
                   width: 40,

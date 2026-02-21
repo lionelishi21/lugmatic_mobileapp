@@ -41,8 +41,12 @@
 			<string>UIInterfaceOrientationLandscapeLeft</string>
 			<string>UIInterfaceOrientationLandscapeRight</string>
 		</array>
-		<key>CADisableMinimumFrameDurationOnPhone</key>
-		<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Lugmatic needs camera access for live streaming</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Lugmatic needs microphone access for live streaming and audio chat</string>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
 		<key>UIApplicationSupportsIndirectInputEvents</key>
 		<true/>
 		<key>UIStatusBarHidden</key>

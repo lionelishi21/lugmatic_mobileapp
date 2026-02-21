@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/theme/neumorphic_theme.dart';
+import '../../../../data/providers/auth_provider.dart';
 import '../../utils/auth_validator.dart';
 import '../widgets/auth_header.dart';
 import '../widgets/social_login_button.dart';
 import 'signup_screen.dart';
 import 'forgot_password_screen.dart';
 import '../../../home/presentation/pages/home_page.dart';
+import '../../../ui/widgets/custom_preloader.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -20,7 +24,6 @@ class _LoginScreenState extends State<LoginScreen>
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _isLoading = false;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
 
@@ -50,57 +53,44 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   Future<void> _signIn() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-      });
+    if (!_formKey.currentState!.validate()) return;
 
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
-
-      setState(() {
-        _isLoading = false;
-      });
-
-      // Check credentials (default login for testing)
-      final email = _emailController.text.trim();
-      final password = _passwordController.text;
-
-      // Default login credentials: test@lugmatic.com / password
-      if (email == 'test@lugmatic.com' && password == 'password') {
-        _showSuccessMessage();
-        // Navigate to home page
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => HomePage(),
-          ),
-        );
-      } else {
-        // Show error for incorrect credentials
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Invalid credentials. Try: test@lugmatic.com / password'),
-            backgroundColor: Colors.red,
-            duration: Duration(seconds: 4),
-          ),
-        );
-      }
-    }
-  }
-
-  void _showSuccessMessage() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Login successful!'),
-        backgroundColor: NeumorphicTheme.primaryAccent,
-        duration: Duration(seconds: 1),
-      ),
+    final authProvider = context.read<AuthProvider>();
+    final success = await authProvider.login(
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
     );
+
+    if (!mounted) return;
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Login successful!'),
+          backgroundColor: NeumorphicTheme.primaryAccent,
+          duration: const Duration(seconds: 1),
+        ),
+      );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomePage()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(authProvider.errorMessage ?? 'Login failed'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 4),
+        ),
+      );
+      authProvider.clearError();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = context.watch<AuthProvider>();
+
     return Scaffold(
       backgroundColor: NeumorphicTheme.backgroundColor,
       body: Stack(
@@ -119,7 +109,7 @@ class _LoginScreenState extends State<LoginScreen>
               ),
             ),
           ),
-          
+
           // Content
           SafeArea(
             child: SingleChildScrollView(
@@ -211,49 +201,44 @@ class _LoginScreenState extends State<LoginScreen>
                       // Forgot Password
                       Align(
                         alignment: Alignment.centerRight,
-                        child:                           TextButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const ForgotPasswordScreen(),
-                                ),
-                              );
-                            },
-                            child: const Text(
-                              AppStrings.forgotPassword,
-                              style: TextStyle(
-                                color: NeumorphicTheme.primaryAccent,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
+                        child: TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const ForgotPasswordScreen(),
                               ),
+                            );
+                          },
+                          child: const Text(
+                            AppStrings.forgotPassword,
+                            style: TextStyle(
+                              color: NeumorphicTheme.primaryAccent,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
+                        ),
                       ),
                       const SizedBox(height: 32),
 
                       // Sign In Button
-                      _isLoading
-                          ? Center(
-                              child: CircularProgressIndicator(
-                                color: NeumorphicTheme.primaryAccent,
-                                strokeWidth: 3,
-                              ),
-                            )
-                          : Container(
-                              width: double.infinity,
-                              height: 56,
-                              decoration: BoxDecoration(
+                      Container(
+                        width: double.infinity,
+                        height: 56,
+                        decoration: BoxDecoration(
                                 gradient: LinearGradient(
                                   colors: [
-                                NeumorphicTheme.accentGradientStart,
-                                NeumorphicTheme.accentGradientEnd,
-                              ],
+                                    NeumorphicTheme.accentGradientStart,
+                                    NeumorphicTheme.accentGradientEnd,
+                                  ],
                                 ),
                                 borderRadius: BorderRadius.circular(16),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: NeumorphicTheme.accentGradientStart.withOpacity(0.4),
+                                    color: NeumorphicTheme.accentGradientStart
+                                        .withOpacity(0.4),
                                     blurRadius: 16,
                                     offset: const Offset(0, 8),
                                   ),
@@ -262,13 +247,13 @@ class _LoginScreenState extends State<LoginScreen>
                               child: Material(
                                 color: Colors.transparent,
                                 child: InkWell(
-                                  onTap: _signIn,
+                                  onTap: authProvider.isLoading ? null : _signIn,
                                   borderRadius: BorderRadius.circular(16),
                                   child: const Center(
                                     child: Text(
-                                AppStrings.signIn,
-                                style: TextStyle(
-                                  color: Colors.white,
+                                      AppStrings.signIn,
+                                      style: TextStyle(
+                                        color: Colors.white,
                                         fontSize: 17,
                                         fontWeight: FontWeight.w700,
                                         letterSpacing: 0.8,
@@ -277,10 +262,9 @@ class _LoginScreenState extends State<LoginScreen>
                                   ),
                                 ),
                               ),
-                            ),
                       const SizedBox(height: 28),
 
-                      // Divider - More elegant
+                      // Divider
                       Row(
                         children: [
                           Expanded(
@@ -290,7 +274,8 @@ class _LoginScreenState extends State<LoginScreen>
                                 gradient: LinearGradient(
                                   colors: [
                                     Colors.transparent,
-                                    NeumorphicTheme.textTertiary.withOpacity(0.25),
+                                    NeumorphicTheme.textTertiary
+                                        .withOpacity(0.25),
                                   ],
                                 ),
                               ),
@@ -301,7 +286,8 @@ class _LoginScreenState extends State<LoginScreen>
                             child: Text(
                               AppStrings.orContinueWith,
                               style: TextStyle(
-                                color: NeumorphicTheme.textSecondary.withOpacity(0.8),
+                                color: NeumorphicTheme.textSecondary
+                                    .withOpacity(0.8),
                                 fontSize: 13,
                                 fontWeight: FontWeight.w500,
                                 letterSpacing: 0.5,
@@ -314,7 +300,8 @@ class _LoginScreenState extends State<LoginScreen>
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
                                   colors: [
-                                    NeumorphicTheme.textTertiary.withOpacity(0.25),
+                                    NeumorphicTheme.textTertiary
+                                        .withOpacity(0.25),
                                     Colors.transparent,
                                   ],
                                 ),
@@ -370,40 +357,6 @@ class _LoginScreenState extends State<LoginScreen>
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
-
-                      // Test Credentials Hint - More subtle
-                      Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: NeumorphicTheme.primaryAccent.withOpacity(0.08),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: NeumorphicTheme.primaryAccent.withOpacity(0.2),
-                            width: 1,
-                          ),
-                        ),
-                        child: Row(
-                              children: [
-                                Icon(
-                                  Icons.info_outline,
-                              color: NeumorphicTheme.primaryAccent.withOpacity(0.8),
-                              size: 18,
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                'Demo: test@lugmatic.com / password',
-                                  style: TextStyle(
-                                  color: NeumorphicTheme.textSecondary.withOpacity(0.9),
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
                       const SizedBox(height: 32),
                     ],
                   ),
@@ -411,6 +364,9 @@ class _LoginScreenState extends State<LoginScreen>
               ),
             ),
           ),
+          
+          if (authProvider.isLoading)
+            const CustomPreloader(text: 'Tuning in...'),
         ],
       ),
     );
@@ -421,15 +377,15 @@ class _LoginScreenState extends State<LoginScreen>
       child: Container(
         width: 110,
         height: 110,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    NeumorphicTheme.accentGradientStart,
-                    NeumorphicTheme.accentGradientEnd,
-                  ],
-                ),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              NeumorphicTheme.accentGradientStart,
+              NeumorphicTheme.accentGradientEnd,
+            ],
+          ),
           borderRadius: BorderRadius.circular(28),
           boxShadow: [
             BoxShadow(
@@ -446,25 +402,64 @@ class _LoginScreenState extends State<LoginScreen>
             height: 70,
             fit: BoxFit.contain,
             errorBuilder: (context, error, stackTrace) {
-              return Icon(
+              return const Icon(
                 Icons.music_note_rounded,
                 size: 56,
                 color: Colors.white,
-            );
-          },
+              );
+            },
           ),
         ),
       ),
     );
   }
 
-  void _signInWithGoogle() {
-    // Implement Google Sign In
-    print("Sign in with Google");
+  Future<void> _signInWithGoogle() async {
+    try {
+      final googleSignIn = GoogleSignIn(scopes: ['email', 'profile']);
+      final account = await googleSignIn.signIn();
+      if (account == null) return; // User cancelled
+
+      final googleAuth = await account.authentication;
+      final idToken = googleAuth.idToken;
+      if (idToken == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Failed to get Google credentials')),
+          );
+        }
+        return;
+      }
+
+      final authProvider = context.read<AuthProvider>();
+      final success = await authProvider.loginWithGoogle(idToken: idToken);
+
+      if (mounted) {
+        if (success) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const HomePage()),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(authProvider.errorMessage ?? 'Google sign-in failed'),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Google sign-in error: $e')),
+        );
+      }
+    }
   }
 
   void _signInWithApple() {
-    // Implement Apple Sign In
-    print("Sign in with Apple");
+    // TODO: Implement Apple Sign In
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Apple Sign-In coming soon')),
+    );
   }
 }
