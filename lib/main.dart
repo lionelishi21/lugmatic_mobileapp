@@ -21,8 +21,12 @@ import 'features/mixer/presentation/pages/mixer_page.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize Stripe SDK
-  await StripeService.init();
+  // Initialize Stripe SDK (non-fatal — app still launches if this fails)
+  try {
+    await StripeService.init().timeout(const Duration(seconds: 5));
+  } catch (_) {
+    // Stripe init failed — coin purchases will be unavailable but app can still launch
+  }
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
@@ -137,12 +141,22 @@ class _SplashScreenState extends State<SplashScreen>
 
   /// Check stored auth and navigate accordingly.
   Future<void> _checkAuthAndNavigate() async {
-    // Show splash for at least 2 seconds
     final authProvider = context.read<AuthProvider>();
-    await Future.wait([
-      authProvider.checkAuthStatus(),
-      Future.delayed(const Duration(seconds: 2)),
-    ]);
+    try {
+      // Show splash for at least 2 seconds, but cap the total wait at 8 seconds
+      // so the app never hangs forever if the API is unreachable.
+      await Future.wait([
+        authProvider.checkAuthStatus(),
+        Future.delayed(const Duration(seconds: 2)),
+      ]).timeout(
+        const Duration(seconds: 8),
+        onTimeout: () {
+          // If we time out, treat the user as unauthenticated and continue
+        },
+      );
+    } catch (_) {
+      // Any unexpected error — treat as unauthenticated
+    }
 
     if (!mounted) return;
 

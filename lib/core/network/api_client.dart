@@ -60,6 +60,8 @@ class _AuthInterceptor extends Interceptor {
         // Use a fresh Dio instance (no interceptors) to avoid loops
         final refreshDio = Dio(BaseOptions(
           baseUrl: ApiConfig.baseUrl,
+          connectTimeout: const Duration(milliseconds: ApiConfig.connectTimeout),
+          receiveTimeout: const Duration(milliseconds: ApiConfig.receiveTimeout),
           headers: {'Content-Type': 'application/json'},
         ));
 
