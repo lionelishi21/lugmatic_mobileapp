@@ -201,9 +201,9 @@ class _StorePageState extends State<StorePage> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: const [
-              Icon(LucideIcons.sparkles, color: Color(0xFF10B981), size: 14),
+              Icon(Icons.auto_awesome, color: Color(0xFF10B981), size: 14),
               SizedBox(width: 6),
-              extra: Text(
+              Text(
                 'LUGMATIC COINS',
                 style: TextStyle(
                   color: Color(0xFF10B981),
