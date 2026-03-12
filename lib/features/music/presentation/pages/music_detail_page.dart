@@ -442,13 +442,14 @@ class _MusicDetailPageState extends State<MusicDetailPage> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _shareSong,
-        backgroundColor: NeumorphicTheme.primaryAccent,
-        child: const Icon(Icons.share, color: Colors.white),
-      ),
-    );
-  }
+    ),
+    floatingActionButton: FloatingActionButton(
+      onPressed: _shareSong,
+      backgroundColor: NeumorphicTheme.primaryAccent,
+      child: const Icon(Icons.share, color: Colors.white),
+    ),
+  );
+}
 
   Widget _buildRelatedSongItem(MusicModel song) {
     return GestureDetector(

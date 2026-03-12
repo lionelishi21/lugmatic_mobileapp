@@ -9,7 +9,7 @@ import 'package:lugmatic_flutter/data/services/socket_service.dart';
 import 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart';
 import '../../../../shared/widgets/comment_section_widget.dart';
 import '../../../../core/theme/neumorphic_theme.dart';
-import '../../gift/presentation/pages/gift_send_page.dart';
+import 'package:lugmatic_flutter/features/gift/presentation/pages/gift_send_page.dart';
 import '../../../../data/models/artist_model.dart';
 
 /// TikTok-style vertical-swiping live stream page.
