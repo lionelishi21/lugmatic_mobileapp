@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:lugmatic_flutter/data/services/gift_service.dart';
 import 'package:lugmatic_flutter/data/services/stripe_service.dart';
 import 'package:lugmatic_flutter/core/theme/neumorphic_theme.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 
 class CoinPackage {
   final String label;

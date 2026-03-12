@@ -10,7 +10,7 @@ import '../widgets/social_login_button.dart';
 import 'signup_screen.dart';
 import 'forgot_password_screen.dart';
 import '../../../home/presentation/pages/home_page.dart';
-import '../../../ui/widgets/custom_preloader.dart';
+import '../../../../ui/widgets/custom_preloader.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -228,40 +228,41 @@ class _LoginScreenState extends State<LoginScreen>
                         width: double.infinity,
                         height: 56,
                         decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    NeumorphicTheme.accentGradientStart,
-                                    NeumorphicTheme.accentGradientEnd,
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(16),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: NeumorphicTheme.accentGradientStart
-                                        .withOpacity(0.4),
-                                    blurRadius: 16,
-                                    offset: const Offset(0, 8),
-                                  ),
-                                ],
-                              ),
-                              child: Material(
-                                color: Colors.transparent,
-                                child: InkWell(
-                                  onTap: authProvider.isLoading ? null : _signIn,
-                                  borderRadius: BorderRadius.circular(16),
-                                  child: const Center(
-                                    child: Text(
-                                      AppStrings.signIn,
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 17,
-                                        fontWeight: FontWeight.w700,
-                                        letterSpacing: 0.8,
-                                      ),
-                                    ),
-                                  ),
+                          gradient: LinearGradient(
+                            colors: [
+                              NeumorphicTheme.accentGradientStart,
+                              NeumorphicTheme.accentGradientEnd,
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: NeumorphicTheme.accentGradientStart
+                                  .withOpacity(0.4),
+                              blurRadius: 16,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: authProvider.isLoading ? null : _signIn,
+                            borderRadius: BorderRadius.circular(16),
+                            child: const Center(
+                              child: Text(
+                                AppStrings.signIn,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.8,
                                 ),
                               ),
+                            ),
+                          ),
+                        ),
+                      ),
                       const SizedBox(height: 28),
 
                       // Divider
