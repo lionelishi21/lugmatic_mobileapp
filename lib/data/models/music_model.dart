@@ -10,6 +10,7 @@ class MusicModel {
   final bool isLiked;
   final int playCount;
   final DateTime releaseDate;
+  final bool isArtistVerified;
 
   MusicModel({
     required this.id,
@@ -23,13 +24,16 @@ class MusicModel {
     this.isLiked = false,
     this.playCount = 0,
     required this.releaseDate,
+    this.isArtistVerified = false,
   });
 
   factory MusicModel.fromJson(Map<String, dynamic> json) {
     // Handle populated artist (object with name) or plain string
     String artistName;
+    bool isVerified = false;
     if (json['artist'] is Map) {
       artistName = json['artist']['name'] ?? '';
+      isVerified = json['artist']['isVerified'] ?? false;
     } else {
       artistName = json['artist']?.toString() ?? '';
     }
@@ -59,6 +63,7 @@ class MusicModel {
       isLiked: json['isLiked'] ?? false,
       playCount: json['playCount'] ?? 0,
       releaseDate: json['releaseDate'] != null ? DateTime.tryParse(json['releaseDate'].toString()) ?? DateTime.now() : DateTime.now(),
+      isArtistVerified: isVerified,
     );
   }
 
@@ -75,6 +80,7 @@ class MusicModel {
       'isLiked': isLiked,
       'playCount': playCount,
       'releaseDate': releaseDate.toIso8601String(),
+      'isArtistVerified': isArtistVerified,
     };
   }
 }
