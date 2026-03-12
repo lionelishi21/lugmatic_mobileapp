@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import '../../../data/models/notification_model.dart';
-import '../../../data/services/notification_service.dart';
-import '../../../core/theme/neumorphic_theme.dart';
+import 'package:lugmatic_flutter/data/models/notification_model.dart';
+import 'package:lugmatic_flutter/data/services/notification_service.dart';
+import 'package:lugmatic_flutter/core/theme/neumorphic_theme.dart';
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({Key? key}) : super(key: key);

@@ -43,7 +43,7 @@ class _StorePageState extends State<StorePage> {
       amount: 500,
       price: '\$5.00',
       description: 'Perfect to try gifting',
-      icon: LucideIcons.zap,
+      icon: Icons.flash_on,
       baseColor: Colors.blueGrey,
     ),
     CoinPackage(
@@ -51,7 +51,7 @@ class _StorePageState extends State<StorePage> {
       amount: 1000,
       price: '\$10.00',
       description: 'Great value for fans',
-      icon: LucideIcons.star,
+      icon: Icons.star,
       baseColor: Colors.blue,
     ),
     CoinPackage(
@@ -59,7 +59,7 @@ class _StorePageState extends State<StorePage> {
       amount: 2000,
       price: '\$20.00',
       description: 'Most popular support',
-      icon: LucideIcons.crown,
+      icon: Icons.workspace_premium,
       baseColor: const Color(0xFF10B981),
       popular: true,
     ),
@@ -68,7 +68,7 @@ class _StorePageState extends State<StorePage> {
       amount: 5000,
       price: '\$50.00',
       description: 'Show serious support',
-      icon: LucideIcons.gift,
+      icon: Icons.card_giftcard,
       baseColor: Colors.purple,
     ),
     CoinPackage(
@@ -76,7 +76,7 @@ class _StorePageState extends State<StorePage> {
       amount: 10000,
       price: '\$100.00',
       description: 'Ultimate artist support',
-      icon: LucideIcons.shieldCheck,
+      icon: Icons.shield,
       baseColor: Colors.amber,
     ),
   ];
@@ -259,7 +259,7 @@ class _StorePageState extends State<StorePage> {
             right: -20,
             top: -20,
             child: Icon(
-              LucideIcons.coins,
+              Icons.monetization_on,
               size: 100,
               color: const Color(0xFF10B981).withOpacity(0.05),
             ),
@@ -279,7 +279,7 @@ class _StorePageState extends State<StorePage> {
               const SizedBox(height: 12),
               Row(
                 children: [
-                  const Icon(LucideIcons.coins, color: Color(0xFF10B981), size: 24),
+                  const Icon(Icons.monetization_on, color: Color(0xFF10B981), size: 24),
                   const SizedBox(width: 12),
                   if (_isLoadingBalance)
                     const SizedBox(
@@ -377,7 +377,7 @@ class _StorePageState extends State<StorePage> {
                             style: TextStyle(
                               color: Colors.black,
                               fontSize: 8,
-                              fontWeight: FontWeight.black,
+                              fontWeight: FontWeight.w900,
                             ),
                           ),
                         ),

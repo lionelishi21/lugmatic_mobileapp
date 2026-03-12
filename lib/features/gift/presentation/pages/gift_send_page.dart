@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:lugmatic_flutter/data/models/gift_model.dart';
 import 'package:lugmatic_flutter/data/models/artist_model.dart';
 import 'package:provider/provider.dart';
@@ -23,11 +24,7 @@ class _GiftSendPageState extends State<GiftSendPage> {
   String _message = '';
   final TextEditingController _messageController = TextEditingController();
 
-  List<GiftModel> _popularGifts = [];
-  List<ArtistModel> _recentArtists = [];
-  bool _isLoading = true;
-  double _userBalance = 0.0;
-  int _userCoins = 0;
+  List<GiftModel> _popularGifts = [
     GiftModel(
       id: '1',
       name: 'Virtual Rose',
@@ -100,7 +97,11 @@ class _GiftSendPageState extends State<GiftSendPage> {
     ),
   ];
 
-  final List<ArtistModel> _recentArtists = [
+  bool _isLoading = true;
+  double _userBalance = 0.0;
+  int _userCoins = 0;
+
+  List<ArtistModel> _recentArtists = [
     ArtistModel(
       id: '1',
       name: 'Luna Nova',
