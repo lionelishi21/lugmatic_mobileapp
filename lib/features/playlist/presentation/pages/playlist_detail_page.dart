@@ -3,6 +3,7 @@ import 'package:lugmatic_flutter/data/models/music_model.dart';
 import 'package:lugmatic_flutter/data/models/artist_model.dart';
 import 'package:lugmatic_flutter/features/home/data/models/playlist_model.dart';
 import 'package:lugmatic_flutter/ui/widgets/music_player_widget.dart';
+import '../../../../shared/widgets/comment_section_widget.dart';
 
 class PlaylistDetailPage extends StatefulWidget {
   final PlaylistModel playlist;
@@ -134,6 +135,11 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                 _buildContributors(),
                 const SizedBox(height: 32),
                 _buildPlaylistInfo(),
+                const SizedBox(height: 48),
+                CommentSectionWidget(
+                  contentType: widget.playlist.type == 'album' ? 'album' : 'playlist',
+                  contentId: widget.playlist.id,
+                ),
                 const SizedBox(height: 100),
               ],
             ),

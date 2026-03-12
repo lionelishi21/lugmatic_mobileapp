@@ -8,9 +8,19 @@ import 'data/services/auth_service.dart';
 import 'features/auth/presentation/pages/login_screen.dart';
 import 'features/home/presentation/pages/home_page.dart';
 import 'features/onboarding/presentation/pages/onboarding_screen.dart';
+import 'data/services/comment_service.dart';
+import 'data/services/notification_service.dart';
+import 'data/services/artist_request_service.dart';
+import 'data/services/video_service.dart';
+import 'data/services/gift_service.dart';
+import 'data/services/stripe_service.dart';
+import 'features/store/presentation/pages/store_page.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Stripe SDK
+  await StripeService.init();
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
@@ -25,6 +35,12 @@ void main() {
     apiClient: apiClient,
     tokenStorage: tokenStorage,
   );
+  final commentService = CommentService(apiClient: apiClient);
+  final notificationService = NotificationService(apiClient: apiClient);
+  final artistRequestService = ArtistRequestService(apiClient: apiClient);
+  final videoService = VideoService(apiClient: apiClient);
+  final giftService = GiftService(apiClient: apiClient);
+  final stripeService = StripeService(giftService: giftService);
 
   runApp(
     MultiProvider(
@@ -37,6 +53,12 @@ void main() {
             tokenStorage: tokenStorage,
           ),
         ),
+        Provider<CommentService>.value(value: commentService),
+        Provider<NotificationService>.value(value: notificationService),
+        Provider<ArtistRequestService>.value(value: artistRequestService),
+        Provider<VideoService>.value(value: videoService),
+        Provider<GiftService>.value(value: giftService),
+        Provider<StripeService>.value(value: stripeService),
       ],
       child: const LugmaticApp(),
     ),
@@ -59,6 +81,7 @@ class LugmaticApp extends StatelessWidget {
       routes: {
         '/home': (context) => const HomePage(),
         '/login': (context) => const LoginScreen(),
+        '/store': (context) => const StorePage(),
       },
     );
   }

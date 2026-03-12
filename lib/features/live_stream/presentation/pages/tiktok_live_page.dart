@@ -7,6 +7,10 @@ import 'package:lugmatic_flutter/data/models/live_stream_model.dart';
 import 'package:lugmatic_flutter/data/services/live_stream_service.dart';
 import 'package:lugmatic_flutter/data/services/socket_service.dart';
 import 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart';
+import '../../../../shared/widgets/comment_section_widget.dart';
+import '../../../../core/theme/neumorphic_theme.dart';
+import '../../gift/presentation/pages/gift_send_page.dart';
+import '../../../../data/models/artist_model.dart';
 
 /// TikTok-style vertical-swiping live stream page.
 ///
@@ -189,6 +193,79 @@ class _TikTokLivePageState extends State<TikTokLivePage>
     setState(() {
       _isFollowing = !_isFollowing;
     });
+  }
+
+  void _showArtistComments() {
+    if (_liveStreams.isEmpty) return;
+    final artist = _liveStreams[_currentStreamIndex].host;
+    if (artist == null) return;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        builder: (_, scrollController) => Container(
+          decoration: BoxDecoration(
+            color: NeumorphicTheme.backgroundColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+          ),
+          child: SingleChildScrollView(
+            controller: scrollController,
+            child: Column(
+              children: [
+                const SizedBox(height: 12),
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: NeumorphicTheme.textTertiary.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 25,
+                        backgroundImage: NetworkImage(artist.image),
+                      ),
+                      const SizedBox(width: 16),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            artist.name,
+                            style: const TextStyle(
+                              color: NeumorphicTheme.textPrimary,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const Text(
+                            'Artist Profile & Feedback',
+                            style: TextStyle(color: NeumorphicTheme.textTertiary, fontSize: 13),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                CommentSectionWidget(
+                  contentType: 'artist',
+                  contentId: artist.id,
+                ),
+                const SizedBox(height: 50),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -599,16 +676,20 @@ class _TikTokLivePageState extends State<TikTokLivePage>
           GestureDetector(
             onTap: () {
               if (_liveStreams.isNotEmpty) {
-                _socketService.sendGift(
-                  _liveStreams[_currentStreamIndex].id,
-                  'love',
-                  'Love',
-                  10,
+                final currentStream = _liveStreams[_currentStreamIndex];
+                final artist = ArtistModel(
+                  id: currentStream.host?.id ?? '',
+                  name: currentStream.host?.name ?? '',
+                  imageUrl: currentStream.host?.image ?? '',
+                  bio: '',
+                  genres: [],
+                  location: '',
                 );
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Gift sent!'),
-                    duration: Duration(seconds: 1),
+                
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => GiftSendPage(selectedArtist: artist),
                   ),
                 );
               }
@@ -634,6 +715,41 @@ class _TikTokLivePageState extends State<TikTokLivePage>
                 const SizedBox(height: 4),
                 const Text(
                   'Gift',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Artist Feedback button
+          GestureDetector(
+            onTap: _showArtistComments,
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.5),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: NeumorphicTheme.primaryAccent.withOpacity(0.5),
+                      width: 1,
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.rate_review_outlined,
+                    color: NeumorphicTheme.primaryAccent,
+                    size: 28,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Feedback',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 12,

@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:lugmatic_flutter/data/models/music_model.dart';
 import 'package:lugmatic_flutter/core/theme/neumorphic_theme.dart';
+import 'package:provider/provider.dart';
+import 'package:lugmatic_flutter/data/services/music_service.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:intl/intl.dart';
+import '../../../../shared/widgets/comment_section_widget.dart';
 
 class MusicDetailPage extends StatefulWidget {
   final MusicModel music;
@@ -22,12 +26,32 @@ class _MusicDetailPageState extends State<MusicDetailPage> {
   bool _isLoading = false;
   Duration _duration = Duration.zero;
   Duration _position = Duration.zero;
+  List<MusicModel> _relatedSongs = [];
+  bool _isFavorited = false;
+  bool _isLoadingRelated = false;
 
   @override
   void initState() {
     super.initState();
     _audioPlayer = AudioPlayer();
     _initPlayer();
+    _loadRelatedSongs();
+  }
+
+  Future<void> _loadRelatedSongs() async {
+    setState(() => _isLoadingRelated = true);
+    try {
+      final musicService = context.read<MusicService>();
+      final songs = await musicService.getRelatedSongs(widget.music.genre, excludeId: widget.music.id);
+      if (mounted) {
+        setState(() {
+          _relatedSongs = songs;
+          _isLoadingRelated = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) setState(() => _isLoadingRelated = false);
+    }
   }
 
   Future<void> _initPlayer() async {
@@ -119,8 +143,9 @@ class _MusicDetailPageState extends State<MusicDetailPage> {
     return Scaffold(
       backgroundColor: NeumorphicTheme.backgroundColor,
       body: SafeArea(
-        child: Column(
-          children: [
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
             // Header with back button
             Padding(
               padding: const EdgeInsets.all(16.0),
@@ -151,16 +176,19 @@ class _MusicDetailPageState extends State<MusicDetailPage> {
                     ),
                   ),
                   const Spacer(),
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: NeumorphicTheme.neumorphicDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(
-                      Icons.favorite_border,
-                      color: NeumorphicTheme.primaryAccent,
-                      size: 22,
+                  GestureDetector(
+                    onTap: _toggleFavorite,
+                    child: Container(
+                      width: 44,
+                      height: 44,
+                      decoration: NeumorphicTheme.neumorphicDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        _isFavorited ? Icons.favorite : Icons.favorite_border,
+                        color: NeumorphicTheme.primaryAccent,
+                        size: 22,
+                      ),
                     ),
                   ),
                 ],
@@ -368,10 +396,151 @@ class _MusicDetailPageState extends State<MusicDetailPage> {
             ),
 
             const SizedBox(height: 40),
+
+            // Related Songs Section
+            if (_relatedSongs.isNotEmpty || _isLoadingRelated) ...[
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'You Might Also Like',
+                    style: TextStyle(
+                      color: NeumorphicTheme.textPrimary,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              if (_isLoadingRelated)
+                const Center(child: CircularProgressIndicator())
+              else
+                SizedBox(
+                  height: 180,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: _relatedSongs.length,
+                    itemBuilder: (context, index) {
+                      final song = _relatedSongs[index];
+                      return _buildRelatedSongItem(song);
+                    },
+                  ),
+                ),
+            ],
+
+            const SizedBox(height: 24),
+
+            // Comments Section
+            CommentSectionWidget(
+              contentType: 'song',
+              contentId: widget.music.id,
+            ),
+
+            const SizedBox(height: 40),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _shareSong,
+        backgroundColor: NeumorphicTheme.primaryAccent,
+        child: const Icon(Icons.share, color: Colors.white),
+      ),
+    );
+  }
+
+  Widget _buildRelatedSongItem(MusicModel song) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MusicDetailPage(music: song),
+          ),
+        );
+      },
+      child: Container(
+        width: 140,
+        margin: const EdgeInsets.symmetric(horizontal: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              height: 120,
+              decoration: NeumorphicTheme.neumorphicDecoration(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.network(
+                  song.imageUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => const Icon(Icons.music_note),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              song.title,
+              style: const TextStyle(
+                color: NeumorphicTheme.textPrimary,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            Text(
+              song.artist,
+              style: const TextStyle(
+                color: NeumorphicTheme.textTertiary,
+                fontSize: 12,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ],
         ),
       ),
     );
+  }
+
+  void _shareSong() {
+    final String shareText = 'Check out this song: ${widget.music.title} by ${widget.music.artist}\n'
+        'Listen here: ${widget.music.audioUrl}';
+    Share.share(shareText);
+  }
+
+  Future<void> _toggleFavorite() async {
+    final musicService = context.read<MusicService>();
+    final newFavoriteStatus = !_isFavorited;
+
+    try {
+      await musicService.toggleFavorite(widget.music.id, newFavoriteStatus);
+      setState(() {
+        _isFavorited = newFavoriteStatus;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(newFavoriteStatus ? 'Added to favorites' : 'Removed from favorites'),
+            backgroundColor: NeumorphicTheme.primaryAccent,
+            duration: const Duration(seconds: 1),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   Widget _buildInfoCard({

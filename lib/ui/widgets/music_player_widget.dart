@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import '../../data/models/music_model.dart';
 import '../../core/theme/neumorphic_theme.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:provider/provider.dart';
+import '../../data/services/music_service.dart';
 
 class MusicPlayerWidget extends StatefulWidget {
   final MusicModel music;
@@ -23,6 +26,7 @@ class _MusicPlayerWidgetState extends State<MusicPlayerWidget> {
   bool _isLoading = false;
   Duration _duration = Duration.zero;
   Duration _position = Duration.zero;
+  bool _isFavorited = false;
 
   @override
   void initState() {
@@ -149,9 +153,9 @@ class _MusicPlayerWidgetState extends State<MusicPlayerWidget> {
                 padding: EdgeInsets.zero,
                 borderRadius: BorderRadius.circular(15),
                 onPressed: () {
-                  // Show more options
+                  _shareSong();
                 },
-                child: const Icon(Icons.more_vert, size: 24, color: NeumorphicTheme.textPrimary),
+                child: const Icon(Icons.share, size: 24, color: NeumorphicTheme.textPrimary),
               ),
             ),
           ],
@@ -386,10 +390,10 @@ class _MusicPlayerWidgetState extends State<MusicPlayerWidget> {
                       padding: EdgeInsets.zero,
                       borderRadius: BorderRadius.circular(16),
                       onPressed: () {
-                        // Implement favorite
+                        _toggleFavorite();
                       },
                       child: Icon(
-                        Icons.favorite_border,
+                        _isFavorited ? Icons.favorite : Icons.favorite_border,
                         color: NeumorphicTheme.primaryAccent,
                         size: 26,
                       ),
@@ -428,6 +432,43 @@ class _MusicPlayerWidgetState extends State<MusicPlayerWidget> {
         ),
       ),
     );
+  }
+
+  void _shareSong() {
+    final String shareText = 'Check out this song: ${widget.music.title} by ${widget.music.artist}\n'
+        'Listen here: ${widget.music.audioUrl}';
+    Share.share(shareText);
+  }
+
+  Future<void> _toggleFavorite() async {
+    final musicService = context.read<MusicService>();
+    final newFavoriteStatus = !_isFavorited;
+    
+    try {
+      await musicService.toggleFavorite(widget.music.id, newFavoriteStatus);
+      setState(() {
+        _isFavorited = newFavoriteStatus;
+      });
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(newFavoriteStatus ? 'Added to favorites' : 'Removed from favorites'),
+            backgroundColor: NeumorphicTheme.primaryAccent,
+            duration: const Duration(seconds: 1),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }
 

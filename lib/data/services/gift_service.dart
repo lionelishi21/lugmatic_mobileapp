@@ -10,6 +10,16 @@ class GiftService {
 
   GiftService({required ApiClient apiClient}) : _apiClient = apiClient;
 
+  /// Fetch user coin balance.
+  Future<Map<String, dynamic>> getCoinBalance() async {
+    try {
+      final response = await _apiClient.dio.get(ApiConfig.coinBalance);
+      return response.data['data'] ?? response.data;
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
   /// Fetch all available gifts.
   Future<List<GiftModel>> getGifts() async {
     try {
@@ -48,7 +58,20 @@ class GiftService {
     }
   }
 
-  /// Purchase coins with a payment token.
+  /// Create a payment intent for native Stripe payments.
+  Future<Map<String, dynamic>> createPaymentIntent(int amount) async {
+    try {
+      final response = await _apiClient.dio.post(
+        ApiConfig.createPaymentIntent,
+        data: {'amount': amount},
+      );
+      return response.data['data'];
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// Purchase coins with a payment token (legacy/manual).
   Future<void> purchaseCoins({
     required int amount,
     required String paymentMethod,

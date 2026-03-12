@@ -14,6 +14,9 @@ import 'package:lugmatic_flutter/features/home/presentation/widgets/music_card.d
 import 'package:lugmatic_flutter/features/home/presentation/widgets/artist_card.dart';
 import 'package:lugmatic_flutter/features/home/presentation/widgets/podcast_card.dart';
 import 'package:lugmatic_flutter/ui/widgets/music_player_widget.dart';
+import 'package:lugmatic_flutter/features/home/presentation/pages/notifications_page.dart';
+import 'package:lugmatic_flutter/shared/widgets/demand_artist_dialog.dart';
+import 'package:lugmatic_flutter/data/services/notification_service.dart';
 import 'package:lugmatic_flutter/features/home/presentation/pages/create_playlist_screen.dart';
 import 'package:lugmatic_flutter/features/home/presentation/pages/browse_page.dart';
 import 'package:lugmatic_flutter/features/home/presentation/pages/radio_page.dart';
@@ -42,6 +45,7 @@ class _HomePageState extends State<HomePage> {
   List<MusicModel> _trendingSongs = [];
   List<ArtistModel> _featuredArtists = [];
   List<PodcastModel> _featuredPodcasts = [];
+  int _unreadNotifications = 0;
 
   @override
   void initState() {
@@ -72,6 +76,21 @@ class _HomePageState extends State<HomePage> {
       }
     } catch (e) {
       if (mounted) setState(() => _isLoading = false);
+    }
+    _loadNotifications();
+  }
+
+  Future<void> _loadNotifications() async {
+    try {
+      final service = context.read<NotificationService>();
+      final items = await service.getNotifications();
+      if (mounted) {
+        setState(() {
+          _unreadNotifications = items.where((n) => !n.isRead).length;
+        });
+      }
+    } catch (e) {
+      // Silent fail
     }
   }
 
@@ -150,6 +169,13 @@ class _HomePageState extends State<HomePage> {
       appBar: _currentIndex == 0
           ? CustomAppBar(
               title: 'Lugmatic Music',
+              unreadCount: _unreadNotifications,
+              onNotificationTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const NotificationsPage()),
+                ).then((_) => _loadNotifications());
+              },
               onProfileTap: () {
                 // Navigate to profile page
                 print('Profile tapped');
@@ -320,6 +346,29 @@ class _HomePageState extends State<HomePage> {
                   },
                     borderRadius: BorderRadius.circular(12),
                     child: const Icon(Icons.live_tv_rounded, color: Colors.white, size: 24),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.white.withOpacity(0.3), width: 1.5),
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => const DemandArtistDialog(),
+                      );
+                    },
+                    borderRadius: BorderRadius.circular(12),
+                    child: const Icon(Icons.person_add_alt_1_rounded, color: Colors.white, size: 22),
                   ),
                 ),
               ),

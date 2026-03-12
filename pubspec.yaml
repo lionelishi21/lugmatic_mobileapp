@@ -21,7 +21,9 @@ dependencies:
 
   # Audio & Media Playback
   just_audio: ^0.10.5 # A feature-rich audio player for streaming music and podcasts
-  audio_video_progress_bar: ^2.0.3 # A ready-to-use progress bar for audio
+  video_player: ^2.8.2 # For local and network video playback
+  chewie: ^1.8.5 # Video player with UI controls
+  audio_video_progress_bar: ^2.0.3 # A ready-to-use progress bar for audio/video
   path_provider: ^2.1.3 # For finding the correct local path to save offline downloads
 
   # State Management
@@ -45,6 +47,7 @@ dependencies:
   flutter_svg: ^2.0.10+1 # For rendering SVG files
 
   # In-App Purchases & Monetization
+  flutter_stripe: ^10.1.1 # Native Stripe payments
   # in_app_purchase: ^3.2.0 # To handle in-app purchases for virtual gifts (temporarily disabled for demo)
 
   # Device & Permissions

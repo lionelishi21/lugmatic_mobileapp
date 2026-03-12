@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lugmatic_flutter/features/gift/presentation/pages/gift_send_page.dart';
-import 'package:lugmatic_flutter/features/gift/presentation/pages/gift_discover_page.dart';
+import 'package:lugmatic_flutter/features/store/presentation/pages/store_page.dart';
 
 class GiftHubPage extends StatefulWidget {
   const GiftHubPage({Key? key}) : super(key: key);
@@ -81,7 +81,7 @@ class _GiftHubPageState extends State<GiftHubPage>
         controller: _tabController,
         children: const [
           GiftSendPage(),
-          GiftDiscoverPage(),
+          StorePage(),
         ],
       ),
     );
@@ -114,7 +114,10 @@ class _GiftHubPageState extends State<GiftHubPage>
             ),
             const SizedBox(height: 16),
             ElevatedButton.icon(
-              onPressed: () => print('Add funds'),
+              onPressed: () {
+                Navigator.pop(context);
+                _tabController.animateTo(1);
+              },
               icon: const Icon(Icons.add),
               label: const Text('Add Funds'),
               style: ElevatedButton.styleFrom(

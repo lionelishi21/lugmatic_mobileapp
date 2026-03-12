@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../../../data/services/auth_service.dart';
+import 'email_verification_screen.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_assets.dart';
@@ -19,7 +22,8 @@ class SignUpScreen extends StatefulWidget {
 class _SignUpScreenState extends State<SignUpScreen>
     with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -46,7 +50,8 @@ class _SignUpScreenState extends State<SignUpScreen>
 
   @override
   void dispose() {
-    _nameController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
@@ -56,20 +61,44 @@ class _SignUpScreenState extends State<SignUpScreen>
 
   Future<void> _signUp() async {
     if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-      });
+      setState(() => _isLoading = true);
 
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
+      try {
+        final authService = context.read<AuthService>();
+        await authService.register(
+          firstName: _firstNameController.text.trim(),
+          lastName: _lastNameController.text.trim(),
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        );
 
-      setState(() {
-        _isLoading = false;
-      });
-
-      // Handle successful signup
-      _showSuccessMessage();
+        if (mounted) {
+          setState(() => _isLoading = false);
+          _navigateToVerification();
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() => _isLoading = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(e.toString()),
+              backgroundColor: Colors.redAccent,
+            ),
+          );
+        }
+      }
     }
+  }
+
+  void _navigateToVerification() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EmailVerificationScreen(
+          email: _emailController.text.trim(),
+        ),
+      ),
+    );
   }
 
   void _showSuccessMessage() {
@@ -141,11 +170,21 @@ class _SignUpScreenState extends State<SignUpScreen>
                       ),
                       const SizedBox(height: 32),
 
-                      // Name Field
+                      // First Name Field
                       CustomTextField(
-                        label: AppStrings.fullName,
-                        hint: "Enter your full name",
-                        controller: _nameController,
+                        label: "First Name",
+                        hint: "Enter your first name",
+                        controller: _firstNameController,
+                        validator: AuthValidator.validateName,
+                        prefixIcon: Icons.person_outline,
+                      ),
+                      const SizedBox(height: 24),
+
+                      // Last Name Field
+                      CustomTextField(
+                        label: "Last Name",
+                        hint: "Enter your last name",
+                        controller: _lastNameController,
                         validator: AuthValidator.validateName,
                         prefixIcon: Icons.person_outline,
                       ),

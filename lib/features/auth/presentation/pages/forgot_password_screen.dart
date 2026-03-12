@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../data/services/auth_service.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../utils/auth_validator.dart';
 import '../widgets/auth_header.dart';
@@ -26,19 +28,27 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   Future<void> _resetPassword() async {
     if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-      });
+      setState(() => _isLoading = true);
 
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
-
-      setState(() {
-        _isLoading = false;
-      });
-
-      // Show success message and navigate back
-      _showSuccessMessage();
+      try {
+        final authService = context.read<AuthService>();
+        await authService.forgotPassword(_emailController.text.trim());
+        
+        if (mounted) {
+          setState(() => _isLoading = false);
+          _showSuccessMessage();
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() => _isLoading = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(e.toString()),
+              backgroundColor: Colors.redAccent,
+            ),
+          );
+        }
+      }
     }
   }
 

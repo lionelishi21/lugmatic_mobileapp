@@ -1,6 +1,12 @@
-import 'package:flutter/material.dart';
 import 'package:lugmatic_flutter/data/models/gift_model.dart';
 import 'package:lugmatic_flutter/data/models/artist_model.dart';
+import 'package:provider/provider.dart';
+import 'package:lugmatic_flutter/data/services/gift_service.dart';
+import 'package:lugmatic_flutter/data/services/home_service.dart';
+import 'package:lugmatic_flutter/data/services/stripe_service.dart';
+import 'package:lugmatic_flutter/core/theme/neumorphic_theme.dart';
+import 'package:dio/dio.dart';
+import 'dart:async';
 
 class GiftSendPage extends StatefulWidget {
   final ArtistModel? selectedArtist;
@@ -17,7 +23,11 @@ class _GiftSendPageState extends State<GiftSendPage> {
   String _message = '';
   final TextEditingController _messageController = TextEditingController();
 
-  final List<GiftModel> _popularGifts = [
+  List<GiftModel> _popularGifts = [];
+  List<ArtistModel> _recentArtists = [];
+  bool _isLoading = true;
+  double _userBalance = 0.0;
+  int _userCoins = 0;
     GiftModel(
       id: '1',
       name: 'Virtual Rose',
@@ -127,6 +137,48 @@ class _GiftSendPageState extends State<GiftSendPage> {
   void initState() {
     super.initState();
     _selectedArtist = widget.selectedArtist;
+    _loadInitialData();
+  }
+
+  Future<void> _loadInitialData() async {
+    setState(() => _isLoading = true);
+    try {
+      final giftService = context.read<GiftService>();
+      final homeService = context.read<HomeService>();
+
+      final results = await Future.wait([
+        giftService.getGifts(),
+        homeService.getFeaturedArtists(),
+        giftService.getCoinBalance(),
+      ]);
+
+      if (mounted) {
+        setState(() {
+          _popularGifts = results[0] as List<GiftModel>;
+          _recentArtists = results[1] as List<ArtistModel>;
+          final balanceData = results[2] as Map<String, dynamic>;
+          _userCoins = balanceData['coins'] ?? 0;
+          _userBalance = _userCoins / 100.0;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _refreshBalance() async {
+    try {
+      final balanceData = await context.read<GiftService>().getCoinBalance();
+      if (mounted) {
+        setState(() {
+          _userCoins = balanceData['coins'] ?? 0;
+          _userBalance = _userCoins / 100.0;
+        });
+      }
+    } catch (e) {
+      // Silent fail
+    }
   }
 
   @override
@@ -190,6 +242,19 @@ class _GiftSendPageState extends State<GiftSendPage> {
         ),
       ),
       actions: [
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: Text(
+              '$_userCoins 🪙',
+              style: const TextStyle(
+                color: Color(0xFFFFD700),
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+          ),
+        ),
         IconButton(
           icon: const Icon(Icons.account_balance_wallet, color: Colors.white),
           onPressed: () => _showWalletDialog(),
@@ -413,6 +478,19 @@ class _GiftSendPageState extends State<GiftSendPage> {
   }
 
   Widget _buildGiftsGrid() {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator(color: Color(0xFFFFD700)));
+    }
+    
+    if (_popularGifts.isEmpty) {
+      return const Center(
+        child: Text(
+          'No gifts available right now.',
+          style: TextStyle(color: Colors.white70),
+        ),
+      );
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: GridView.builder(
@@ -600,17 +678,20 @@ class _GiftSendPageState extends State<GiftSendPage> {
 
   Widget _buildSendButton() {
     final canSend = _selectedArtist != null && _selectedGift != null;
+    final hasEnoughCoins = _selectedGift != null && _userCoins >= (_selectedGift!.price * 100);
     
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       width: double.infinity,
       child: ElevatedButton.icon(
-        onPressed: canSend ? _sendGift : null,
-        icon: const Icon(Icons.card_giftcard, size: 20),
+        onPressed: (canSend && hasEnoughCoins) ? _sendGift : (canSend ? () => _showWalletDialog() : null),
+        icon: Icon(hasEnoughCoins ? Icons.card_giftcard : Icons.account_balance_wallet, size: 20),
         label: Text(
-          canSend 
-              ? 'Send Gift (\$${_selectedGift!.price.toStringAsFixed(2)})'
-              : 'Select Artist & Gift',
+          !canSend 
+              ? 'Select Artist & Gift'
+              : (hasEnoughCoins 
+                  ? 'Send Gift (\$${_selectedGift!.price.toStringAsFixed(2)})'
+                  : 'Insufficient Balance - Top Up'),
         ),
         style: ElevatedButton.styleFrom(
           backgroundColor: canSend ? const Color(0xFFFFD700) : Colors.grey,
@@ -699,14 +780,17 @@ class _GiftSendPageState extends State<GiftSendPage> {
               ),
             ),
             const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: () => print('Add funds'),
-              icon: const Icon(Icons.add),
-              label: const Text('Add Funds'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFFD700),
-                foregroundColor: Colors.black,
-              ),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [500, 1000, 2000, 5000].map((amount) {
+                return ActionChip(
+                  label: Text('$amount 🪙'),
+                  onPressed: () => _handlePurchase(amount),
+                  backgroundColor: const Color(0xFFFFD700).withOpacity(0.1),
+                  labelStyle: const TextStyle(color: Color(0xFFFFD700)),
+                );
+              }).toList(),
             ),
           ],
         ),
@@ -718,6 +802,39 @@ class _GiftSendPageState extends State<GiftSendPage> {
         ],
       ),
     );
+  }
+
+  Future<void> _handlePurchase(int amount) async {
+    final stripeService = context.read<StripeService>();
+    
+    // Show loading
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Initializing payment...'), duration: Duration(seconds: 1)),
+    );
+
+    final success = await stripeService.purchaseCoins(amount);
+    
+    if (success) {
+      await _refreshBalance();
+      if (mounted) {
+        Navigator.pop(context); // Close wallet dialog
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Successfully purchased $amount coins!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Payment failed or cancelled.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   void _sendGift() {
@@ -766,9 +883,9 @@ class _GiftSendPageState extends State<GiftSendPage> {
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              _processGiftSending();
+              await _processGiftSending();
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFFFD700),
@@ -781,23 +898,46 @@ class _GiftSendPageState extends State<GiftSendPage> {
     );
   }
 
-  void _processGiftSending() {
-    // Show success animation
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Gift sent to ${_selectedArtist!.name}! 🎁',
-        ),
-        backgroundColor: const Color(0xFFFFD700),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+  Future<void> _processGiftSending() async {
+    if (_selectedArtist == null || _selectedGift == null) return;
     
-    // Reset selections
-    setState(() {
-      _selectedGift = null;
-      _message = '';
-      _messageController.clear();
-    });
+    try {
+      final giftService = context.read<GiftService>();
+      await giftService.sendGift(
+        artistId: _selectedArtist!.id,
+        giftId: _selectedGift!.id,
+        message: _message,
+      );
+
+      // Animation & Haptic could go here
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Gift sent to ${_selectedArtist!.name}! 🎁'),
+            backgroundColor: const Color(0xFFFFD700),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        
+        // Refresh balance and reset
+        await _refreshBalance();
+        setState(() {
+          _selectedGift = null;
+          _message = '';
+          _messageController.clear();
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to send gift: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
   }
 }

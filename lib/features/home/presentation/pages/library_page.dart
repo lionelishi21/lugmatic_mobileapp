@@ -40,24 +40,24 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
 
     try {
       final results = await Future.wait([
-        api.dio.get(ApiConfig.playlists, queryParameters: {'limit': 20}),
-        api.dio.get(ApiConfig.songs, queryParameters: {'limit': 30}),
-        api.dio.get(ApiConfig.albums, queryParameters: {'limit': 20}),
-        api.dio.get(ApiConfig.artists, queryParameters: {'limit': 20}),
+        api.dio.get(ApiConfig.mobilePlaylists), // Fetches user playlists
+        api.dio.get(ApiConfig.mobileFavorites), // Fetches liked songs
+        api.dio.get(ApiConfig.albums, queryParameters: {'limit': 20}), // Global or liked albums
+        api.dio.get(ApiConfig.mobileArtists), // Fetches followed artists
       ]);
 
       if (mounted) {
         final playlistBody = results[0].data;
-        final songBody = results[1].data;
+        final favoritesBody = results[1].data;
         final albumBody = results[2].data;
         final artistBody = results[3].data;
 
         setState(() {
-          _playlists = List<Map<String, dynamic>>.from(playlistBody['data'] ?? playlistBody['playlists'] ?? []);
-          final songItems = songBody['data'] ?? songBody['songs'] ?? [];
+          _playlists = List<Map<String, dynamic>>.from(playlistBody['data'] ?? []);
+          final songItems = favoritesBody['data'] ?? [];
           _songs = (songItems as List).map((j) => MusicModel.fromJson(j as Map<String, dynamic>)).toList();
-          _albums = List<Map<String, dynamic>>.from(albumBody['data'] ?? albumBody['albums'] ?? []);
-          final artistItems = artistBody['data'] ?? artistBody['artists'] ?? [];
+          _albums = List<Map<String, dynamic>>.from(albumBody['data'] ?? []);
+          final artistItems = artistBody['data'] ?? [];
           _artists = (artistItems as List).map((j) => ArtistModel.fromJson(j as Map<String, dynamic>)).toList();
           _isLoading = false;
         });

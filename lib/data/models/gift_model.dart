@@ -37,11 +37,11 @@ class GiftModel {
       name: json['name'] ?? '',
       description: json['description'] ?? '',
       imageUrl: json['image'] ?? json['imageUrl'] ?? '',
-      price: (json['coinCost'] ?? json['value'] ?? json['price'] ?? 0).toDouble(),
+      price: (json['coinCost'] ?? json['value'] ?? 0).toDouble() / 100.0, // Convert to display dollars
       currency: json['currency'] ?? 'coins',
       category: json['category'] ?? json['type'] ?? 'support',
       isPopular: json['rarity'] == 'legendary' || json['rarity'] == 'epic' || (json['isPopular'] ?? false),
-      isLimited: json['isSeasonal'] ?? json['isLimited'] ?? false,
+      isLimited: json['isSeasonal'] ?? (json['isLimited'] ?? false),
       quantity: json['quantity'] ?? 1,
       artistId: json['artistId'] ?? '',
       artistName: json['artistName'] ?? '',

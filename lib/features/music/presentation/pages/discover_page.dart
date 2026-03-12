@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:lugmatic_flutter/data/models/music_model.dart';
 import 'package:lugmatic_flutter/data/models/artist_model.dart';
 import 'package:lugmatic_flutter/ui/widgets/music_player_widget.dart';
+import 'package:provider/provider.dart';
+import 'package:lugmatic_flutter/core/network/api_client.dart';
+import 'package:lugmatic_flutter/data/services/home_service.dart';
 
 class DiscoverPage extends StatefulWidget {
   const DiscoverPage({Key? key}) : super(key: key);
@@ -12,105 +15,50 @@ class DiscoverPage extends StatefulWidget {
 
 class _DiscoverPageState extends State<DiscoverPage> {
   final TextEditingController _searchController = TextEditingController();
+  late HomeService _homeService;
+  bool _isLoading = true;
 
-  final List<MusicModel> _trendingSongs = [
-    MusicModel(
-      id: '1',
-      title: 'Electric Dreams',
-      artist: 'SynthWave',
-      album: 'Neon Nights',
-      imageUrl: 'https://via.placeholder.com/300x300/10B981/FFFFFF?text=Trend+1',
-      audioUrl: 'https://example.com/trend1.mp3',
-      duration: const Duration(minutes: 3, seconds: 45),
-      genre: 'Electronic',
-      releaseDate: DateTime.now(),
-    ),
-    MusicModel(
-      id: '2',
-      title: 'Midnight City',
-      artist: 'Urban Beats',
-      album: 'City Lights',
-      imageUrl: 'https://via.placeholder.com/300x300/8B5CF6/FFFFFF?text=Trend+2',
-      audioUrl: 'https://example.com/trend2.mp3',
-      duration: const Duration(minutes: 4, seconds: 12),
-      genre: 'Hip-Hop',
-      releaseDate: DateTime.now(),
-    ),
-    MusicModel(
-      id: '3',
-      title: 'Ocean Waves',
-      artist: 'Chill Vibes',
-      album: 'Relaxation',
-      imageUrl: 'https://via.placeholder.com/300x300/06B6D4/FFFFFF?text=Trend+3',
-      audioUrl: 'https://example.com/trend3.mp3',
-      duration: const Duration(minutes: 5, seconds: 30),
-      genre: 'Ambient',
-      releaseDate: DateTime.now(),
-    ),
-  ];
-
-  final List<MusicModel> _newReleases = [
-    MusicModel(
-      id: '4',
-      title: 'Sunset Boulevard',
-      artist: 'Indie Dreams',
-      album: 'New Horizons',
-      imageUrl: 'https://via.placeholder.com/300x300/F59E0B/FFFFFF?text=New+1',
-      audioUrl: 'https://example.com/new1.mp3',
-      duration: const Duration(minutes: 3, seconds: 20),
-      genre: 'Indie',
-      releaseDate: DateTime.now().subtract(const Duration(days: 1)),
-    ),
-    MusicModel(
-      id: '5',
-      title: 'Digital Love',
-      artist: 'Cyber Pop',
-      album: 'Future Sounds',
-      imageUrl: 'https://via.placeholder.com/300x300/EC4899/FFFFFF?text=New+2',
-      audioUrl: 'https://example.com/new2.mp3',
-      duration: const Duration(minutes: 4, seconds: 15),
-      genre: 'Pop',
-      releaseDate: DateTime.now().subtract(const Duration(days: 2)),
-    ),
-  ];
-
-  final List<ArtistModel> _featuredArtists = [
-    ArtistModel(
-      id: '1',
-      name: 'Luna Nova',
-      imageUrl: 'https://via.placeholder.com/300x300/10B981/FFFFFF?text=Luna',
-      bio: 'Electronic music producer and DJ',
-      followers: 125000,
-      isVerified: true,
-      genres: ['Electronic', 'Ambient'],
-      location: 'Los Angeles, CA',
-    ),
-    ArtistModel(
-      id: '2',
-      name: 'Thunder Band',
-      imageUrl: 'https://via.placeholder.com/300x300/EF4444/FFFFFF?text=Thunder',
-      bio: 'Rock band with electrifying performances',
-      followers: 89000,
-      isVerified: true,
-      genres: ['Rock', 'Alternative'],
-      location: 'Seattle, WA',
-    ),
-    ArtistModel(
-      id: '3',
-      name: 'Chill Wave',
-      imageUrl: 'https://via.placeholder.com/300x300/06B6D4/FFFFFF?text=Chill',
-      bio: 'Ambient and chill music creator',
-      followers: 67000,
-      isVerified: false,
-      genres: ['Ambient', 'Chill'],
-      location: 'Portland, OR',
-    ),
-  ];
+  List<MusicModel> _trendingSongs = [];
+  List<MusicModel> _newReleases = [];
+  List<ArtistModel> _featuredArtists = [];
 
   final List<String> _genres = [
     'Pop', 'Rock', 'Hip-Hop', 'Electronic', 'Jazz', 'Classical',
     'Country', 'R&B', 'Reggae', 'Blues', 'Folk', 'Alternative'
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _homeService = HomeService(apiClient: context.read<ApiClient>());
+    _loadDiscoveryData();
+  }
+
+  Future<void> _loadDiscoveryData() async {
+    if (!mounted) return;
+    setState(() => _isLoading = true);
+    
+    try {
+      final results = await Future.wait([
+        _homeService.getTrendingSongs(),
+        _homeService.getNewReleases(),
+        _homeService.getFeaturedArtists(),
+      ]);
+
+      if (mounted) {
+        setState(() {
+          _trendingSongs = results[0] as List<MusicModel>;
+          _newReleases = results[1] as List<MusicModel>;
+          _featuredArtists = results[2] as List<ArtistModel>;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -122,38 +70,58 @@ class _DiscoverPageState extends State<DiscoverPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF111827),
-      body: CustomScrollView(
-        slivers: [
-          _buildAppBar(),
-          SliverToBoxAdapter(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 20),
-                _buildSearchBar(),
-                const SizedBox(height: 24),
-                _buildGenresGrid(),
-                const SizedBox(height: 32),
-                _buildSectionHeader('Trending Now', 'See All'),
-                const SizedBox(height: 16),
-                _buildTrendingSongs(),
-                const SizedBox(height: 32),
-                _buildSectionHeader('New Releases', 'View All'),
-                const SizedBox(height: 16),
-                _buildNewReleases(),
-                const SizedBox(height: 32),
-                _buildSectionHeader('Featured Artists', 'Browse'),
-                const SizedBox(height: 16),
-                _buildFeaturedArtists(),
-                const SizedBox(height: 32),
-                _buildSectionHeader('Recommended for You', ''),
-                const SizedBox(height: 16),
-                _buildRecommendedSongs(),
-                const SizedBox(height: 100),
-              ],
+      body: RefreshIndicator(
+        onRefresh: _loadDiscoveryData,
+        color: const Color(0xFF10B981),
+        backgroundColor: const Color(0xFF1F2937),
+        child: CustomScrollView(
+          slivers: [
+            _buildAppBar(),
+            SliverToBoxAdapter(
+              child: _isLoading 
+                ? SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.7,
+                    child: const Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF10B981)),
+                      ),
+                    ),
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 20),
+                      _buildSearchBar(),
+                      const SizedBox(height: 24),
+                      _buildGenresGrid(),
+                      const SizedBox(height: 32),
+                      if (_trendingSongs.isNotEmpty) ...[
+                        _buildSectionHeader('Trending Now', 'See All'),
+                        const SizedBox(height: 16),
+                        _buildTrendingSongs(),
+                        const SizedBox(height: 32),
+                      ],
+                      if (_newReleases.isNotEmpty) ...[
+                        _buildSectionHeader('New Releases', 'View All'),
+                        const SizedBox(height: 16),
+                        _buildNewReleases(),
+                        const SizedBox(height: 32),
+                      ],
+                      if (_featuredArtists.isNotEmpty) ...[
+                        _buildSectionHeader('Featured Artists', 'Browse'),
+                        const SizedBox(height: 16),
+                        _buildFeaturedArtists(),
+                        const SizedBox(height: 32),
+                      ],
+                      _buildSectionHeader('Recommended for You', ''),
+                      const SizedBox(height: 16),
+                      _buildRecommendedSongs(),
+                      const SizedBox(height: 100),
+                    ],
+                  ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

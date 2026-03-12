@@ -25,6 +25,7 @@ class ApiConfig {
   static const String refreshToken = '/auth/refresh-token';
   static const String logout = '/auth/logout';
   static const String me = '/auth/me';
+  static const String verifyEmail = '/auth/verify-email';
 
   // ── Song endpoints ──────────────────────────────────────────────
   static const String songs = '/song';
@@ -34,10 +35,12 @@ class ApiConfig {
   static const String artists = '/artist';
   static const String artistDetails = '/artist'; // + /:id
 
-  // ── Gift endpoints ──────────────────────────────────────────────
   static const String gifts = '/gift';
   static const String sendGift = '/gift/send';
   static const String purchaseCoins = '/gift/purchase-coins';
+  static const String createPaymentIntent = '/gift/create-payment-intent';
+  static const String verifyPurchase = '/gift/verify-purchase';
+  static const String coinBalance = '/gift/balance';
 
   // ── Album endpoints ─────────────────────────────────────────────
   static const String albums = '/album';
@@ -51,6 +54,19 @@ class ApiConfig {
 
   // ── Podcast endpoints ───────────────────────────────────────────
   static const String podcasts = '/podcast';
+  static const String podcastDetails = '/podcast'; // + /:id
+
+  // ── Comment endpoints ───────────────────────────────────────────
+  static const String comments = '/comment';
+  static const String commentLike = '/comment'; // + /:id/like
+
+  // ── Notification endpoints ──────────────────────────────────────
+  static const String notifications = '/notification';
+  static const String markRead = '/notification/read-all';
+
+  // ── Artist Request endpoints ────────────────────────────────────
+  static const String artistRequest = '/artist-request';
+  static const String myArtistRequests = '/artist-request/my';
 
   // ── Search endpoints ────────────────────────────────────────────
   static const String search = '/search/global';
@@ -59,6 +75,13 @@ class ApiConfig {
   static const String liveStreams = '/live-stream';
   static const String liveStreamDetails = '/live-stream'; // + /:id
   static const String liveStreamToken = '/live-stream'; // + /:id/token
+
+  // ── Video endpoints ─────────────────────────────────────────────
+  static const String videos = '/video/list';
+  static const String videoFeed = '/video/feed';
+  static const String videoDetails = '/video/details'; // + /:id
+  static const String songVideos = '/video/song'; // + /:id
+  static const String videoView = '/video/view'; // + /:id
 
   // ── LiveKit ────────────────────────────────────────────────────
   static const String livekitUrl = String.fromEnvironment(

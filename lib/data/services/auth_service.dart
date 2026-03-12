@@ -168,4 +168,28 @@ class AuthService {
       return null;
     }
   }
+
+  /// Send a password reset email.
+  Future<void> forgotPassword(String email) async {
+    try {
+      await _apiClient.dio.post(
+        ApiConfig.forgotPassword,
+        data: {'email': email},
+      );
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// Verify email with code/token.
+  Future<void> verifyEmail(String token) async {
+    try {
+      await _apiClient.dio.post(
+        ApiConfig.verifyEmail,
+        data: {'token': token},
+      );
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
 }

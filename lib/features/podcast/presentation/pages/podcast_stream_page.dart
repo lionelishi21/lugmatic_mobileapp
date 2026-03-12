@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lugmatic_flutter/data/models/podcast_model.dart';
 import 'package:lugmatic_flutter/data/models/music_model.dart';
 import 'package:lugmatic_flutter/ui/widgets/music_player_widget.dart';
+import '../../../../shared/widgets/comment_section_widget.dart';
 
 class PodcastStreamPage extends StatefulWidget {
   const PodcastStreamPage({Key? key}) : super(key: key);
@@ -124,6 +125,22 @@ class _PodcastStreamPageState extends State<PodcastStreamPage> {
                 _buildSectionHeader('Popular Series'),
                 const SizedBox(height: 16),
                 _buildPopularSeries(),
+                const SizedBox(height: 48),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16),
+                  child: Text(
+                    'Recent Podcast Activity',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const CommentSectionWidget(
+                  contentType: 'podcast',
+                  contentId: 'general_podcast_hub',
+                ),
                 const SizedBox(height: 100),
               ],
             ),

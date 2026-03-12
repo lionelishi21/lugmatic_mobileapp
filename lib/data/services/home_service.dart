@@ -27,6 +27,23 @@ class HomeService {
     }
   }
 
+  /// Fetch new releases from the backend.
+  Future<List<MusicModel>> getNewReleases() async {
+    try {
+      final response = await _apiClient.dio.get(
+        ApiConfig.songs,
+        queryParameters: {'limit': 20, 'sort': '-releaseDate'},
+      );
+      final body = response.data;
+      final items = body['data'] ?? body['songs'] ?? [];
+      return (items as List)
+          .map((json) => MusicModel.fromJson(json as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      return [];
+    }
+  }
+
   /// Fetch featured artists from the backend.
   Future<List<ArtistModel>> getFeaturedArtists() async {
     try {
