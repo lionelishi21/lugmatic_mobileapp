@@ -380,62 +380,62 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildQuickActions() {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildQuickActionCard(
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          _buildQuickActionItem(
             icon: Icons.music_note,
             title: 'Music',
-            subtitle: 'Stream & Discover',
+            subtitle: 'Stream',
             color: const Color(0xFF10B981),
-            onTap: () {
-              print('Music button tapped - navigating to MusicHubPage');
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const MusicHubPage(),
-                ),
-              );
-            },
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MusicHubPage())),
           ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildQuickActionCard(
+          const SizedBox(width: 12),
+          _buildQuickActionItem(
             icon: Icons.mic,
             title: 'Podcasts',
-            subtitle: 'Listen & Learn',
+            subtitle: 'Listen',
             color: const Color(0xFF8B5CF6),
-            onTap: () {
-              print('Podcasts button tapped - navigating to PodcastHubPage');
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const PodcastHubPage(),
-                ),
-              );
-            },
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PodcastHubPage())),
           ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildQuickActionCard(
+          const SizedBox(width: 12),
+          _buildQuickActionItem(
             icon: Icons.card_giftcard,
             title: 'Gifts',
-            subtitle: 'Support Artists',
+            subtitle: 'Support',
             color: const Color(0xFFFFD700),
-            onTap: () {
-              print('Gifts button tapped - navigating to GiftHubPage');
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const GiftHubPage(),
-                ),
-              );
-            },
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const GiftHubPage())),
           ),
-        ),
-      ],
+          const SizedBox(width: 12),
+          _buildQuickActionItem(
+            icon: Icons.auto_awesome,
+            title: 'AI Mixer',
+            subtitle: 'Remix',
+            color: const Color(0xFF10B981),
+            onTap: () => Navigator.pushNamed(context, '/mixer'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickActionItem({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return SizedBox(
+      width: 110,
+      child: _buildQuickActionCard(
+        icon: icon,
+        title: title,
+        subtitle: subtitle,
+        color: color,
+        onTap: onTap,
+      ),
     );
   }
 

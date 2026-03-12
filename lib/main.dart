@@ -14,7 +14,9 @@ import 'data/services/artist_request_service.dart';
 import 'data/services/video_service.dart';
 import 'data/services/gift_service.dart';
 import 'data/services/stripe_service.dart';
+import 'data/services/music_service.dart';
 import 'features/store/presentation/pages/store_page.dart';
+import 'features/mixer/presentation/pages/mixer_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,6 +43,7 @@ void main() async {
   final videoService = VideoService(apiClient: apiClient);
   final giftService = GiftService(apiClient: apiClient);
   final stripeService = StripeService(giftService: giftService);
+  final musicService = MusicService(apiClient: apiClient);
 
   runApp(
     MultiProvider(
@@ -59,6 +62,7 @@ void main() async {
         Provider<VideoService>.value(value: videoService),
         Provider<GiftService>.value(value: giftService),
         Provider<StripeService>.value(value: stripeService),
+        Provider<MusicService>.value(value: musicService),
       ],
       child: const LugmaticApp(),
     ),
@@ -82,6 +86,7 @@ class LugmaticApp extends StatelessWidget {
         '/home': (context) => const HomePage(),
         '/login': (context) => const LoginScreen(),
         '/store': (context) => const StorePage(),
+        '/mixer': (context) => const MixerPage(),
       },
     );
   }

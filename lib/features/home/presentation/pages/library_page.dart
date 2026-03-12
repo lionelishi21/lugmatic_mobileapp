@@ -126,6 +126,11 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
         style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w800, letterSpacing: -0.5),
       ),
       actions: [
+        IconButton(
+          onPressed: () => Navigator.pushNamed(context, '/mixer'),
+          icon: const Icon(Icons.auto_awesome, color: Color(0xFF10B981)),
+          tooltip: 'AI Mixer',
+        ),
         IconButton(onPressed: () {}, icon: const Icon(Icons.search, color: Colors.white)),
         IconButton(onPressed: () {}, icon: const Icon(Icons.add, color: Colors.white)),
         const SizedBox(width: 8),
