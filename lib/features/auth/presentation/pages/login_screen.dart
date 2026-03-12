@@ -416,8 +416,9 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   Future<void> _signInWithGoogle() async {
+    /*
     try {
-      final googleSignIn = GoogleSignIn(scopes: ['email', 'profile']);
+      final googleSignIn = GoogleSignIn();
       final account = await googleSignIn.signIn();
       if (account == null) return; // User cancelled
 
@@ -455,6 +456,10 @@ class _LoginScreenState extends State<LoginScreen>
         );
       }
     }
+    */
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Google Sign-In is temporarily disabled')),
+    );
   }
 
   void _signInWithApple() {

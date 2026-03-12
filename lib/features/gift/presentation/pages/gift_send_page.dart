@@ -937,6 +937,7 @@ class _GiftSendPageState extends State<GiftSendPage> {
             backgroundColor: Colors.red,
           ),
         );
+      }
     }
   }
 }
