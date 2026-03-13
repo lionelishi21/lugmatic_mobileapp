@@ -1,7 +1,10 @@
+import '../../core/config/api_config.dart';
+
 class MusicModel {
   final String id;
   final String title;
   final String artist;
+  final String artistId;
   final String album;
   final String imageUrl;
   final String audioUrl;
@@ -16,6 +19,7 @@ class MusicModel {
     required this.id,
     required this.title,
     required this.artist,
+    this.artistId = '',
     required this.album,
     required this.imageUrl,
     required this.audioUrl,
@@ -29,17 +33,19 @@ class MusicModel {
 
   factory MusicModel.fromJson(Map<String, dynamic> json) {
     // Handle populated artist (object with name) or plain string
-    String artistName;
+    String artistName = '';
+    String artistId = '';
     bool isVerified = false;
     if (json['artist'] is Map) {
       artistName = json['artist']['name'] ?? '';
+      artistId = json['artist']['_id'] ?? json['artist']['id'] ?? '';
       isVerified = json['artist']['isVerified'] ?? false;
     } else {
       artistName = json['artist']?.toString() ?? '';
     }
 
     // Handle populated album (object with name) or plain string
-    String albumName;
+    String albumName = '';
     String albumCoverArt = '';
     if (json['album'] is Map) {
       albumName = json['album']['name'] ?? '';
@@ -49,20 +55,32 @@ class MusicModel {
     }
 
     // Image: prefer coverArt on the song, then album coverArt
-    final imageUrl = json['coverArt'] ?? albumCoverArt;
+    final rawImage = json['coverArt'] ?? json['coverArtUrl'] ?? albumCoverArt ?? '';
+    final imageUrl = ApiConfig.resolveUrl(rawImage is String ? rawImage : '');
+
+    // Audio URL: resolve relative paths to absolute
+    final rawAudio = json['audioFile'] ?? json['audioFileUrl'] ?? json['audioUrl'] ?? '';
+    final audioUrl = ApiConfig.resolveUrl(rawAudio is String ? rawAudio : '');
 
     return MusicModel(
       id: json['_id'] ?? json['id'] ?? '',
       title: json['name'] ?? json['title'] ?? '',
       artist: artistName,
+      artistId: artistId,
       album: albumName,
-      imageUrl: imageUrl is String ? imageUrl : '',
-      audioUrl: json['audioFile'] ?? json['audioUrl'] ?? '',
-      duration: Duration(seconds: (json['duration'] ?? 0) is int ? json['duration'] : (json['duration'] as num).toInt()),
-      genre: json['genre'] ?? '',
+      imageUrl: imageUrl,
+      audioUrl: audioUrl,
+      duration: Duration(
+        seconds: (json['duration'] ?? 0) is int
+            ? json['duration']
+            : (json['duration'] as num).toInt(),
+      ),
+      genre: json['genre']?.toString() ?? '',
       isLiked: json['isLiked'] ?? false,
       playCount: json['playCount'] ?? 0,
-      releaseDate: json['releaseDate'] != null ? DateTime.tryParse(json['releaseDate'].toString()) ?? DateTime.now() : DateTime.now(),
+      releaseDate: json['releaseDate'] != null
+          ? DateTime.tryParse(json['releaseDate'].toString()) ?? DateTime.now()
+          : DateTime.now(),
       isArtistVerified: isVerified,
     );
   }
@@ -72,6 +90,7 @@ class MusicModel {
       'id': id,
       'title': title,
       'artist': artist,
+      'artistId': artistId,
       'album': album,
       'imageUrl': imageUrl,
       'audioUrl': audioUrl,
@@ -84,4 +103,3 @@ class MusicModel {
     };
   }
 }
-

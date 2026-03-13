@@ -10,6 +10,17 @@ class HomeService {
 
   HomeService({required ApiClient apiClient}) : _apiClient = apiClient;
 
+  /// Parse the data list from an API response body.
+  /// Handles both {success, data: [...]} and raw [...] responses.
+  List _extractList(dynamic body, List<String> keys) {
+    if (body is List) return body;
+    for (final key in keys) {
+      final val = body[key];
+      if (val is List) return val;
+    }
+    return [];
+  }
+
   /// Fetch trending songs from the backend.
   Future<List<MusicModel>> getTrendingSongs() async {
     try {
@@ -17,9 +28,8 @@ class HomeService {
         ApiConfig.songs,
         queryParameters: {'limit': 20, 'sort': '-playCount'},
       );
-      final body = response.data;
-      final items = body['data'] ?? body['songs'] ?? [];
-      return (items as List)
+      final items = _extractList(response.data, ['data', 'songs']);
+      return (items)
           .map((json) => MusicModel.fromJson(json as Map<String, dynamic>))
           .toList();
     } catch (e) {
@@ -34,9 +44,8 @@ class HomeService {
         ApiConfig.songs,
         queryParameters: {'limit': 20, 'sort': '-releaseDate'},
       );
-      final body = response.data;
-      final items = body['data'] ?? body['songs'] ?? [];
-      return (items as List)
+      final items = _extractList(response.data, ['data', 'songs']);
+      return (items)
           .map((json) => MusicModel.fromJson(json as Map<String, dynamic>))
           .toList();
     } catch (e) {
@@ -51,9 +60,9 @@ class HomeService {
         ApiConfig.artists,
         queryParameters: {'limit': 20},
       );
-      final body = response.data;
-      final items = body['data'] ?? body['artists'] ?? [];
-      return (items as List)
+      // /artist endpoint returns a raw array or {data: [...]}
+      final items = _extractList(response.data, ['data', 'artists']);
+      return (items)
           .map((json) => ArtistModel.fromJson(json as Map<String, dynamic>))
           .toList();
     } catch (e) {
@@ -68,9 +77,8 @@ class HomeService {
         ApiConfig.podcasts,
         queryParameters: {'limit': 10},
       );
-      final body = response.data;
-      final items = body['data'] ?? body['podcasts'] ?? [];
-      return (items as List)
+      final items = _extractList(response.data, ['data', 'podcasts']);
+      return (items)
           .map((json) => PodcastModel.fromJson(json as Map<String, dynamic>))
           .toList();
     } catch (e) {
@@ -83,14 +91,11 @@ class HomeService {
     try {
       final response = await _apiClient.dio.get(ApiConfig.gifts);
       final body = response.data;
-      final items = body['data'] ?? body;
-      if (items is List) {
-        return items
-            .where((g) => g['isActive'] == true)
-            .map((json) => GiftModel.fromJson(json as Map<String, dynamic>))
-            .toList();
-      }
-      return [];
+      final items = _extractList(body, ['data', 'gifts']);
+      return items
+          .where((g) => g['isActive'] == true)
+          .map((json) => GiftModel.fromJson(json as Map<String, dynamic>))
+          .toList();
     } catch (e) {
       return [];
     }
@@ -103,8 +108,7 @@ class HomeService {
         ApiConfig.playlists,
         queryParameters: {'recommended': true, 'limit': 10},
       );
-      final body = response.data;
-      final items = body['data'] ?? body['playlists'] ?? [];
+      final items = _extractList(response.data, ['data', 'playlists']);
       return List<Map<String, dynamic>>.from(items);
     } catch (e) {
       return [];

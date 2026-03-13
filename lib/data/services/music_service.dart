@@ -39,15 +39,16 @@ class MusicService {
     }
   }
 
-  /// Search songs.
+  /// Search songs, artists, and albums.
   Future<List<MusicModel>> searchSongs(String query) async {
     try {
       final response = await _apiClient.dio.get(
-        ApiConfig.mobileSearch,
-        queryParameters: {'q': query, 'type': 'song'},
+        ApiConfig.search,
+        queryParameters: {'q': query},
       );
       final body = response.data;
-      final results = body['data']?['songs'] ?? [];
+      final data = body['data'] ?? body;
+      final results = data['songs'] ?? [];
       return (results as List)
           .map((json) => MusicModel.fromJson(json as Map<String, dynamic>))
           .toList();

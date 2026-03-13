@@ -1,3 +1,5 @@
+import '../../core/config/api_config.dart';
+
 class PodcastModel {
   final String id;
   final String title;
@@ -36,23 +38,38 @@ class PodcastModel {
   });
 
   factory PodcastModel.fromJson(Map<String, dynamic> json) {
+    // Handle populated artist/host field
+    String hostName = '';
+    if (json['artist'] is Map) {
+      hostName = json['artist']['name'] ?? '';
+    } else {
+      hostName = json['host']?.toString() ?? json['artist']?.toString() ?? '';
+    }
+
+    final rawImage = json['imageUrl'] ?? json['coverArt'] ?? json['image'] ?? '';
+    final rawAudio = json['audioFile'] ?? json['audioFileUrl'] ?? json['audioUrl'] ?? '';
+
     return PodcastModel(
-      id: json['id'],
-      title: json['title'],
-      description: json['description'],
-      host: json['host'],
-      imageUrl: json['imageUrl'],
-      audioUrl: json['audioUrl'],
-      duration: Duration(seconds: json['duration']),
-      category: json['category'],
-      publishDate: DateTime.parse(json['publishDate']),
-      episodeNumber: json['episodeNumber'],
-      totalEpisodes: json['totalEpisodes'],
+      id: json['_id'] ?? json['id'] ?? '',
+      title: json['name'] ?? json['title'] ?? '',
+      description: json['description'] ?? '',
+      host: hostName,
+      imageUrl: ApiConfig.resolveUrl(rawImage is String ? rawImage : ''),
+      audioUrl: ApiConfig.resolveUrl(rawAudio is String ? rawAudio : ''),
+      duration: Duration(seconds: (json['duration'] ?? 0) is int ? json['duration'] : (json['duration'] as num).toInt()),
+      category: json['category']?.toString() ?? json['genre']?.toString() ?? '',
+      publishDate: json['publishDate'] != null
+          ? DateTime.tryParse(json['publishDate'].toString()) ?? DateTime.now()
+          : json['releaseDate'] != null
+              ? DateTime.tryParse(json['releaseDate'].toString()) ?? DateTime.now()
+              : DateTime.now(),
+      episodeNumber: json['episodeNumber'] ?? json['trackNumber'] ?? 1,
+      totalEpisodes: json['totalEpisodes'] ?? 0,
       isLiked: json['isLiked'] ?? false,
       playCount: json['playCount'] ?? 0,
       tags: List<String>.from(json['tags'] ?? []),
-      seriesId: json['seriesId'],
-      seriesTitle: json['seriesTitle'],
+      seriesId: json['seriesId']?.toString() ?? json['album']?.toString() ?? '',
+      seriesTitle: json['seriesTitle']?.toString() ?? '',
     );
   }
 
@@ -77,4 +94,3 @@ class PodcastModel {
     };
   }
 }
-

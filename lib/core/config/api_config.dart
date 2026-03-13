@@ -12,6 +12,19 @@ class ApiConfig {
     defaultValue: 'https://api.lugmaticmusic.com/api',
   );
 
+  /// Storage base URL for resolving relative media paths (/uploads/...)
+  static const String storageBaseUrl = String.fromEnvironment(
+    'STORAGE_BASE_URL',
+    defaultValue: 'https://api.lugmaticmusic.com',
+  );
+
+  /// Resolve a potentially-relative media path to a full URL.
+  static String resolveUrl(String? path) {
+    if (path == null || path.isEmpty) return '';
+    if (path.startsWith('http')) return path;
+    return '$storageBaseUrl$path';
+  }
+
   /// Connection timeout in milliseconds
   static const int connectTimeout = 15000;
 
@@ -30,12 +43,14 @@ class ApiConfig {
   static const String resetPassword = '/auth/reset-password';
 
   // ── Song endpoints ──────────────────────────────────────────────
-  static const String songs = '/song';
-  static const String songDetails = '/song'; // + /:id
+  static const String songs = '/song/list';
+  static const String songDetails = '/song/details'; // + /:id
 
   // ── Artist endpoints ────────────────────────────────────────────
-  static const String artists = '/artist';
-  static const String artistDetails = '/artist'; // + /:id
+  static const String artists = '/artist/list';
+  static const String artistDetails = '/artist/details'; // + /:id
+  static const String artistSongs = '/artist'; // + /:id/songs
+  static const String artistAlbums = '/artist'; // + /:id/albums
 
   static const String gifts = '/gift';
   static const String sendGift = '/gift/send';
@@ -45,18 +60,19 @@ class ApiConfig {
   static const String coinBalance = '/gift/balance';
 
   // ── Album endpoints ─────────────────────────────────────────────
-  static const String albums = '/album';
-  static const String albumDetails = '/album'; // + /:id
-
-  // ── Genre endpoints ────────────────────────────────────────────
-  static const String genres = '/genre';
+  static const String albums = '/album/list';
+  static const String albumDetails = '/album/details'; // + /:id
 
   // ── Playlist endpoints ──────────────────────────────────────────
   static const String playlists = '/playlist';
 
+  // ── Genre endpoints ────────────────────────────────────────────
+  static const String genres = '/genre/list';
+  static const String genreContent = '/genre/content'; // + /:id
+
   // ── Podcast endpoints ───────────────────────────────────────────
-  static const String podcasts = '/podcast';
-  static const String podcastDetails = '/podcast'; // + /:id
+  static const String podcasts = '/podcast/list';
+  static const String podcastDetails = '/podcast/details'; // + /:id
 
   // ── Comment endpoints ───────────────────────────────────────────
   static const String comments = '/comment';
