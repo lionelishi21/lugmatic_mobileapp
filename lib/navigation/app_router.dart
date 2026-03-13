@@ -1,31 +1,80 @@
 import 'package:flutter/material.dart';
+import '../features/home/presentation/pages/home_page.dart';
+import '../features/home/presentation/pages/artist_detail_page.dart';
+import '../features/home/presentation/pages/album_detail_page.dart';
+import '../features/song/presentation/pages/song_detail_page.dart';
+import '../features/store/presentation/pages/store_page.dart';
+import '../features/mixer/presentation/pages/mixer_page.dart';
 
 class AppRouter {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
       case '/':
-        return MaterialPageRoute(
-          builder: (_) => const _PlaceholderScreen(title: 'Home Placeholder'),
-        );
+      case '/home':
+        return MaterialPageRoute(builder: (_) => const HomePage());
+
+      case '/song':
+        final args = settings.arguments;
+        if (args is Map) {
+          return MaterialPageRoute(
+            builder: (_) => SongDetailPage(
+              songId: args['id'] as String,
+              initialData: args['initialData'],
+            ),
+          );
+        }
+        if (args is String) {
+          return MaterialPageRoute(builder: (_) => SongDetailPage(songId: args));
+        }
+        return _notFound();
+
+      case '/artist':
+        final args = settings.arguments;
+        if (args is Map) {
+          return MaterialPageRoute(
+            builder: (_) => ArtistDetailPage(
+              artistId: args['id'] as String,
+              initialData: args['initialData'],
+            ),
+          );
+        }
+        if (args is String) {
+          return MaterialPageRoute(builder: (_) => ArtistDetailPage(artistId: args));
+        }
+        return _notFound();
+
+      case '/album':
+        final args = settings.arguments;
+        if (args is Map) {
+          return MaterialPageRoute(
+            builder: (_) => AlbumDetailPage(
+              albumId: args['id'] as String,
+              initialData: args['initialData'],
+            ),
+          );
+        }
+        if (args is String) {
+          return MaterialPageRoute(builder: (_) => AlbumDetailPage(albumId: args));
+        }
+        return _notFound();
+
+      case '/store':
+        return MaterialPageRoute(builder: (_) => const StorePage());
+
+      case '/mixer':
+        return MaterialPageRoute(builder: (_) => const MixerPage());
+
       default:
-        return MaterialPageRoute(
-          builder: (_) => const _PlaceholderScreen(title: '404 - Not Found'),
-        );
+        return _notFound();
     }
   }
+
+  static MaterialPageRoute _notFound() => MaterialPageRoute(
+    builder: (_) => const Scaffold(
+      backgroundColor: Color(0xFF0F172A),
+      body: Center(
+        child: Text('Page not found', style: TextStyle(color: Colors.white)),
+      ),
+    ),
+  );
 }
-
-class _PlaceholderScreen extends StatelessWidget {
-  final String title;
-  const _PlaceholderScreen({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: const Center(child: Text('Replace with real screen')), 
-    );
-  }
-}
-
-

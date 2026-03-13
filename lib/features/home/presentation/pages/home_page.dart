@@ -1,4 +1,3 @@
-// lib/features/home/presentation/pages/home_page.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lugmatic_flutter/core/network/api_client.dart';
@@ -27,6 +26,8 @@ import 'package:lugmatic_flutter/features/gift/presentation/pages/gift_hub_page.
 import 'package:lugmatic_flutter/features/playlist/presentation/pages/playlist_detail_page.dart';
 import 'package:lugmatic_flutter/features/home/data/models/playlist_model.dart';
 import 'package:lugmatic_flutter/features/live_stream/presentation/pages/tiktok_live_page.dart';
+import 'package:lugmatic_flutter/features/home/presentation/pages/artist_detail_page.dart';
+import 'package:lugmatic_flutter/features/song/presentation/pages/song_detail_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -589,7 +590,10 @@ class _HomePageState extends State<HomePage> {
           final song = _trendingSongs[index];
           return MusicCard(
             music: song,
-            onTap: () => _openMusicPlayer(song),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => SongDetailPage(songId: song.id, initialData: song)),
+            ),
             onPlay: () => _openMusicPlayer(song),
             onLike: () => print('Like ${song.title}'),
           );
@@ -618,14 +622,12 @@ class _HomePageState extends State<HomePage> {
           final artist = _featuredArtists[index];
           return ArtistCard(
             artist: artist,
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const TikTokLivePage(),
-                ),
-              );
-            },
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ArtistDetailPage(artistId: artist.id, initialData: artist),
+              ),
+            ),
             onFollow: () => print('Follow ${artist.name}'),
             onGift: () => print('Gift ${artist.name}'),
           );
