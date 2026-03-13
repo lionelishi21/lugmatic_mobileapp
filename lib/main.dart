@@ -145,15 +145,13 @@ class _SplashScreenState extends State<SplashScreen>
     try {
       // Show splash for at least 2 seconds, but cap the total wait at 8 seconds
       // so the app never hangs forever if the API is unreachable.
-      await Future.wait([
-        authProvider.checkAuthStatus(),
-        Future.delayed(const Duration(seconds: 2)),
-      ]).timeout(
-        const Duration(seconds: 8),
-        onTimeout: () {
-          // If we time out, treat the user as unauthenticated and continue
-        },
-      );
+      await Future.any([
+        Future.wait([
+          authProvider.checkAuthStatus(),
+          Future.delayed(const Duration(seconds: 2)),
+        ]),
+        Future.delayed(const Duration(seconds: 8)),
+      ]);
     } catch (_) {
       // Any unexpected error — treat as unauthenticated
     }
