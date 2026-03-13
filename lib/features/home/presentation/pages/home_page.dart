@@ -46,6 +46,8 @@ class _HomePageState extends State<HomePage> {
   List<MusicModel> _trendingSongs = [];
   List<ArtistModel> _featuredArtists = [];
   List<PodcastModel> _featuredPodcasts = [];
+  List<Map<String, dynamic>> _genres = [];
+  List<Map<String, dynamic>> _playlists = [];
   int _unreadNotifications = 0;
 
   @override
@@ -62,16 +64,21 @@ class _HomePageState extends State<HomePage> {
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
     try {
+      final apiClient = context.read<ApiClient>();
       final results = await Future.wait([
         _homeService.getTrendingSongs(),
         _homeService.getFeaturedArtists(),
         _homeService.getFeaturedPodcasts(),
+        _loadGenres(apiClient),
+        _loadPlaylists(apiClient),
       ]);
       if (mounted) {
         setState(() {
           _trendingSongs = results[0] as List<MusicModel>;
           _featuredArtists = results[1] as List<ArtistModel>;
           _featuredPodcasts = results[2] as List<PodcastModel>;
+          _genres = results[3] as List<Map<String, dynamic>>;
+          _playlists = results[4] as List<Map<String, dynamic>>;
           _isLoading = false;
         });
       }
@@ -79,6 +86,32 @@ class _HomePageState extends State<HomePage> {
       if (mounted) setState(() => _isLoading = false);
     }
     _loadNotifications();
+  }
+
+  Future<List<Map<String, dynamic>>> _loadGenres(ApiClient apiClient) async {
+    try {
+      final res = await apiClient.dio.get(ApiConfig.genres);
+      final body = res.data;
+      final items = body['data'] ?? body['genres'] ?? [];
+      return List<Map<String, dynamic>>.from(items as List);
+    } catch (_) { return []; }
+  }
+
+  Future<List<Map<String, dynamic>>> _loadPlaylists(ApiClient apiClient) async {
+    try {
+      // Try mobile playlists first, then fall back to general playlist API
+      final res = await apiClient.dio.get('/mobile/playlists');
+      final body = res.data;
+      final items = body['data'] ?? body['playlists'] ?? [];
+      return List<Map<String, dynamic>>.from(items as List);
+    } catch (_) {
+      try {
+        final res = await apiClient.dio.get('/playlist/my/list');
+        final body = res.data;
+        final items = body['data'] ?? body['playlists'] ?? [];
+        return List<Map<String, dynamic>>.from(items as List);
+      } catch (_) { return []; }
+    }
   }
 
   Future<void> _loadNotifications() async {
@@ -109,57 +142,73 @@ class _HomePageState extends State<HomePage> {
       onRefresh: _loadData,
       color: const Color(0xFF10B981),
       child: SingleChildScrollView(
-      padding: const EdgeInsets.only(left: 16, right: 16, bottom: 100),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 20),
-          
-          // Welcome Section
-          _buildWelcomeSection(),
-          const SizedBox(height: 28),
-          
-          // Quick Actions
-          _buildQuickActions(),
-          const SizedBox(height: 36),
-          
-          // TikTok-Style Live Streams
-          _buildSectionHeader('Live Now', 'View All'),
-          const SizedBox(height: 18),
-          _buildTikTokLiveStreams(),
-          const SizedBox(height: 36),
-          
-          // Trending Songs
-          _buildSectionHeader('Trending Now', 'See All'),
-          const SizedBox(height: 18),
-          _buildTrendingSongs(),
-          const SizedBox(height: 36),
-          
-          // Featured Artists
-          _buildSectionHeader('Featured Artists', 'View All'),
-          const SizedBox(height: 18),
-          _buildFeaturedArtists(),
-          const SizedBox(height: 36),
-          
-          // Made for You Section
-          _buildSectionHeader('Made for You', ''),
-          const SizedBox(height: 18),
-          _buildMadeForYou(),
-          const SizedBox(height: 36),
-          
-          // Popular Podcasts
-          _buildSectionHeader('Podcasts', 'Browse'),
-          const SizedBox(height: 18),
-          _buildPopularPodcasts(),
-          const SizedBox(height: 36),
-          
-          // Recently Played
-          _buildSectionHeader('Recently Played', ''),
-          const SizedBox(height: 18),
-          _buildRecentlyPlayed(),
-        ],
+        padding: const EdgeInsets.only(left: 16, right: 16, bottom: 100),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 20),
+
+            // Welcome Section
+            _buildWelcomeSection(),
+            const SizedBox(height: 28),
+
+            // Quick Actions
+            _buildQuickActions(),
+            const SizedBox(height: 36),
+
+            // Live Now section
+            _buildSectionHeader('Live Now', 'View All'),
+            const SizedBox(height: 18),
+            _buildLiveSection(),
+            const SizedBox(height: 36),
+
+            // Trending Songs
+            _buildSectionHeader('Trending Now', 'See All'),
+            const SizedBox(height: 18),
+            _buildTrendingSongs(),
+            const SizedBox(height: 36),
+
+            // Featured Artists
+            if (_featuredArtists.isNotEmpty) ...[  
+              _buildSectionHeader('Featured Artists', 'View All'),
+              const SizedBox(height: 18),
+              _buildFeaturedArtists(),
+              const SizedBox(height: 36),
+            ],
+
+            // Genres Section
+            if (_genres.isNotEmpty) ...[  
+              _buildSectionHeader('Browse by Genre', ''),
+              const SizedBox(height: 18),
+              _buildGenresSection(),
+              const SizedBox(height: 36),
+            ],
+
+            // Made for You Section
+            _buildSectionHeader('Made for You', ''),
+            const SizedBox(height: 18),
+            _buildMadeForYou(),
+            const SizedBox(height: 36),
+
+            // Popular Podcasts
+            if (_featuredPodcasts.isNotEmpty) ...[  
+              _buildSectionHeader('Podcasts', 'Browse'),
+              const SizedBox(height: 18),
+              _buildPopularPodcasts(),
+              const SizedBox(height: 36),
+            ],
+
+            // Demand Artist
+            _buildDemandArtistBanner(),
+            const SizedBox(height: 36),
+
+            // Recently Played
+            _buildSectionHeader('Recently Played', ''),
+            const SizedBox(height: 18),
+            _buildRecentlyPlayed(),
+          ],
+        ),
       ),
-    ),
     );
   }
 
@@ -581,6 +630,13 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildTrendingSongs() {
+    if (_trendingSongs.isEmpty) {
+      return _buildEmptyPlaceholder(
+        icon: Icons.music_note_outlined,
+        title: 'No trending songs yet',
+        subtitle: 'Check back soon for trending hits',
+      );
+    }
     return SizedBox(
       height: 200,
       child: ListView.builder(
@@ -598,6 +654,195 @@ class _HomePageState extends State<HomePage> {
             onLike: () => print('Like ${song.title}'),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildEmptyPlaceholder({required IconData icon, required String title, required String subtitle}) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.04),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.08)),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: Colors.white.withOpacity(0.2), size: 48),
+          const SizedBox(height: 12),
+          Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16)),
+          const SizedBox(height: 4),
+          Text(subtitle, style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 13), textAlign: TextAlign.center),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLiveSection() {
+    // No real live data — show a compelling placeholder
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            const Color(0xFFEF4444).withOpacity(0.15),
+            const Color(0xFFDC2626).withOpacity(0.08),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFEF4444).withOpacity(0.25)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 52, height: 52,
+            decoration: BoxDecoration(
+              color: const Color(0xFFEF4444).withOpacity(0.2),
+              shape: BoxShape.circle,
+              border: Border.all(color: const Color(0xFFEF4444).withOpacity(0.4)),
+            ),
+            child: const Icon(Icons.live_tv_rounded, color: Color(0xFFEF4444), size: 28),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'No live streams right now',
+                  style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Artists go live here — follow them to get notified',
+                  style: TextStyle(color: Colors.white.withOpacity(0.55), fontSize: 13),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          GestureDetector(
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TikTokLivePage())),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: const Color(0xFFEF4444).withOpacity(0.15),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFEF4444).withOpacity(0.4)),
+              ),
+              child: const Text('Browse', style: TextStyle(color: Color(0xFFEF4444), fontWeight: FontWeight.w700, fontSize: 13)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGenresSection() {
+    final genreColors = [
+      [const Color(0xFF10B981), const Color(0xFF059669)],
+      [const Color(0xFF8B5CF6), const Color(0xFF7C3AED)],
+      [const Color(0xFFEF4444), const Color(0xFFDC2626)],
+      [const Color(0xFFF59E0B), const Color(0xFFD97706)],
+      [const Color(0xFF3B82F6), const Color(0xFF2563EB)],
+      [const Color(0xFFEC4899), const Color(0xFFDB2777)],
+      [const Color(0xFF14B8A6), const Color(0xFF0D9488)],
+      [const Color(0xFFF97316), const Color(0xFFEA580C)],
+    ];
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 2.8,
+        mainAxisSpacing: 10,
+        crossAxisSpacing: 10,
+      ),
+      itemCount: _genres.take(8).length,
+      itemBuilder: (context, i) {
+        final genre = _genres[i];
+        final name = genre['name']?.toString() ?? '';
+        final colors = genreColors[i % genreColors.length];
+        return GestureDetector(
+          onTap: () {
+            // Navigate to browse page filtered by genre
+            setState(() => _currentIndex = 1);
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: colors,
+              ),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                const Icon(Icons.library_music, color: Colors.white70, size: 22),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    name,
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 15),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildDemandArtistBanner() {
+    return GestureDetector(
+      onTap: () => showDialog(
+        context: context,
+        builder: (_) => const DemandArtistDialog(),
+      ),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [const Color(0xFF8B5CF6).withOpacity(0.2), const Color(0xFF7C3AED).withOpacity(0.1)],
+          ),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFF8B5CF6).withOpacity(0.3)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48, height: 48,
+              decoration: BoxDecoration(
+                color: const Color(0xFF8B5CF6).withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.person_search_rounded, color: Color(0xFF8B5CF6), size: 26),
+            ),
+            const SizedBox(width: 16),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Missing an artist?', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
+                  SizedBox(height: 3),
+                  Text('Request them and we\'ll add them to Lugmatic.', style: TextStyle(color: Color(0xFFB0BEC5), fontSize: 13)),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Icon(Icons.arrow_forward_ios, color: Color(0xFF8B5CF6), size: 16),
+          ],
+        ),
       ),
     );
   }
@@ -682,96 +927,191 @@ class _HomePageState extends State<HomePage> {
 
 
   Widget _buildMadeForYou() {
+    if (_playlists.isEmpty) {
+      return _buildEmptyPlaylistPrompt(
+        icon: Icons.queue_music_rounded,
+        title: 'Your playlists will appear here',
+        subtitle: 'Create a playlist to get started',
+        actionLabel: 'Create Playlist',
+        onAction: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const CreatePlaylistScreen()),
+        ),
+      );
+    }
+    // Show first two playlists as featured cards
+    final featured = _playlists.take(2).toList();
+    final gradients = [
+      [const Color(0xFF4CAF50), const Color(0xFF2196F3)],
+      [const Color(0xFFFF9800), const Color(0xFFE91E63)],
+    ];
     return Row(
-      children: [
-        Expanded(
-          child: PlaylistCard(
-            title: 'Chill Mix',
-            subtitle: 'Electronic',
-            gradientColors: [const Color(0xFF4CAF50), const Color(0xFF2196F3)],
-            onTap: () => _openPlaylistDetail(
-              PlaylistModel(
-                id: 'chill_mix',
-                title: 'Chill Mix',
-                subtitle: 'Electronic',
-                imageUrl: 'https://via.placeholder.com/300x300/4CAF50/FFFFFF?text=Chill',
-                type: 'playlist',
+      children: featured.asMap().entries.map((e) {
+        final pl = e.value;
+        final name = pl['name']?.toString() ?? pl['title']?.toString() ?? 'Playlist';
+        final desc = pl['description']?.toString() ?? pl['subtitle']?.toString() ?? '';
+        final gradient = gradients[e.key % gradients.length];
+        final coverUrl = ApiConfig.resolveUrl(pl['coverImage']?.toString() ?? pl['imageUrl']?.toString() ?? '');
+        return Expanded(
+          child: Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => _openPlaylistFromMap(pl),
+                  child: Container(
+                    height: 130,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      gradient: coverUrl.isEmpty
+                        ? LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: gradient)
+                        : null,
+                      image: coverUrl.isNotEmpty
+                        ? DecorationImage(image: NetworkImage(coverUrl), fit: BoxFit.cover)
+                        : null,
+                      boxShadow: [BoxShadow(color: gradient.first.withOpacity(0.35), blurRadius: 16, offset: const Offset(0, 8))],
+                    ),
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text(name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 15), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        if (desc.isNotEmpty) Text(desc, style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      ],
+                    ),
+                  ),
+                ),
               ),
-            ),
+              if (e.key == 0) const SizedBox(width: 14),
+            ],
           ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: PlaylistCard(
-            title: 'Energy Boost',
-            subtitle: 'Upbeat',
-            gradientColors: [const Color(0xFFFF9800), const Color(0xFFE91E63)],
-            onTap: () => _openPlaylistDetail(
-              PlaylistModel(
-                id: 'energy_boost',
-                title: 'Energy Boost',
-                subtitle: 'Upbeat',
-                imageUrl: 'https://via.placeholder.com/300x300/FF9800/FFFFFF?text=Energy',
-                type: 'playlist',
-              ),
-            ),
-          ),
-        ),
-      ],
+        );
+      }).toList(),
     );
   }
 
   Widget _buildRecentlyPlayed() {
+    // Show remaining playlists (after the first 2 used in Made for You)
+    final shown = _playlists.skip(2).take(5).toList();
+    if (shown.isEmpty) {
+      return _buildEmptyPlaylistPrompt(
+        icon: Icons.history_rounded,
+        title: 'No playlists yet',
+        subtitle: 'Playlists you create will appear here',
+        actionLabel: 'Browse Music',
+        onAction: () => setState(() => _currentIndex = 1),
+      );
+    }
     return Column(
-      children: [
-        PlaylistListItem(
-          title: 'Top 100 Hits',
-          artist: 'Lugmatic Music',
-          gradientColors: [const Color(0xFFFF5722), const Color(0xFFFF9800)],
-          onTap: () => _openPlaylistDetail(
-            PlaylistModel(
-              id: 'top_100_hits',
-              title: 'Top 100 Hits',
-              subtitle: 'Lugmatic Music',
-              imageUrl: 'https://via.placeholder.com/300x300/FF5722/FFFFFF?text=Top100',
-              type: 'playlist',
+      children: shown.asMap().entries.map((e) {
+        final pl = e.value;
+        final name = pl['name']?.toString() ?? pl['title']?.toString() ?? 'Playlist';
+        final desc = pl['description']?.toString() ?? pl['subtitle']?.toString() ?? '';
+        final gradients = [
+          [const Color(0xFFFF5722), const Color(0xFFFF9800)],
+          [const Color(0xFF2196F3), const Color(0xFF00BCD4)],
+          [const Color(0xFF4CAF50), const Color(0xFF8BC34A)],
+          [const Color(0xFF9C27B0), const Color(0xFFE91E63)],
+          [const Color(0xFFFF9800), const Color(0xFFFFEB3B)],
+        ];
+        final colors = gradients[e.key % gradients.length];
+        return Column(
+          children: [
+            GestureDetector(
+              onTap: () => _openPlaylistFromMap(pl),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.04),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 52, height: 52,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(colors: colors),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(Icons.queue_music_rounded, color: Colors.white, size: 26),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(name, style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis),
+                          if (desc.isNotEmpty) Text(desc, style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        ],
+                      ),
+                    ),
+                    Icon(Icons.chevron_right, color: Colors.white.withOpacity(0.3)),
+                  ],
+                ),
+              ),
+            ),
+            if (e.key < shown.length - 1) const SizedBox(height: 8),
+          ],
+        );
+      }).toList(),
+    );
+  }
+
+  void _openPlaylistFromMap(Map<String, dynamic> pl) {
+    final id = pl['_id']?.toString() ?? pl['id']?.toString() ?? '';
+    final name = pl['name']?.toString() ?? pl['title']?.toString() ?? 'Playlist';
+    _openPlaylistDetail(PlaylistModel(
+      id: id,
+      title: name,
+      subtitle: pl['description']?.toString() ?? '',
+      imageUrl: ApiConfig.resolveUrl(pl['coverImage']?.toString() ?? pl['imageUrl']?.toString() ?? ''),
+      type: 'playlist',
+    ));
+  }
+
+  Widget _buildEmptyPlaylistPrompt({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required String actionLabel,
+    required VoidCallback onAction,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.04),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.08)),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.white.withOpacity(0.25), size: 40),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 15)),
+                const SizedBox(height: 2),
+                Text(subtitle, style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 13)),
+              ],
             ),
           ),
-          onMoreTap: () => print('More options tapped'),
-        ),
-        const SizedBox(height: 16),
-        PlaylistListItem(
-          title: 'Acoustic Mornings',
-          artist: 'Lugmatic Music',
-          gradientColors: [const Color(0xFF2196F3), const Color(0xFF00BCD4)],
-          onTap: () => _openPlaylistDetail(
-            PlaylistModel(
-              id: 'acoustic_mornings',
-              title: 'Acoustic Mornings',
-              subtitle: 'Lugmatic Music',
-              imageUrl: 'https://via.placeholder.com/300x300/2196F3/FFFFFF?text=Acoustic',
-              type: 'playlist',
+          const SizedBox(width: 12),
+          GestureDetector(
+            onTap: onAction,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF10B981).withOpacity(0.15),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: const Color(0xFF10B981).withOpacity(0.3)),
+              ),
+              child: Text(actionLabel, style: const TextStyle(color: Color(0xFF10B981), fontWeight: FontWeight.w700, fontSize: 12)),
             ),
           ),
-          onMoreTap: () => print('More options tapped'),
-        ),
-        const SizedBox(height: 16),
-        PlaylistListItem(
-          title: 'Road Trip Jams',
-          artist: 'Lugmatic Music',
-          gradientColors: [const Color(0xFF4CAF50), const Color(0xFF8BC34A)],
-          onTap: () => _openPlaylistDetail(
-            PlaylistModel(
-              id: 'road_trip_jams',
-              title: 'Road Trip Jams',
-              subtitle: 'Lugmatic Music',
-              imageUrl: 'https://via.placeholder.com/300x300/4CAF50/FFFFFF?text=RoadTrip',
-              type: 'playlist',
-            ),
-          ),
-          onMoreTap: () => print('More options tapped'),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
