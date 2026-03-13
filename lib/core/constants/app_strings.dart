@@ -1,6 +1,6 @@
 class AppStrings {
   // Onboarding
-  static const String streamMusicTitle = "Lugmatic Music";
+  static const String streamMusicTitle = "Lugmatic";
   static const String streamMusicDescription = 
       "Access a vast library of songs in high-quality audio, anytime, anywhere.";
       

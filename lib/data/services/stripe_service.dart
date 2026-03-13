@@ -24,7 +24,7 @@ class StripeService {
         paymentSheetParameters: SetupPaymentSheetParameters(
           paymentIntentClientSecret: clientSecret,
           style: ThemeMode.dark,
-          merchantDisplayName: 'Lugmatic Music',
+          merchantDisplayName: 'Lugmatic',
         ),
       );
 

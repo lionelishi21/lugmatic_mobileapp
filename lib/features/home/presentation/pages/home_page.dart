@@ -218,7 +218,7 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: const Color(0xFF111827),
       appBar: _currentIndex == 0
           ? CustomAppBar(
-              title: 'Lugmatic Music',
+              title: 'Lugmatic',
               unreadCount: _unreadNotifications,
               onNotificationTap: () {
                 Navigator.push(
