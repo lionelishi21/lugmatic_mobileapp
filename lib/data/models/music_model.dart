@@ -8,6 +8,7 @@ class MusicModel {
   final String album;
   final String imageUrl;
   final String audioUrl;
+  final String videoUrl;
   final Duration duration;
   final String genre;
   final bool isLiked;
@@ -23,6 +24,7 @@ class MusicModel {
     required this.album,
     required this.imageUrl,
     required this.audioUrl,
+    this.videoUrl = '',
     required this.duration,
     required this.genre,
     this.isLiked = false,
@@ -70,6 +72,7 @@ class MusicModel {
       album: albumName,
       imageUrl: imageUrl,
       audioUrl: audioUrl,
+      videoUrl: ApiConfig.resolveUrl(json['videoUrl'] ?? json['videoFileUrl'] ?? ''),
       duration: Duration(
         seconds: (json['duration'] ?? 0) is int
             ? json['duration']
@@ -94,6 +97,7 @@ class MusicModel {
       'album': album,
       'imageUrl': imageUrl,
       'audioUrl': audioUrl,
+      'videoUrl': videoUrl,
       'duration': duration.inSeconds,
       'genre': genre,
       'isLiked': isLiked,

@@ -4,7 +4,8 @@ import '../../../../core/config/api_config.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../data/models/music_model.dart';
 import '../../../../shared/widgets/gift_bottom_sheet.dart';
-import '../../../../ui/widgets/music_player_widget.dart';
+import '../../../../data/providers/audio_provider.dart';
+import '../../../../ui/widgets/player_screen.dart';
 import '../../../song/presentation/pages/song_detail_page.dart';
 import '../pages/artist_detail_page.dart';
 import '../../../../data/models/artist_model.dart';
@@ -223,9 +224,15 @@ class _AlbumDetailPageState extends State<AlbumDetailPage> {
                     Expanded(
                       child: GestureDetector(
                         onTap: _songs.isNotEmpty
-                            ? () => Navigator.push(context, MaterialPageRoute(
-                                builder: (_) => MusicPlayerWidget(music: _songs[0]),
-                                fullscreenDialog: true))
+                            ? () {
+                                context.read<AudioProvider>().playMusic(_songs[0], queue: _songs);
+                                showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  backgroundColor: Colors.transparent,
+                                  builder: (context) => PlayerScreen(music: _songs[0]),
+                                );
+                              }
                             : null,
                         child: Container(
                           height: 50,
@@ -275,9 +282,15 @@ class _AlbumDetailPageState extends State<AlbumDetailPage> {
                   const Text('Tracks', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w800)),
                   const SizedBox(height: 12),
                   ..._songs.asMap().entries.map((e) => GestureDetector(
-                    onTap: () => Navigator.push(context, MaterialPageRoute(
-                      builder: (_) => SongDetailPage(songId: e.value.id, initialData: e.value),
-                    )),
+                    onTap: () {
+                      context.read<AudioProvider>().playMusic(e.value, queue: _songs);
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (context) => PlayerScreen(music: e.value),
+                      );
+                    },
                     child: Container(
                       margin: const EdgeInsets.only(bottom: 4),
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),

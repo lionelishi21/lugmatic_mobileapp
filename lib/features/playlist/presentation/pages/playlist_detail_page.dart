@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:lugmatic_flutter/data/models/music_model.dart';
 import 'package:lugmatic_flutter/data/models/artist_model.dart';
 import 'package:lugmatic_flutter/features/home/data/models/playlist_model.dart';
-import 'package:lugmatic_flutter/ui/widgets/music_player_widget.dart';
+import 'package:lugmatic_flutter/data/providers/audio_provider.dart';
+import 'package:lugmatic_flutter/ui/widgets/player_screen.dart';
+import 'package:provider/provider.dart';
 import '../../../../shared/widgets/comment_section_widget.dart';
 
 class PlaylistDetailPage extends StatefulWidget {
@@ -21,96 +23,9 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
   bool _isLiked = false;
   bool _isShuffled = false;
 
-  final List<MusicModel> _songs = [
-    MusicModel(
-      id: '1',
-      title: 'Midnight Dreams',
-      artist: 'Luna Nova',
-      album: 'Cosmic Vibes',
-      imageUrl: 'https://via.placeholder.com/300x300/10B981/FFFFFF?text=Song1',
-      audioUrl: 'https://example.com/song1.mp3',
-      duration: const Duration(minutes: 3, seconds: 45),
-      genre: 'Electronic',
-      releaseDate: DateTime.now().subtract(const Duration(days: 30)),
-    ),
-    MusicModel(
-      id: '2',
-      title: 'Electric Storm',
-      artist: 'Thunder Band',
-      album: 'Lightning Strikes',
-      imageUrl: 'https://via.placeholder.com/300x300/EF4444/FFFFFF?text=Song2',
-      audioUrl: 'https://example.com/song2.mp3',
-      duration: const Duration(minutes: 4, seconds: 12),
-      genre: 'Rock',
-      releaseDate: DateTime.now().subtract(const Duration(days: 25)),
-    ),
-    MusicModel(
-      id: '3',
-      title: 'Ocean Waves',
-      artist: 'Chill Wave',
-      album: 'Relaxation',
-      imageUrl: 'https://via.placeholder.com/300x300/06B6D4/FFFFFF?text=Song3',
-      audioUrl: 'https://example.com/song3.mp3',
-      duration: const Duration(minutes: 5, seconds: 30),
-      genre: 'Ambient',
-      releaseDate: DateTime.now().subtract(const Duration(days: 20)),
-    ),
-    MusicModel(
-      id: '4',
-      title: 'City Lights',
-      artist: 'Urban Beats',
-      album: 'Metropolitan',
-      imageUrl: 'https://via.placeholder.com/300x300/F59E0B/FFFFFF?text=Song4',
-      audioUrl: 'https://example.com/song4.mp3',
-      duration: const Duration(minutes: 3, seconds: 58),
-      genre: 'Hip-Hop',
-      releaseDate: DateTime.now().subtract(const Duration(days: 15)),
-    ),
-    MusicModel(
-      id: '5',
-      title: 'Sunset Boulevard',
-      artist: 'Indie Dreams',
-      album: 'New Horizons',
-      imageUrl: 'https://via.placeholder.com/300x300/EC4899/FFFFFF?text=Song5',
-      audioUrl: 'https://example.com/song5.mp3',
-      duration: const Duration(minutes: 4, seconds: 25),
-      genre: 'Indie',
-      releaseDate: DateTime.now().subtract(const Duration(days: 10)),
-    ),
-  ];
+  final List<MusicModel> _songs = [];
 
-  final List<ArtistModel> _contributors = [
-    ArtistModel(
-      id: '1',
-      name: 'Luna Nova',
-      imageUrl: 'https://via.placeholder.com/300x300/10B981/FFFFFF?text=Luna',
-      bio: 'Electronic music producer and DJ',
-      followers: 125000,
-      isVerified: true,
-      genres: ['Electronic', 'Ambient'],
-      location: 'Los Angeles, CA',
-    ),
-    ArtistModel(
-      id: '2',
-      name: 'Thunder Band',
-      imageUrl: 'https://via.placeholder.com/300x300/EF4444/FFFFFF?text=Thunder',
-      bio: 'Rock band with electrifying performances',
-      followers: 89000,
-      isVerified: true,
-      genres: ['Rock', 'Alternative'],
-      location: 'Seattle, WA',
-    ),
-    ArtistModel(
-      id: '3',
-      name: 'Chill Wave',
-      imageUrl: 'https://via.placeholder.com/300x300/06B6D4/FFFFFF?text=Chill',
-      bio: 'Ambient and chill music creator',
-      followers: 67000,
-      isVerified: false,
-      genres: ['Ambient', 'Chill'],
-      location: 'Portland, OR',
-    ),
-  ];
+  final List<ArtistModel> _contributors = [];
 
   @override
   Widget build(BuildContext context) {
@@ -391,7 +306,11 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
         children: [
           Expanded(
             child: ElevatedButton.icon(
-              onPressed: () => _playPlaylist(),
+              onPressed: () {
+                if (_songs.isNotEmpty) {
+                  context.read<AudioProvider>().playMusic(_songs[0], queue: _songs);
+                }
+              },
               icon: const Icon(Icons.play_arrow, size: 20),
               label: const Text('Play All'),
               style: ElevatedButton.styleFrom(
@@ -776,12 +695,12 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
   }
 
   void _playSong(MusicModel song) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => MusicPlayerWidget(music: song),
-        fullscreenDialog: true,
-      ),
+    context.read<AudioProvider>().playMusic(song, queue: _songs);
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => PlayerScreen(music: song),
     );
   }
 

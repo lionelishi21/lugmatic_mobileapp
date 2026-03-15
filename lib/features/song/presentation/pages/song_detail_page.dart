@@ -4,7 +4,8 @@ import '../../../../core/config/api_config.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../data/models/music_model.dart';
 import '../../../../shared/widgets/gift_bottom_sheet.dart';
-import '../../../../ui/widgets/music_player_widget.dart';
+import '../../../../data/providers/audio_provider.dart';
+import '../../../../ui/widgets/player_screen.dart';
 
 class SongDetailPage extends StatefulWidget {
   final String songId;
@@ -209,13 +210,15 @@ class _SongDetailPageState extends State<SongDetailPage> {
                     // Play button
                     Expanded(
                       child: _ActionButton(
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => MusicPlayerWidget(music: song),
-                            fullscreenDialog: true,
-                          ),
-                        ),
+                        onTap: () {
+                          context.read<AudioProvider>().playMusic(song);
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            builder: (context) => PlayerScreen(music: song),
+                          );
+                        },
                         gradient: const [Color(0xFF10B981), Color(0xFF059669)],
                         child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,

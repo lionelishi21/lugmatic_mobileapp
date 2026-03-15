@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:lugmatic_flutter/data/models/podcast_model.dart';
 import 'package:lugmatic_flutter/data/models/music_model.dart';
-import 'package:lugmatic_flutter/ui/widgets/music_player_widget.dart';
+import 'package:lugmatic_flutter/data/providers/audio_provider.dart';
+import 'package:lugmatic_flutter/ui/widgets/player_screen.dart';
+import 'package:provider/provider.dart';
 
 class PodcastDiscoverPage extends StatefulWidget {
   const PodcastDiscoverPage({Key? key}) : super(key: key);
@@ -583,12 +585,12 @@ class _PodcastDiscoverPageState extends State<PodcastDiscoverPage> {
       releaseDate: podcast.publishDate,
     );
     
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => MusicPlayerWidget(music: musicModel),
-        fullscreenDialog: true,
-      ),
+    context.read<AudioProvider>().playMusic(musicModel);
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => PlayerScreen(music: musicModel),
     );
   }
 

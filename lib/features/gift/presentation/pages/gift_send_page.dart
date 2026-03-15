@@ -101,38 +101,7 @@ class _GiftSendPageState extends State<GiftSendPage> {
   double _userBalance = 0.0;
   int _userCoins = 0;
 
-  List<ArtistModel> _recentArtists = [
-    ArtistModel(
-      id: '1',
-      name: 'Luna Nova',
-      imageUrl: 'https://via.placeholder.com/300x300/10B981/FFFFFF?text=Luna',
-      bio: 'Electronic music producer and DJ',
-      followers: 125000,
-      isVerified: true,
-      genres: ['Electronic', 'Ambient'],
-      location: 'Los Angeles, CA',
-    ),
-    ArtistModel(
-      id: '2',
-      name: 'Thunder Band',
-      imageUrl: 'https://via.placeholder.com/300x300/EF4444/FFFFFF?text=Thunder',
-      bio: 'Rock band with electrifying performances',
-      followers: 89000,
-      isVerified: true,
-      genres: ['Rock', 'Alternative'],
-      location: 'Seattle, WA',
-    ),
-    ArtistModel(
-      id: '3',
-      name: 'Chill Wave',
-      imageUrl: 'https://via.placeholder.com/300x300/06B6D4/FFFFFF?text=Chill',
-      bio: 'Ambient and chill music creator',
-      followers: 67000,
-      isVerified: false,
-      genres: ['Ambient', 'Chill'],
-      location: 'Portland, OR',
-    ),
-  ];
+  List<ArtistModel> _recentArtists = [];
 
   @override
   void initState() {

@@ -5,7 +5,8 @@ import '../../../../core/network/api_client.dart';
 import '../../../../data/models/artist_model.dart';
 import '../../../../data/models/music_model.dart';
 import '../../../../shared/widgets/gift_bottom_sheet.dart';
-import '../../../../ui/widgets/music_player_widget.dart';
+import '../../../../data/providers/audio_provider.dart';
+import '../../../../ui/widgets/player_screen.dart';
 import '../../../song/presentation/pages/song_detail_page.dart';
 
 class ArtistDetailPage extends StatefulWidget {
@@ -228,9 +229,15 @@ class _ArtistDetailPageState extends State<ArtistDetailPage> {
                         icon: Icons.play_arrow_rounded,
                         gradient: const [Color(0xFF10B981), Color(0xFF059669)],
                         onTap: _songs.isNotEmpty
-                            ? () => Navigator.push(context, MaterialPageRoute(
-                                builder: (_) => MusicPlayerWidget(music: _songs[0]),
-                                fullscreenDialog: true))
+                            ? () {
+                                context.read<AudioProvider>().playMusic(_songs[0], queue: _songs);
+                                showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  backgroundColor: Colors.transparent,
+                                  builder: (context) => PlayerScreen(music: _songs[0]),
+                                );
+                              }
                             : null,
                       ),
                     ),
@@ -264,9 +271,15 @@ class _ArtistDetailPageState extends State<ArtistDetailPage> {
                       index: i + 1,
                       song: s,
                       coverUrl: s.imageUrl.isNotEmpty ? s.imageUrl : imageUrl,
-                      onTap: () => Navigator.push(context, MaterialPageRoute(
-                        builder: (_) => SongDetailPage(songId: s.id, initialData: s),
-                      )),
+                      onTap: () {
+                        context.read<AudioProvider>().playMusic(s, queue: _songs);
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (context) => PlayerScreen(music: s),
+                        );
+                      },
                     );
                   }),
                   const SizedBox(height: 28),

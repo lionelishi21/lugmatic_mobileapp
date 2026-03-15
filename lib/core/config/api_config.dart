@@ -48,6 +48,7 @@ class ApiConfig {
 
   // ── Artist endpoints ────────────────────────────────────────────
   static const String artists = '/artist/list';
+  static const String mobileArtists = '/mobile/artists';
   static const String artistDetails = '/artist/details'; // + /:id
   static const String artistSongs = '/artist'; // + /:id/songs
   static const String artistAlbums = '/artist'; // + /:id/albums
@@ -114,8 +115,7 @@ class ApiConfig {
   );
 
   // ── Mobile-specific endpoints ───────────────────────────────────
-  static const String mobilePlaylists = '/mobile/playlists';
+  static const String mobilePlaylists = '/playlist/my/list';
   static const String mobileSearch = '/mobile/search';
   static const String mobileFavorites = '/mobile/favorites';
-  static const String mobileArtists = '/mobile/artists';
 }

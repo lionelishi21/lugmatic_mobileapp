@@ -4,6 +4,7 @@ import '../../../../core/config/api_config.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../data/models/music_model.dart';
 import '../../../../data/models/artist_model.dart';
+import '../../../../data/providers/audio_provider.dart';
 
 class LibraryPage extends StatefulWidget {
   const LibraryPage({Key? key}) : super(key: key);
@@ -88,8 +89,8 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
                   unselectedLabelStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
                   tabs: const [
                     Tab(text: 'Playlists'),
-                    Tab(text: 'Songs'),
-                    Tab(text: 'Albums'),
+                    Tab(text: 'Liked Songs'),
+                    Tab(text: 'Following'),
                     Tab(text: 'Artists'),
                   ],
                 ),
@@ -107,8 +108,8 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
                 controller: _tabController,
                 children: [
                   _buildPlaylistsTab(),
-                  _buildSongsTab(),
-                  _buildAlbumsTab(),
+                  _buildSongsTab(), // Liked Songs
+                  _buildFollowingTab(),
                   _buildArtistsTab(),
                 ],
               ),
@@ -142,7 +143,8 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        const SizedBox(height: 8),
+        _buildPremiumBanner(),
+        const SizedBox(height: 16),
         _buildCreatePlaylistCard(),
         const SizedBox(height: 24),
         if (_playlists.isEmpty)
@@ -154,39 +156,82 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
     );
   }
 
-  Widget _buildCreatePlaylistCard() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft, end: Alignment.bottomRight,
-          colors: [Color(0xFF10B981), Color(0xFF059669)],
+  Widget _buildPremiumBanner() {
+    return GestureDetector(
+      onTap: () => Navigator.pushNamed(context, '/premium'),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          color: Colors.white.withOpacity(0.05),
+          border: Border.all(color: const Color(0xFF10B981).withOpacity(0.3)),
         ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(color: const Color(0xFF10B981).withOpacity(0.3), blurRadius: 20, offset: const Offset(0, 10)),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 60, height: 60,
-            decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(12)),
-            child: const Icon(Icons.add, color: Colors.white, size: 32),
-          ),
-          const SizedBox(width: 16),
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Create New Playlist', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
-                SizedBox(height: 4),
-                Text('Start building your collection', style: TextStyle(color: Colors.white70, fontSize: 14)),
-              ],
+        child: Row(
+          children: [
+            Container(
+              width: 50, height: 50,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(colors: [Color(0xFF10B981), Color(0xFF059669)]),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(Icons.star, color: Colors.white, size: 28),
             ),
+            const SizedBox(width: 16),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Lugmatic Premium', style: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 2),
+                  Text('Ad-free, High Quality & Offline', style: TextStyle(color: Colors.white60, fontSize: 13)),
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios, color: Colors.white30, size: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCreatePlaylistCard() {
+    return GestureDetector(
+      onTap: () {
+        // Navigator.pushNamed(context, '/create_playlist');
+      },
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft, end: Alignment.bottomRight,
+            colors: [Color(0xFF10B981), Color(0xFF059669)],
           ),
-          const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 20),
-        ],
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(color: const Color(0xFF10B981).withOpacity(0.3), blurRadius: 20, offset: const Offset(0, 10)),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 60, height: 60,
+              decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(12)),
+              child: const Icon(Icons.add, color: Colors.white, size: 32),
+            ),
+            const SizedBox(width: 16),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Create New Playlist', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
+                  SizedBox(height: 4),
+                  Text('Start building your collection', style: TextStyle(color: Colors.white70, fontSize: 14)),
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 20),
+          ],
+        ),
       ),
     );
   }
@@ -206,6 +251,9 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
         border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
       ),
       child: ListTile(
+        onTap: () {
+          // Navigator.pushNamed(context, '/playlist_details', arguments: playlist);
+        },
         leading: Container(
           width: 50, height: 50,
           decoration: BoxDecoration(
@@ -216,7 +264,10 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
         ),
         title: Text(name, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
         subtitle: Text('$songCount songs', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 14)),
-        trailing: Icon(Icons.more_vert, color: Colors.white.withOpacity(0.7)),
+        trailing: IconButton(
+          icon: Icon(Icons.more_vert, color: Colors.white.withOpacity(0.7)),
+          onPressed: () {},
+        ),
       ),
     );
   }
@@ -238,6 +289,10 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
             color: Colors.white.withOpacity(0.02),
           ),
           child: ListTile(
+            onTap: () {
+              final audioProvider = context.read<AudioProvider>();
+              audioProvider.playMusic(song, queue: _songs);
+            },
             leading: Container(
               width: 50, height: 50,
               decoration: BoxDecoration(
@@ -249,7 +304,7 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
               child: song.imageUrl.isNotEmpty
                   ? ClipRRect(
                       borderRadius: BorderRadius.circular(8),
-                      child: Image.network(song.imageUrl, fit: BoxFit.cover,
+                      child: Image.network(ApiConfig.resolveUrl(song.imageUrl), fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => const Icon(Icons.music_note, color: Colors.white, size: 24)),
                     )
                   : const Icon(Icons.music_note, color: Colors.white, size: 24),
@@ -259,9 +314,14 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.favorite_border, color: Colors.white.withOpacity(0.6), size: 20),
-                const SizedBox(width: 8),
-                Icon(Icons.more_vert, color: Colors.white.withOpacity(0.6), size: 20),
+                IconButton(
+                  icon: const Icon(Icons.favorite, color: Colors.red, size: 20),
+                  onPressed: () {},
+                ),
+                IconButton(
+                  icon: Icon(Icons.more_vert, color: Colors.white.withOpacity(0.6), size: 20),
+                  onPressed: () {},
+                ),
               ],
             ),
           ),
@@ -270,72 +330,43 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
     );
   }
 
-  Widget _buildAlbumsTab() {
-    if (_albums.isEmpty) {
-      return Center(child: _buildEmptyState('No albums yet', Icons.album));
+  Widget _buildFollowingTab() {
+    if (_artists.isEmpty) {
+      return Center(child: _buildEmptyState('No followed artists yet', Icons.people));
     }
 
-    return GridView.builder(
+    return ListView.builder(
       padding: const EdgeInsets.all(16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2, mainAxisSpacing: 16, crossAxisSpacing: 16, childAspectRatio: 0.75,
-      ),
-      itemCount: _albums.length,
+      itemCount: _artists.length,
       itemBuilder: (context, index) {
-        final album = _albums[index];
-        final name = album['name']?.toString() ?? 'Untitled';
-        final coverArt = album['coverArt']?.toString() ?? '';
-        final artistObj = album['artist'];
-        final artistName = artistObj is Map ? (artistObj['name'] ?? '') : '';
-
+        final artist = _artists[index];
         return Container(
+          margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft, end: Alignment.bottomRight,
               colors: [Colors.white.withOpacity(0.08), Colors.white.withOpacity(0.03)],
             ),
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(12),
             border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF8B5CF6).withOpacity(0.3),
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(16), topRight: Radius.circular(16),
-                    ),
-                  ),
-                  child: coverArt.isNotEmpty
-                      ? ClipRRect(
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(16), topRight: Radius.circular(16),
-                          ),
-                          child: Image.network(
-                            coverArt.startsWith('http') ? coverArt : 'https://api.lugmaticmusic.com$coverArt',
-                            fit: BoxFit.cover, width: double.infinity,
-                            errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.album, color: Colors.white, size: 48)),
-                          ),
-                        )
-                      : const Center(child: Icon(Icons.album, color: Colors.white, size: 48)),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(name, style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700),
-                        maxLines: 1, overflow: TextOverflow.ellipsis),
-                    const SizedBox(height: 4),
-                    Text(artistName, style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 13),
-                        maxLines: 1, overflow: TextOverflow.ellipsis),
-                  ],
-                ),
-              ),
-            ],
+          child: ListTile(
+            onTap: () {
+              // Navigator.pushNamed(context, '/artist_details', arguments: artist);
+            },
+            leading: CircleAvatar(
+              radius: 28,
+              backgroundImage: artist.imageUrl.isNotEmpty ? NetworkImage(
+                ApiConfig.resolveUrl(artist.imageUrl)
+              ) : null,
+              child: artist.imageUrl.isEmpty ? const Icon(Icons.person, color: Colors.white) : null,
+            ),
+            title: Text(artist.name, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
+            subtitle: Text('${artist.totalSongs} songs', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 14)),
+            trailing: IconButton(
+              icon: Icon(Icons.more_vert, color: Colors.white.withOpacity(0.7)),
+              onPressed: () {},
+            ),
           ),
         );
       },
@@ -363,16 +394,25 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
             border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
           ),
           child: ListTile(
+            onTap: () {
+              // Assuming '/artist' takes arguments or you might have '/artist_details'
+              // The specific implementation depends on how Lugmatic app passes arguments
+              // Here is a common pattern. Adjust to the actual route name used.
+              // Navigator.pushNamed(context, '/artist_details', arguments: artist);
+            },
             leading: CircleAvatar(
               radius: 28,
               backgroundImage: artist.imageUrl.isNotEmpty ? NetworkImage(
-                artist.imageUrl.startsWith('http') ? artist.imageUrl : 'https://api.lugmaticmusic.com${artist.imageUrl}',
+                ApiConfig.resolveUrl(artist.imageUrl)
               ) : null,
               child: artist.imageUrl.isEmpty ? const Icon(Icons.person, color: Colors.white) : null,
             ),
             title: Text(artist.name, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
             subtitle: Text('${artist.totalSongs} songs', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 14)),
-            trailing: Icon(Icons.more_vert, color: Colors.white.withOpacity(0.7)),
+            trailing: IconButton(
+              icon: Icon(Icons.more_vert, color: Colors.white.withOpacity(0.7)),
+              onPressed: () {},
+            ),
           ),
         );
       },

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lugmatic_flutter/data/models/music_model.dart';
-import 'package:lugmatic_flutter/ui/widgets/music_player_widget.dart';
+import 'package:lugmatic_flutter/data/providers/audio_provider.dart';
+import 'package:lugmatic_flutter/ui/widgets/player_screen.dart';
+import 'package:provider/provider.dart';
 
 class StreamPage extends StatefulWidget {
   const StreamPage({Key? key}) : super(key: key);
@@ -491,12 +493,12 @@ class _StreamPageState extends State<StreamPage> {
   }
 
   void _openMusicPlayer(MusicModel music) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => MusicPlayerWidget(music: music),
-        fullscreenDialog: true,
-      ),
+    context.read<AudioProvider>().playMusic(music);
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => PlayerScreen(music: music),
     );
   }
 

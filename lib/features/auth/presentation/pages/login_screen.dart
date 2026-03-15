@@ -375,42 +375,11 @@ class _LoginScreenState extends State<LoginScreen>
 
   Widget _buildLogo() {
     return Center(
-      child: Container(
+      child: Image.asset(
+        'assets/images/app_logo_transparent.png',
         width: 110,
         height: 110,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              NeumorphicTheme.accentGradientStart,
-              NeumorphicTheme.accentGradientEnd,
-            ],
-          ),
-          borderRadius: BorderRadius.circular(28),
-          boxShadow: [
-            BoxShadow(
-              color: NeumorphicTheme.accentGradientStart.withOpacity(0.3),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-            ),
-          ],
-        ),
-        child: Center(
-          child: Image.asset(
-            'assets/images/logo.png',
-            width: 70,
-            height: 70,
-            fit: BoxFit.contain,
-            errorBuilder: (context, error, stackTrace) {
-              return const Icon(
-                Icons.music_note_rounded,
-                size: 56,
-                color: Colors.white,
-              );
-            },
-          ),
-        ),
+        fit: BoxFit.contain,
       ),
     );
   }

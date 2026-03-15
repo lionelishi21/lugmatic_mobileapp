@@ -4,6 +4,9 @@ import '../../../../core/config/api_config.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../data/models/music_model.dart';
 import '../../../../data/models/artist_model.dart';
+import '../../../../data/providers/audio_provider.dart';
+import '../../../../ui/widgets/player_screen.dart';
+import 'artist_detail_page.dart';
 
 class BrowsePage extends StatefulWidget {
   const BrowsePage({Key? key}) : super(key: key);
@@ -248,6 +251,17 @@ class _BrowsePageState extends State<BrowsePage> {
             ),
             const SizedBox(height: 12),
             ...(_artistResults.take(5).map((a) => ListTile(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ArtistDetailPage(
+                          artistId: a.id,
+                          initialData: a,
+                        ),
+                      ),
+                    );
+                  },
                   leading: CircleAvatar(
                     backgroundImage: a.imageUrl.isNotEmpty ? NetworkImage(a.imageUrl) : null,
                     child: a.imageUrl.isEmpty ? const Icon(Icons.person) : null,
@@ -266,6 +280,15 @@ class _BrowsePageState extends State<BrowsePage> {
             ),
             const SizedBox(height: 12),
             ...(_searchResults.take(10).map((s) => ListTile(
+                  onTap: () {
+                    context.read<AudioProvider>().playMusic(s, queue: _searchResults);
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (context) => PlayerScreen(music: s),
+                    );
+                  },
                   leading: Container(
                     width: 48,
                     height: 48,
@@ -432,7 +455,11 @@ class _BrowsePageState extends State<BrowsePage> {
                 child: Material(
                   color: Colors.transparent,
                   child: InkWell(
-                    onTap: () {},
+                    onTap: () {
+                      setState(() {
+                        _selectedCategoryIndex = index + 1; // + 1 to account for 'All' tab
+                      });
+                    },
                     borderRadius: BorderRadius.circular(16),
                     child: Padding(
                       padding: const EdgeInsets.all(20),
@@ -465,6 +492,15 @@ class _BrowsePageState extends State<BrowsePage> {
   Widget _buildNewReleases() {
     if (_newReleases.isEmpty) return const SizedBox.shrink();
 
+    final categories = ['All', ..._genres.map((g) => g['name']?.toString() ?? '').where((n) => n.isNotEmpty).take(8)];
+    final selectedGenre = categories[_selectedCategoryIndex].toLowerCase();
+    
+    final displayReleases = selectedGenre == 'all' 
+        ? _newReleases 
+        : _newReleases.where((song) => song.genre.toLowerCase().contains(selectedGenre)).toList();
+
+    if (displayReleases.isEmpty) return const SizedBox.shrink();
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
@@ -483,13 +519,23 @@ class _BrowsePageState extends State<BrowsePage> {
           ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: _newReleases.length.clamp(0, 5),
+            itemCount: displayReleases.length.clamp(0, 5),
             itemBuilder: (context, index) {
-              final song = _newReleases[index];
-              return Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
+              final song = displayReleases[index];
+              return GestureDetector(
+                onTap: () {
+                  context.read<AudioProvider>().playMusic(song, queue: displayReleases);
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (context) => PlayerScreen(music: song),
+                  );
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -547,7 +593,15 @@ class _BrowsePageState extends State<BrowsePage> {
                       ),
                     ),
                     IconButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        context.read<AudioProvider>().playMusic(song, queue: displayReleases);
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (context) => PlayerScreen(music: song),
+                        );
+                      },
                       icon: const Icon(
                         Icons.play_circle_fill,
                         color: Color(0xFF10B981),
@@ -556,9 +610,10 @@ class _BrowsePageState extends State<BrowsePage> {
                     ),
                   ],
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
+        ),
         ],
       ),
     );

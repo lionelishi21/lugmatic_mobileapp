@@ -1,9 +1,10 @@
-import 'package:flutter/material.dart';
+import 'package:lugmatic_flutter/core/constants/app_colors.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final VoidCallback? onProfileTap;
   final VoidCallback? onNotificationTap;
+  final VoidCallback? onStoreTap;
   final int unreadCount;
 
   const CustomAppBar({
@@ -11,13 +12,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     required this.title,
     this.onProfileTap,
     this.onNotificationTap,
+    this.onStoreTap,
     this.unreadCount = 0,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: Color(0xFF1A1A1A),
+      backgroundColor: AppColors.darkBackground,
       elevation: 0,
       flexibleSpace: SafeArea(
         child: Padding(
@@ -35,6 +37,32 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
               Row(
                 children: [
+                   if (onStoreTap != null) ...[
+                    GestureDetector(
+                      onTap: onStoreTap,
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: AppColors.darkBackground,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.3),
+                              offset: const Offset(4, 4),
+                              blurRadius: 8,
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.monetization_on,
+                          color: Color(0xFFFFD700),
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                  ],
                   GestureDetector(
                     onTap: onNotificationTap,
                     child: Stack(
@@ -43,18 +71,13 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF1A1A1A),
+                            color: AppColors.darkBackground,
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: [
-                              const BoxShadow(
-                                color: Color(0xFF141414),
-                                offset: Offset(6, 6),
-                                blurRadius: 12,
-                              ),
-                              const BoxShadow(
-                                color: Color(0xFF202020),
-                                offset: Offset(-6, -6),
-                                blurRadius: 12,
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.3),
+                                offset: const Offset(4, 4),
+                                blurRadius: 8,
                               ),
                             ],
                           ),
@@ -99,18 +122,13 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF1A1A1A),
+                        color: AppColors.darkBackground,
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
-                          const BoxShadow(
-                            color: Color(0xFF141414),
-                            offset: Offset(6, 6),
-                            blurRadius: 12,
-                          ),
-                          const BoxShadow(
-                            color: Color(0xFF202020),
-                            offset: Offset(-6, -6),
-                            blurRadius: 12,
+                           BoxShadow(
+                            color: Colors.black.withOpacity(0.3),
+                            offset: const Offset(4, 4),
+                            blurRadius: 8,
                           ),
                         ],
                       ),

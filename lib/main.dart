@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:video_player/video_player.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:just_audio_background/just_audio_background.dart';
+import 'features/premium/presentation/pages/subscription_page.dart';
 import 'core/network/api_client.dart';
 import 'core/network/token_storage.dart';
 import 'data/providers/auth_provider.dart';
@@ -15,63 +18,104 @@ import 'data/services/video_service.dart';
 import 'data/services/gift_service.dart';
 import 'data/services/stripe_service.dart';
 import 'data/services/music_service.dart';
+import 'data/services/subscription_service.dart';
+import 'data/providers/audio_provider.dart';
 import 'features/store/presentation/pages/store_page.dart';
 import 'features/mixer/presentation/pages/mixer_page.dart';
+import 'ui/widgets/mini_player.dart';
+
+final ValueNotifier<String> appStatus = ValueNotifier<String>("Initalizing...");
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  
-  // Initialize Stripe SDK (non-fatal — app still launches if this fails)
+  runApp(const MaterialApp(
+    debugShowCheckedModeBanner: false,
+    home: Scaffold(backgroundColor: Colors.black, body: Center(child: CircularProgressIndicator())),
+  ));
+
   try {
-    await StripeService.init().timeout(const Duration(seconds: 5));
-  } catch (_) {
-    // Stripe init failed — coin purchases will be unavailable but app can still launch
-  }
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.light,
-    ),
-  );
+  WidgetsFlutterBinding.ensureInitialized();
 
-  // Core dependencies
-  final tokenStorage = TokenStorage();
-  final apiClient = ApiClient(tokenStorage: tokenStorage);
-  final authService = AuthService(
-    apiClient: apiClient,
-    tokenStorage: tokenStorage,
+  await JustAudioBackground.init(
+    androidNotificationChannelId: 'com.lugmatic.music.channel.audio',
+    androidNotificationChannelName: 'Audio playback',
+    androidNotificationOngoing: true,
   );
-  final commentService = CommentService(apiClient: apiClient);
-  final notificationService = NotificationService(apiClient: apiClient);
-  final artistRequestService = ArtistRequestService(apiClient: apiClient);
-  final videoService = VideoService(apiClient: apiClient);
-  final giftService = GiftService(apiClient: apiClient);
-  final stripeService = StripeService(giftService: giftService);
-  final musicService = MusicService(apiClient: apiClient);
+    
+    // Initialize Stripe SDK (non-fatal — app still launches if this fails)
+    try {
+      appStatus.value = "Initializing Stripe...";
+      await StripeService.init().timeout(const Duration(seconds: 5));
+    } catch (e) {
+      appStatus.value = "Stripe Error: $e";
+    }
+    
+    appStatus.value = "Setting orientations...";
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+      ),
+    );
 
-  runApp(
-    MultiProvider(
-      providers: [
-        Provider<TokenStorage>.value(value: tokenStorage),
-        Provider<ApiClient>.value(value: apiClient),
-        ChangeNotifierProvider(
-          create: (_) => AuthProvider(
-            authService: authService,
-            tokenStorage: tokenStorage,
+    // Core dependencies
+    appStatus.value = "Initializing storage...";
+    final tokenStorage = TokenStorage();
+    final apiClient = ApiClient(tokenStorage: tokenStorage);
+    
+    appStatus.value = "Setting up services...";
+    final authService = AuthService(
+      apiClient: apiClient,
+      tokenStorage: tokenStorage,
+    );
+    final commentService = CommentService(apiClient: apiClient);
+    final notificationService = NotificationService(apiClient: apiClient);
+    final artistRequestService = ArtistRequestService(apiClient: apiClient);
+    final videoService = VideoService(apiClient: apiClient);
+    final giftService = GiftService(apiClient: apiClient);
+    final stripeService = StripeService(giftService: giftService);
+    final musicService = MusicService(apiClient: apiClient);
+    final subscriptionService = SubscriptionService(apiClient: apiClient);
+
+    runApp(
+      MultiProvider(
+        providers: [
+          Provider<TokenStorage>.value(value: tokenStorage),
+          Provider<ApiClient>.value(value: apiClient),
+          ChangeNotifierProvider(
+            create: (_) => AuthProvider(
+              authService: authService,
+              tokenStorage: tokenStorage,
+            ),
           ),
-        ),
-        Provider<CommentService>.value(value: commentService),
-        Provider<NotificationService>.value(value: notificationService),
-        Provider<ArtistRequestService>.value(value: artistRequestService),
-        Provider<VideoService>.value(value: videoService),
-        Provider<GiftService>.value(value: giftService),
-        Provider<StripeService>.value(value: stripeService),
-        Provider<MusicService>.value(value: musicService),
-      ],
-      child: const LugmaticApp(),
-    ),
-  );
+          Provider<CommentService>.value(value: commentService),
+          Provider<NotificationService>.value(value: notificationService),
+          Provider<ArtistRequestService>.value(value: artistRequestService),
+          Provider<VideoService>.value(value: videoService),
+          Provider<GiftService>.value(value: giftService),
+          Provider<StripeService>.value(value: stripeService),
+          Provider<MusicService>.value(value: musicService),
+          Provider<SubscriptionService>.value(value: subscriptionService),
+          ChangeNotifierProvider(
+            create: (_) => AudioProvider(musicService: musicService),
+          ),
+        ],
+        child: const LugmaticApp(),
+      ),
+    );
+  } catch (e, stack) {
+    debugPrint('FATAL STARTUP ERROR: $e\n$stack');
+    runApp(MaterialApp(
+      home: Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Text('Fatal Error: $e', style: const TextStyle(color: Colors.red)),
+        )),
+      ),
+    ));
+  }
 }
+
 
 class LugmaticApp extends StatelessWidget {
   const LugmaticApp({Key? key}) : super(key: key);
@@ -91,6 +135,18 @@ class LugmaticApp extends StatelessWidget {
         '/login': (context) => const LoginScreen(),
         '/store': (context) => const StorePage(),
         '/mixer': (context) => const MixerPage(),
+        '/premium': (context) => const SubscriptionPage(),
+      },
+      builder: (context, child) {
+        return Stack(
+          children: [
+            child!,
+            const Align(
+              alignment: Alignment.bottomCenter,
+              child: MiniPlayer(),
+            ),
+          ],
+        );
       },
     );
   }
@@ -103,57 +159,48 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _fadeAnimation;
-  late Animation<double> _scaleAnimation;
+class _SplashScreenState extends State<SplashScreen> {
+  late VideoPlayerController _controller;
+  bool _isInitialized = false;
 
   @override
   void initState() {
     super.initState();
-    _initializeAnimations();
-    _checkAuthAndNavigate();
+    _initializeVideo();
   }
 
-  void _initializeAnimations() {
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1500),
-    );
+  Future<void> _initializeVideo() async {
+    _controller = VideoPlayerController.asset('assets/videos/splash_video.mp4');
+    try {
+      await _controller.initialize();
+      if (mounted) {
+        setState(() {
+          _isInitialized = true;
+        });
+        _controller.play();
+        _controller.addListener(_videoListener);
+      }
+    } catch (e) {
+      debugPrint("Video splash error: $e");
+      _checkAuthAndNavigate();
+    }
+  }
 
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: const Interval(0.0, 0.6, curve: Curves.easeIn),
-      ),
-    );
-
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
-      ),
-    );
-
-    _animationController.forward();
+  void _videoListener() {
+    if (_controller.value.position >= _controller.value.duration) {
+      _controller.removeListener(_videoListener);
+      _checkAuthAndNavigate();
+    }
   }
 
   /// Check stored auth and navigate accordingly.
   Future<void> _checkAuthAndNavigate() async {
     final authProvider = context.read<AuthProvider>();
     try {
-      // Show splash for at least 2 seconds, but cap the total wait at 8 seconds
-      // so the app never hangs forever if the API is unreachable.
-      await Future.any([
-        Future.wait([
-          authProvider.checkAuthStatus(),
-          Future.delayed(const Duration(seconds: 2)),
-        ]),
-        Future.delayed(const Duration(seconds: 8)),
-      ]);
-    } catch (_) {
-      // Any unexpected error — treat as unauthenticated
+      appStatus.value = "Checking authentication...";
+      await authProvider.checkAuthStatus();
+    } catch (e) {
+      appStatus.value = "Auth check failed: $e";
     }
 
     if (!mounted) return;
@@ -179,7 +226,8 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   void dispose() {
-    _animationController.dispose();
+    _controller.removeListener(_videoListener);
+    _controller.dispose();
     super.dispose();
   }
 
@@ -205,62 +253,22 @@ class _SplashScreenState extends State<SplashScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Logo with animation
-                AnimatedBuilder(
-                  animation: _animationController,
-                  builder: (context, child) {
-                    return Transform.scale(
-                      scale: _scaleAnimation.value,
-                      child: FadeTransition(
-                        opacity: _fadeAnimation,
-                        child: Container(
-                          width: 120,
-                          height: 120,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: const LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                Color(0xFF10B981),
-                                Color(0xFF059669),
-                                Color(0xFF047857),
-                              ],
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(0xFF10B981).withOpacity(0.3),
-                                blurRadius: 30,
-                                offset: const Offset(0, 10),
-                              ),
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.music_note,
-                            color: Colors.white,
-                            size: 60,
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
+                // App Video Splash
+                if (_isInitialized)
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height * 0.6,
+                    child: AspectRatio(
+                      aspectRatio: _controller.value.aspectRatio,
+                      child: VideoPlayer(_controller),
+                    ),
+                  )
+                else
+                  const Center(child: CircularProgressIndicator()),
 
                 const SizedBox(height: 32),
 
-                // App name with animation
-                FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: const Text(
-                    'Lugmatic',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 32,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 2,
-                    ),
-                  ),
-                ),
+
 
                 const SizedBox(height: 16),
 
@@ -275,19 +283,38 @@ class _SplashScreenState extends State<SplashScreen>
                   ),
                 ),
 
-                const SizedBox(height: 60),
+                const SizedBox(height: 40),
+
+                // Debug Status text
+                ValueListenableBuilder<String>(
+                  valueListenable: appStatus,
+                  builder: (context, status, child) {
+                    return Text(
+                      status,
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.5),
+                        fontSize: 12,
+                        fontStyle: FontStyle.italic,
+                      ),
+                      textAlign: TextAlign.center,
+                    );
+                  },
+                ),
+
+                const SizedBox(height: 20),
 
                 // Loading indicator
-                SizedBox(
-                  width: 40,
-                  height: 40,
-                  child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      const Color(0xFFA855F7).withOpacity(0.6),
+                if (!_isInitialized)
+                  SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        const Color(0xFFA855F7).withOpacity(0.6),
+                      ),
+                      strokeWidth: 3,
                     ),
-                    strokeWidth: 3,
                   ),
-                ),
               ],
             ),
           ),

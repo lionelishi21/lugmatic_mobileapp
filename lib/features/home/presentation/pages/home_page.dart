@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:lugmatic_flutter/core/config/api_config.dart';
 import 'package:lugmatic_flutter/core/network/api_client.dart';
 import 'package:lugmatic_flutter/data/models/music_model.dart';
 import 'package:lugmatic_flutter/data/models/artist_model.dart';
@@ -12,14 +13,17 @@ import 'package:lugmatic_flutter/features/home/presentation/widgets/custom_botto
 import 'package:lugmatic_flutter/features/home/presentation/widgets/music_card.dart';
 import 'package:lugmatic_flutter/features/home/presentation/widgets/artist_card.dart';
 import 'package:lugmatic_flutter/features/home/presentation/widgets/podcast_card.dart';
-import 'package:lugmatic_flutter/ui/widgets/music_player_widget.dart';
+import 'package:lugmatic_flutter/data/providers/audio_provider.dart';
+import 'package:lugmatic_flutter/ui/widgets/player_screen.dart';
 import 'package:lugmatic_flutter/features/home/presentation/pages/notifications_page.dart';
 import 'package:lugmatic_flutter/shared/widgets/demand_artist_dialog.dart';
 import 'package:lugmatic_flutter/data/services/notification_service.dart';
 import 'package:lugmatic_flutter/features/home/presentation/pages/create_playlist_screen.dart';
-import 'package:lugmatic_flutter/features/home/presentation/pages/browse_page.dart';
+import 'package:lugmatic_flutter/features/home/presentation/pages/explore_hub_page.dart';
+import 'package:lugmatic_flutter/features/home/presentation/pages/home_page.dart';
 import 'package:lugmatic_flutter/features/home/presentation/pages/radio_page.dart';
 import 'package:lugmatic_flutter/features/home/presentation/pages/library_page.dart';
+import 'package:lugmatic_flutter/features/home/presentation/pages/browse_page.dart';
 import 'package:lugmatic_flutter/features/music/presentation/pages/music_hub_page.dart';
 import 'package:lugmatic_flutter/features/podcast/presentation/pages/podcast_hub_page.dart';
 import 'package:lugmatic_flutter/features/gift/presentation/pages/gift_hub_page.dart';
@@ -230,19 +234,21 @@ class _HomePageState extends State<HomePage> {
                 // Navigate to profile page
                 print('Profile tapped');
               },
+              onStoreTap: () {
+                Navigator.pushNamed(context, '/store');
+              },
             )
           : null,
       body: IndexedStack(
         index: _currentIndex,
         children: [
           _buildHomePage(),
-          const BrowsePage(),
+          const ExploreHubPage(),
           const RadioPage(),
           const LibraryPage(),
         ],
       ),
-      floatingActionButton: _currentIndex == 0 ? _buildFloatingActionButton() : null,
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      // floatingActionButton and floatingActionButtonLocation removed because MiniPlayer overlays bottom bar now
       bottomNavigationBar: CustomBottomNav(
         currentIndex: _currentIndex,
         onTap: (index) {
@@ -848,12 +854,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _openMusicPlayer(MusicModel music) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => MusicPlayerWidget(music: music),
-        fullscreenDialog: true,
-      ),
+    context.read<AudioProvider>().playMusic(music);
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => PlayerScreen(music: music),
     );
   }
 
@@ -1115,45 +1121,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildFloatingActionButton() {
-    return Container(
-          width: 64,
-          height: 64,
-          decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF10B981), Color(0xFF059669)],
-        ),
-            borderRadius: BorderRadius.circular(32),
-            boxShadow: [
-              BoxShadow(
-            color: const Color(0xFF10B981).withOpacity(0.5),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            if (_trendingSongs.isNotEmpty) {
-              _openMusicPlayer(_trendingSongs[0]);
-            }
-          },
-          borderRadius: BorderRadius.circular(32),
-          child: const Center(
-            child: Icon(
-              Icons.play_arrow_rounded,
-            color: Colors.white,
-              size: 36,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+
 
   Widget _buildTikTokLiveStreams() {
     return SizedBox(
