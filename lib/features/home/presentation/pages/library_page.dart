@@ -25,7 +25,7 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadData());
   }
 
@@ -90,8 +90,9 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
                   tabs: const [
                     Tab(text: 'Playlists'),
                     Tab(text: 'Liked Songs'),
+                    Tab(text: 'Top Charts'),
                     Tab(text: 'Following'),
-                    Tab(text: 'Artists'),
+                    Tab(text: 'My Artists'),
                   ],
                 ),
               ),
@@ -109,8 +110,9 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
                 children: [
                   _buildPlaylistsTab(),
                   _buildSongsTab(), // Liked Songs
+                  _buildTopChartsTab(),
                   _buildFollowingTab(),
-                  _buildArtistsTab(),
+                  _buildArtistsTab(), // My Artists
                 ],
               ),
       ),
@@ -120,7 +122,7 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
   Widget _buildAppBar() {
     return SliverAppBar(
       floating: true,
-      backgroundColor: const Color(0xFF111827),
+      backgroundColor: const Color(0xFF0F172A),
       elevation: 0,
       title: const Text(
         'Library',
@@ -416,6 +418,35 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
           ),
         );
       },
+    );
+  }
+
+  Widget _buildTopChartsTab() {
+    // Placeholder for Top Charts (Mirroring Web Feature)
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: const Color(0xFF10B981).withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.trending_up_rounded, color: Color(0xFF10B981), size: 48),
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            'Global Top Charts',
+            style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Trending hits from around the world',
+            style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 14),
+          ),
+        ],
+      ),
     );
   }
 

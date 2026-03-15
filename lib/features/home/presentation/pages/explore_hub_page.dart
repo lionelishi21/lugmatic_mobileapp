@@ -14,10 +14,23 @@ class ExploreHubPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.darkBackground,
-      body: CustomScrollView(
-        slivers: [
-          _buildSliverAppBar(context),
+      backgroundColor: Colors.transparent,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFF064E3B), // Dark Green tint (OKLCH 0.13)
+              Color(0xFF0F172A), // Dark Slate (OKLCH 0.10)
+              Color(0xFF000000), // Black (OKLCH 0.09)
+            ],
+            stops: [0.0, 0.6, 1.0],
+          ),
+        ),
+        child: CustomScrollView(
+          slivers: [
+            _buildSliverAppBar(context),
           SliverToBoxAdapter(
             child: _buildSearchBar(context),
           ),

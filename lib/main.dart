@@ -128,6 +128,9 @@ class LugmaticApp extends StatelessWidget {
       theme: ThemeData(
         brightness: Brightness.dark,
         primarySwatch: Colors.green,
+        textTheme: GoogleFonts.dmSansTextTheme(
+          ThemeData.dark().textTheme,
+        ),
       ),
       home: const SplashScreen(),
       routes: {
