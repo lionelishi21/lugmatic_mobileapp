@@ -162,38 +162,28 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
-  late VideoPlayerController _controller;
-  bool _isInitialized = false;
+class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
-    _initializeVideo();
-  }
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    );
+    _fadeAnimation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeIn,
+    );
 
-  Future<void> _initializeVideo() async {
-    _controller = VideoPlayerController.asset('assets/videos/splash_video.mp4');
-    try {
-      await _controller.initialize();
-      if (mounted) {
-        setState(() {
-          _isInitialized = true;
-        });
-        _controller.play();
-        _controller.addListener(_videoListener);
-      }
-    } catch (e) {
-      debugPrint("Video splash error: $e");
+    _animationController.forward();
+    
+    // Auto-navigate after a short delay
+    Future.delayed(const Duration(seconds: 2), () {
       _checkAuthAndNavigate();
-    }
-  }
-
-  void _videoListener() {
-    if (_controller.value.position >= _controller.value.duration) {
-      _controller.removeListener(_videoListener);
-      _checkAuthAndNavigate();
-    }
+    });
   }
 
   /// Check stored auth and navigate accordingly.
@@ -229,8 +219,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   void dispose() {
-    _controller.removeListener(_videoListener);
-    _controller.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -239,87 +228,106 @@ class _SplashScreenState extends State<SplashScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       body: Container(
+        width: double.infinity,
+        height: double.infinity,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFF0F0F0F),
-              Color(0xFF1A1A1A),
+              Color(0xFF0F172A),
               Color(0xFF000000),
             ],
-            stops: [0.0, 0.5, 1.0],
           ),
         ),
         child: SafeArea(
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // App Video Splash
-                if (_isInitialized)
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width,
-                    height: MediaQuery.of(context).size.height * 0.6,
-                    child: AspectRatio(
-                      aspectRatio: _controller.value.aspectRatio,
-                      child: VideoPlayer(_controller),
-                    ),
-                  )
-                else
-                  const Center(child: CircularProgressIndicator()),
-
-                const SizedBox(height: 32),
-
-
-
-                const SizedBox(height: 16),
-
-                // Tagline
-                Text(
-                  'Your Music Universe',
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: Colors.white.withOpacity(0.8),
-                    fontWeight: FontWeight.w300,
-                    letterSpacing: 1,
+          child: Stack(
+            children: [
+              Center(
+                child: FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // App Logo
+                      Container(
+                        width: 140,
+                        height: 140,
+                        decoration: BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF10B981).withOpacity(0.2),
+                              blurRadius: 40,
+                              spreadRadius: 10,
+                            ),
+                          ],
+                        ),
+                        child: Image.asset(
+                          'assets/images/app_logo_transparent.png',
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                      const Text(
+                        'LUGMATIC',
+                        style: TextStyle(
+                          fontSize: 32,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 4,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Your Music Universe',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.white.withOpacity(0.6),
+                          fontWeight: FontWeight.w300,
+                          letterSpacing: 2,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-
-                const SizedBox(height: 40),
-
-                // Debug Status text
-                ValueListenableBuilder<String>(
-                  valueListenable: appStatus,
-                  builder: (context, status, child) {
-                    return Text(
-                      status,
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.5),
-                        fontSize: 12,
-                        fontStyle: FontStyle.italic,
-                      ),
-                      textAlign: TextAlign.center,
-                    );
-                  },
-                ),
-
-                const SizedBox(height: 20),
-
-                // Loading indicator
-                if (!_isInitialized)
-                  SizedBox(
-                    width: 40,
-                    height: 40,
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        const Color(0xFFA855F7).withOpacity(0.6),
-                      ),
-                      strokeWidth: 3,
+              ),
+              
+              // Bottom Status
+              Positioned(
+                bottom: 40,
+                left: 0,
+                right: 0,
+                child: Column(
+                  children: [
+                    ValueListenableBuilder<String>(
+                      valueListenable: appStatus,
+                      builder: (context, status, child) {
+                        return Text(
+                          status,
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.4),
+                            fontSize: 12,
+                            fontStyle: FontStyle.italic,
+                          ),
+                          textAlign: TextAlign.center,
+                        );
+                      },
                     ),
-                  ),
-              ],
-            ),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: 30,
+                      height: 30,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          const Color(0xFF10B981).withOpacity(0.5),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
