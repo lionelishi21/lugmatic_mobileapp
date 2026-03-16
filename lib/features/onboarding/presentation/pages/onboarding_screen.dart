@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:ui';
+import '../../../../core/constants/app_colors.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({Key? key}) : super(key: key);
@@ -9,388 +11,354 @@ class OnboardingScreen extends StatefulWidget {
 
 class _OnboardingScreenState extends State<OnboardingScreen>
     with TickerProviderStateMixin {
-  late PageController _pageController;
-  late AnimationController _fadeController;
-  late AnimationController _scaleController;
-  late Animation<double> _fadeAnimation;
-  late Animation<double> _scaleAnimation;
-  
+  late PageController _pageCtrl;
+  late AnimationController _fadeCtrl;
+  late AnimationController _scaleCtrl;
+  late Animation<double> _fadeAnim;
+  late Animation<double> _scaleAnim;
   int _currentPage = 0;
-  
-  final List<OnboardingStep> _steps = [
-    OnboardingStep(
-      title: "Welcome to\nLugmatic",
-      subtitle: "Your ultimate music streaming experience",
-      description: "Discover, stream, and connect with your favorite artists in one place",
-      icon: Icons.music_note,
-      color: const Color(0xFF10B981),
+
+  final List<_Step> _steps = [
+    _Step(
+      emoji: '🎵',
+      title: 'WELCOME TO\nLUGMATIC',
+      subtitle: 'Your ultimate music experience',
+      description:
+          'Discover, stream, and connect with your favourite artists — all in one place.',
+      accentColor: AppColors.primary,
     ),
-    OnboardingStep(
-      title: "Live Streams\n& Artists",
-      subtitle: "Watch artists perform live",
-      description: "Experience real-time performances and connect directly with your favorite musicians",
-      icon: Icons.live_tv,
-      color: const Color(0xFF3B82F6),
+    _Step(
+      emoji: '📡',
+      title: 'LIVE STREAMS\n& ARTISTS',
+      subtitle: 'Watch artists perform live',
+      description:
+          'Experience real-time performances and connect directly with the musicians you love.',
+      accentColor: AppColors.primary,
     ),
-    OnboardingStep(
-      title: "Send Gifts\n& Support",
-      subtitle: "Support your favorite artists",
-      description: "Show your love by sending gifts and supporting the artists you admire",
-      icon: Icons.card_giftcard,
-      color: const Color(0xFFFFD700),
+    _Step(
+      emoji: '🎁',
+      title: 'SEND GIFTS\n& SUPPORT',
+      subtitle: 'Back your favourite artists',
+      description:
+          'Show your love by sending gifts and supporting the artists who move you.',
+      accentColor: AppColors.primary,
     ),
   ];
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController();
-    _initializeAnimations();
-  }
-
-  void _initializeAnimations() {
-    _fadeController = AnimationController(
-      duration: const Duration(milliseconds: 800),
-      vsync: this,
-    );
-    
-    _scaleController = AnimationController(
-      duration: const Duration(milliseconds: 600),
-      vsync: this,
-    );
-
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
-    );
-
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(parent: _scaleController, curve: Curves.elasticOut),
-    );
-
-    _fadeController.forward();
-    _scaleController.forward();
+    _pageCtrl = PageController();
+    _fadeCtrl = AnimationController(
+        duration: const Duration(milliseconds: 600), vsync: this);
+    _scaleCtrl = AnimationController(
+        duration: const Duration(milliseconds: 700), vsync: this);
+    _fadeAnim = Tween<double>(begin: 0, end: 1).animate(
+        CurvedAnimation(parent: _fadeCtrl, curve: Curves.easeInOut));
+    _scaleAnim = Tween<double>(begin: 0.88, end: 1.0).animate(
+        CurvedAnimation(parent: _scaleCtrl, curve: Curves.elasticOut));
+    _fadeCtrl.forward();
+    _scaleCtrl.forward();
   }
 
   @override
   void dispose() {
-    _pageController.dispose();
-    _fadeController.dispose();
-    _scaleController.dispose();
+    _pageCtrl.dispose();
+    _fadeCtrl.dispose();
+    _scaleCtrl.dispose();
     super.dispose();
   }
 
-  void _nextPage() {
+  void _next() {
     if (_currentPage < _steps.length - 1) {
-      _pageController.nextPage(
-        duration: const Duration(milliseconds: 300),
+      _pageCtrl.nextPage(
+        duration: const Duration(milliseconds: 400),
         curve: Curves.easeInOut,
       );
     } else {
-      _completeOnboarding();
+      Navigator.pushReplacementNamed(context, '/login');
     }
-  }
-
-  void _completeOnboarding() {
-    Navigator.pushReplacementNamed(context, '/login');
   }
 
   @override
   Widget build(BuildContext context) {
+    final step = _steps[_currentPage];
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppColors.background,
       body: Stack(
         children: [
-          _buildBackground(),
-          _buildPageView(),
-          _buildBottomSection(),
+          // Background
+          Container(
+            decoration: BoxDecoration(gradient: AppColors.screenGradient),
+          ),
+
+          // Purple radial glow at top
+          Positioned(
+            top: -160,
+            left: -80,
+            child: Container(
+              width: 420,
+              height: 420,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(colors: [
+                  AppColors.secondary.withOpacity(0.20),
+                  Colors.transparent,
+                ]),
+              ),
+            ),
+          ),
+
+          // Green glow bottom right
+          Positioned(
+            bottom: -100,
+            right: -80,
+            child: Container(
+              width: 320,
+              height: 320,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(colors: [
+                  AppColors.primary.withOpacity(0.10),
+                  Colors.transparent,
+                ]),
+              ),
+            ),
+          ),
+
+          // Page view
+          PageView.builder(
+            controller: _pageCtrl,
+            onPageChanged: (i) {
+              setState(() => _currentPage = i);
+              _fadeCtrl.forward(from: 0);
+              _scaleCtrl.forward(from: 0);
+            },
+            itemCount: _steps.length,
+            itemBuilder: (ctx, i) => _buildPage(_steps[i]),
+          ),
+
+          // Skip
+          Positioned(
+            top: 56,
+            right: 24,
+            child: SafeArea(
+              child: TextButton(
+                onPressed: () =>
+                    Navigator.pushReplacementNamed(context, '/login'),
+                child: const Text(
+                  'Skip',
+                  style: TextStyle(
+                      color: AppColors.mutedForeground, fontSize: 14),
+                ),
+              ),
+            ),
+          ),
+
+          // Bottom controls
+          Positioned(
+            bottom: 40,
+            left: 24,
+            right: 24,
+            child: SafeArea(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Dot indicators
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(
+                      _steps.length,
+                      (i) => AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        margin:
+                            const EdgeInsets.symmetric(horizontal: 4),
+                        width: _currentPage == i ? 24 : 6,
+                        height: 6,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(3),
+                          color: _currentPage == i
+                              ? AppColors.primary
+                              : AppColors.surface10,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // CTA button
+                  GestureDetector(
+                    onTap: _next,
+                    child: Container(
+                      height: 56,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withOpacity(0.35),
+                            blurRadius: 24,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            _currentPage == _steps.length - 1
+                                ? 'Get Started'
+                                : 'Continue',
+                            style: const TextStyle(
+                              color: AppColors.background,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          const Icon(
+                            Icons.arrow_forward_rounded,
+                            color: AppColors.background,
+                            size: 18,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildBackground() {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.black,
-            const Color(0xFF1A1A1A),
-            Colors.black,
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPageView() {
-    return PageView.builder(
-      controller: _pageController,
-      onPageChanged: (index) {
-        setState(() {
-          _currentPage = index;
-        });
-        _fadeController.forward(from: 0);
-        _scaleController.forward(from: 0);
-      },
-      itemCount: _steps.length,
-      itemBuilder: (context, index) {
-        return _buildOnboardingPage(_steps[index]);
-      },
-    );
-  }
-
-  Widget _buildOnboardingPage(OnboardingStep step) {
+  Widget _buildPage(_Step step) {
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
+        padding: const EdgeInsets.symmetric(horizontal: 28),
         child: Column(
           children: [
             const Spacer(flex: 2),
-            _buildCutoutImage(),
-            const Spacer(flex: 1),
-            _buildContent(step),
-            const Spacer(flex: 2),
-          ],
-        ),
-      ),
-    );
-  }
 
-  Widget _buildCutoutImage() {
-    return FadeTransition(
-      opacity: _fadeAnimation,
-      child: ScaleTransition(
-        scale: _scaleAnimation,
-        child: Container(
-          width: 280,
-          height: 280,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: _steps[_currentPage].color.withOpacity(0.3),
-                blurRadius: 30,
-                spreadRadius: 5,
-              ),
-            ],
-          ),
-          child: Stack(
-            children: [
-              // Background with cutout effect
-              Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      _steps[_currentPage].color.withOpacity(0.2),
-                      _steps[_currentPage].color.withOpacity(0.1),
-                      Colors.transparent,
-                    ],
-                    stops: const [0.0, 0.7, 1.0],
-                  ),
-                ),
-              ),
-              // Artist image with cutout border
-              Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: _steps[_currentPage].color,
-                    width: 3,
-                  ),
-                ),
-                child: ClipOval(
-                  child: Image.asset(
-                    'assets/images/onboarding_guy.png',
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              _steps[_currentPage].color.withOpacity(0.3),
-                              _steps[_currentPage].color.withOpacity(0.6),
-                            ],
-                          ),
-                        ),
-                        child: Icon(
-                          _steps[_currentPage].icon,
-                          size: 120,
-                          color: Colors.white,
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-              // Floating icon overlay
-              Positioned(
-                bottom: 20,
-                right: 20,
+            // Illustration — glass circle with glow
+            FadeTransition(
+              opacity: _fadeAnim,
+              child: ScaleTransition(
+                scale: _scaleAnim,
                 child: Container(
-                  width: 60,
-                  height: 60,
+                  width: 260,
+                  height: 260,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: _steps[_currentPage].color,
-                    boxShadow: [
-                      BoxShadow(
-                        color: _steps[_currentPage].color.withOpacity(0.5),
-                        blurRadius: 15,
-                        offset: const Offset(0, 5),
-                      ),
-                    ],
+                    gradient: RadialGradient(colors: [
+                      AppColors.primary.withOpacity(0.12),
+                      AppColors.secondary.withOpacity(0.08),
+                      Colors.transparent,
+                    ]),
+                    border: Border.all(
+                      color: AppColors.primary.withOpacity(0.25),
+                      width: 1.5,
+                    ),
                   ),
-                  child: Icon(
-                    _steps[_currentPage].icon,
-                    color: Colors.white,
-                    size: 30,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+                  child: ClipOval(
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          // Main image
+                          Image.asset(
+                            'assets/images/onboarding_guy.png',
+                            fit: BoxFit.cover,
+                            width: 260,
+                            height: 260,
+                            errorBuilder: (ctx, e, st) => Center(
+                              child: Text(
+                                step.emoji,
+                                style:
+                                    const TextStyle(fontSize: 80),
+                              ),
+                            ),
+                          ),
 
-  Widget _buildContent(OnboardingStep step) {
-    return FadeTransition(
-      opacity: _fadeAnimation,
-      child: Column(
-        children: [
-          // Title
-          Text(
-            step.title,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 32,
-              fontWeight: FontWeight.w800,
-              height: 1.2,
-              letterSpacing: -0.5,
+                          // Bottom gradient overlay
+                          Positioned(
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            height: 80,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.bottomCenter,
+                                  end: Alignment.topCenter,
+                                  colors: [
+                                    AppColors.background
+                                        .withOpacity(0.8),
+                                    Colors.transparent,
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          
-          // Subtitle
-          Text(
-            step.subtitle,
-            style: TextStyle(
-              color: step.color,
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
-          
-          // Description
-          Text(
-            step.description,
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
-              fontSize: 16,
-              height: 1.5,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildBottomSection() {
-    return Positioned(
-      bottom: 40,
-      left: 24,
-      right: 24,
-      child: SafeArea(
-        child: Column(
-          children: [
-            // Page indicators
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                _steps.length,
-                (index) => AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  width: _currentPage == index ? 24 : 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(4),
-                    color: _currentPage == index
-                        ? _steps[_currentPage].color
-                        : Colors.white.withOpacity(0.3),
+            const Spacer(flex: 1),
+
+            // Text content
+            FadeTransition(
+              opacity: _fadeAnim,
+              child: Column(
+                children: [
+                  // Display title — Bebas Neue style (all caps, heavy)
+                  Text(
+                    step.title,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: AppColors.foreground,
+                      fontSize: 36,
+                      fontWeight: FontWeight.w800,
+                      height: 1.1,
+                      letterSpacing: 1.5,
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 12),
+
+                  // Subtitle in brand green
+                  Text(
+                    step.subtitle,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: AppColors.primary,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Description
+                  Text(
+                    step.description,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: AppColors.mutedForeground,
+                      fontSize: 14,
+                      height: 1.6,
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 32),
-            
-            // Action button
-            GestureDetector(
-              onTap: _nextPage,
-              child: Container(
-                height: 60,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                    colors: [
-                      _steps[_currentPage].color,
-                      _steps[_currentPage].color.withOpacity(0.8),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(30),
-                  boxShadow: [
-                    BoxShadow(
-                      color: _steps[_currentPage].color.withOpacity(0.3),
-                      blurRadius: 15,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      margin: const EdgeInsets.only(left: 6),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white.withOpacity(0.2),
-                      ),
-                      child: Icon(
-                        _currentPage == _steps.length - 1
-                            ? Icons.check
-                            : Icons.arrow_forward,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Text(
-                      _currentPage == _steps.length - 1
-                          ? 'Get Started'
-                          : 'Continue',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+
+            const Spacer(flex: 3),
           ],
         ),
       ),
@@ -398,18 +366,18 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   }
 }
 
-class OnboardingStep {
+class _Step {
+  final String emoji;
   final String title;
   final String subtitle;
   final String description;
-  final IconData icon;
-  final Color color;
+  final Color accentColor;
 
-  OnboardingStep({
+  const _Step({
+    required this.emoji,
     required this.title,
     required this.subtitle,
     required this.description,
-    required this.icon,
-    required this.color,
+    required this.accentColor,
   });
 }

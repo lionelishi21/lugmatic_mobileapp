@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 
+/// Social login button matching lugmatic-music web style:
+/// dark input-filled surface, white/muted text, subtle border.
 class SocialLoginButton extends StatelessWidget {
   final String text;
   final String iconPath;
@@ -19,40 +21,40 @@ class SocialLoginButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      height: 56,
+      height: 50,
       child: OutlinedButton(
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(
-          backgroundColor: backgroundColor ?? Colors.white.withOpacity(0.1),
-          side: BorderSide(color: AppColors.greyDark.withOpacity(0.3)),
+          backgroundColor: backgroundColor ?? AppColors.input,
+          side: const BorderSide(color: AppColors.border, width: 1),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+              borderRadius: BorderRadius.circular(14)),
+          elevation: 0,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
               iconPath,
-              width: 24,
-              height: 24,
-              errorBuilder: (context, error, stackTrace) {
-                // Fallback icons
+              width: 20,
+              height: 20,
+              errorBuilder: (ctx, err, st) {
                 IconData icon = Icons.login;
                 if (text.toLowerCase().contains('google')) {
-                  icon = Icons.g_mobiledata;
+                  icon = Icons.g_mobiledata_rounded;
                 } else if (text.toLowerCase().contains('apple')) {
-                  icon = Icons.apple;
+                  icon = Icons.apple_rounded;
                 }
-                return Icon(icon, color: AppColors.white, size: 24);
+                return Icon(icon,
+                    color: AppColors.foreground, size: 20);
               },
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 10),
             Text(
               text,
               style: const TextStyle(
-                color: AppColors.white,
-                fontSize: 16,
+                color: AppColors.foreground,
+                fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
             ),

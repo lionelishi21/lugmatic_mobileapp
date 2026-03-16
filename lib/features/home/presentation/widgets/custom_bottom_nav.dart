@@ -1,6 +1,10 @@
 // lib/features/home/presentation/widgets/custom_bottom_nav.dart
 import 'package:flutter/material.dart';
+import 'dart:ui';
+import '../../../../core/constants/app_colors.dart';
 
+/// Bottom nav matching lugmatic-music web sidebar style:
+/// dark glass surface, white icons, green active indicator pill.
 class CustomBottomNav extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
@@ -15,54 +19,68 @@ class CustomBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BottomAppBar(
-      color: const Color(0xFF1A1A1A),
-      elevation: 0,
-      height: 80,
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border(
-            top: BorderSide(
-              color: Colors.white.withOpacity(0.05),
-              width: 1,
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+        child: Container(
+          height: 72,
+          decoration: BoxDecoration(
+            color: AppColors.glassBg,
+            border: Border(
+              top: BorderSide(color: AppColors.border, width: 1),
             ),
           ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _buildNavItem(Icons.home, 'Home', 0),
-            _buildNavItem(Icons.grid_view_rounded, 'Explore', 1),
-            _buildNavItem(Icons.radio, 'Radio', 2),
-            _buildNavItem(Icons.library_music, 'Library', 3),
-          ],
+          child: Row(
+            children: [
+              _item(context, Icons.home_rounded, 'Home', 0),
+              _item(context, Icons.grid_view_rounded, 'Explore', 1),
+              _item(context, Icons.radio_rounded, 'Radio', 2),
+              _item(context, Icons.library_music_rounded, 'Library', 3),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildNavItem(IconData icon, String label, int index) {
-    bool isSelected = currentIndex == index;
+  Widget _item(BuildContext ctx, IconData icon, String label, int index) {
+    final selected = currentIndex == index;
     return Expanded(
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () => onTap(index),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.max,
           children: [
-            Icon(
-              icon,
-              color: isSelected ? Colors.white : Colors.grey[400],
-              size: 24,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                color: isSelected ? Colors.white : Colors.grey[400],
-                fontSize: 10,
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 14, vertical: 5),
+              decoration: BoxDecoration(
+                color: selected
+                    ? AppColors.primary.withOpacity(0.15)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(20),
               ),
+              child: Icon(
+                icon,
+                size: 22,
+                color: selected
+                    ? AppColors.primary
+                    : AppColors.mutedForeground,
+              ),
+            ),
+            const SizedBox(height: 2),
+            AnimatedDefaultTextStyle(
+              duration: const Duration(milliseconds: 200),
+              style: TextStyle(
+                color: selected
+                    ? AppColors.primary
+                    : AppColors.mutedForeground,
+                fontSize: 10,
+                fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+              ),
+              child: Text(label),
             ),
           ],
         ),
