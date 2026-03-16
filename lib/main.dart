@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:video_player/video_player.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:just_audio_background/just_audio_background.dart';
@@ -23,6 +22,8 @@ import 'data/providers/audio_provider.dart';
 import 'features/store/presentation/pages/store_page.dart';
 import 'features/mixer/presentation/pages/mixer_page.dart';
 import 'ui/widgets/mini_player.dart';
+import 'core/theme/app_theme.dart';
+import 'core/constants/app_colors.dart';
 
 final ValueNotifier<String> appStatus = ValueNotifier<String>("Initalizing...");
 
@@ -125,13 +126,7 @@ class LugmaticApp extends StatelessWidget {
     return MaterialApp(
       title: 'Lugmatic',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        brightness: Brightness.dark,
-        primarySwatch: Colors.green,
-        textTheme: GoogleFonts.dmSansTextTheme(
-          ThemeData.dark().textTheme,
-        ),
-      ),
+      theme: AppTheme.lightTheme,
       home: const SplashScreen(),
       routes: {
         '/home': (context) => const HomePage(),
@@ -146,7 +141,10 @@ class LugmaticApp extends StatelessWidget {
             child!,
             const Align(
               alignment: Alignment.bottomCenter,
-              child: MiniPlayer(),
+              child: SafeArea(
+                top: false,
+                child: MiniPlayer(),
+              ),
             ),
           ],
         );
@@ -181,13 +179,14 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     _animationController.forward();
     
     // Auto-navigate after a short delay
-    Future.delayed(const Duration(seconds: 2), () {
+    Future.delayed(const Duration(seconds: 3), () {
       _checkAuthAndNavigate();
     });
   }
 
   /// Check stored auth and navigate accordingly.
   Future<void> _checkAuthAndNavigate() async {
+    if (!mounted) return;
     final authProvider = context.read<AuthProvider>();
     try {
       appStatus.value = "Checking authentication...";

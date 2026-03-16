@@ -118,4 +118,5 @@ class ApiConfig {
   static const String mobilePlaylists = '/playlist/my/list';
   static const String mobileSearch = '/mobile/search';
   static const String mobileFavorites = '/mobile/favorites';
+  static const String recentlyPlayed = '/user/recently-played/list';
 }

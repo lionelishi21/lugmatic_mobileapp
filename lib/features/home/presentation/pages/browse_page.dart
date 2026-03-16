@@ -194,7 +194,7 @@ class _BrowsePageState extends State<BrowsePage> {
         child: TextField(
           controller: _searchController,
           style: const TextStyle(color: Colors.white),
-          onSubmitted: _performSearch,
+          onSubmitted: (value) => _performSearch(value),
           decoration: InputDecoration(
             hintText: 'Search for songs, artists, albums...',
             hintStyle: TextStyle(
@@ -497,7 +497,7 @@ class _BrowsePageState extends State<BrowsePage> {
     
     final displayReleases = selectedGenre == 'all' 
         ? _newReleases 
-        : _newReleases.where((song) => song.genre.toLowerCase().contains(selectedGenre)).toList();
+        : _newReleases.where((song) => song.genre.toLowerCase().trim() == selectedGenre.trim()).toList();
 
     if (displayReleases.isEmpty) return const SizedBox.shrink();
 

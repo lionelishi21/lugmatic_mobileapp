@@ -21,6 +21,7 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
   List<MusicModel> _songs = [];
   List<Map<String, dynamic>> _albums = [];
   List<ArtistModel> _artists = [];
+  List<MusicModel> _history = [];
 
   @override
   void initState() {
@@ -37,14 +38,16 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
 
   Future<void> _loadData() async {
     final api = context.read<ApiClient>();
+    if (!mounted) return;
     setState(() => _isLoading = true);
 
     try {
       final results = await Future.wait([
         api.dio.get(ApiConfig.mobilePlaylists), // Fetches user playlists
-        api.dio.get(ApiConfig.mobileFavorites), // Fetches liked songs
+        api.dio.get(ApiConfig.mobileFavorites, queryParameters: {'type': 'song'}), // Liked songs
         api.dio.get(ApiConfig.albums, queryParameters: {'limit': 20}), // Global or liked albums
-        api.dio.get(ApiConfig.mobileArtists), // Fetches followed artists
+        api.dio.get(ApiConfig.mobileArtists), // Following
+        api.dio.get(ApiConfig.recentlyPlayed), // History
       ]);
 
       if (mounted) {
@@ -52,14 +55,29 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
         final favoritesBody = results[1].data;
         final albumBody = results[2].data;
         final artistBody = results[3].data;
+        final historyBody = results[4].data;
 
         setState(() {
           _playlists = List<Map<String, dynamic>>.from(playlistBody['data'] ?? []);
-          final songItems = favoritesBody['data'] ?? [];
+          
+          // Fix: favorites and artists return { items: [...], nextCursor: ... }
+          final songItems = favoritesBody['data']?['items'] ?? [];
           _songs = (songItems as List).map((j) => MusicModel.fromJson(j as Map<String, dynamic>)).toList();
+          
           _albums = List<Map<String, dynamic>>.from(albumBody['data'] ?? []);
-          final artistItems = artistBody['data'] ?? [];
+          
+          final artistItems = artistBody['data']?['items'] ?? [];
           _artists = (artistItems as List).map((j) => ArtistModel.fromJson(j as Map<String, dynamic>)).toList();
+          
+          // Fix: history returns { success, data: [ { song: {...}, playedAt: ... } ] }
+          final historyRaw = historyBody['data'] ?? [];
+          _history = (historyRaw as List)
+              .map((item) => item['song'] != null 
+                  ? MusicModel.fromJson(item['song'] as Map<String, dynamic>) 
+                  : null)
+              .whereType<MusicModel>()
+              .toList();
+          
           _isLoading = false;
         });
       }
@@ -87,12 +105,13 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
                   unselectedLabelColor: Colors.white.withOpacity(0.5),
                   labelStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
                   unselectedLabelStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                  isScrollable: true,
                   tabs: const [
                     Tab(text: 'Playlists'),
                     Tab(text: 'Liked Songs'),
                     Tab(text: 'Top Charts'),
                     Tab(text: 'Following'),
-                    Tab(text: 'My Artists'),
+                    Tab(text: 'History'),
                   ],
                 ),
               ),
@@ -112,7 +131,7 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
                   _buildSongsTab(), // Liked Songs
                   _buildTopChartsTab(),
                   _buildFollowingTab(),
-                  _buildArtistsTab(), // My Artists
+                  _buildSongsTab(songs: _history), // History
                 ],
               ),
       ),
@@ -259,10 +278,19 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
         leading: Container(
           width: 50, height: 50,
           decoration: BoxDecoration(
-            gradient: const LinearGradient(colors: [Color(0xFF8B5CF6), Color(0xFF7C3AED)]),
+            color: Colors.white.withOpacity(0.1),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: const Icon(Icons.library_music, color: Colors.white, size: 24),
+          child: (playlist['songs'] is List && (playlist['songs'] as List).isNotEmpty && (playlist['songs'][0] is Map && playlist['songs'][0]['coverArt'] != null))
+              ? ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.network(
+                    ApiConfig.resolveUrl(playlist['songs'][0]['coverArt']),
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => const Icon(Icons.library_music, color: Colors.white, size: 24),
+                  ),
+                )
+              : const Icon(Icons.library_music, color: Colors.white, size: 24),
         ),
         title: Text(name, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
         subtitle: Text('$songCount songs', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 14)),
@@ -274,16 +302,17 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
     );
   }
 
-  Widget _buildSongsTab() {
-    if (_songs.isEmpty) {
+  Widget _buildSongsTab({List<MusicModel>? songs}) {
+    final list = songs ?? _songs;
+    if (list.isEmpty) {
       return Center(child: _buildEmptyState('No songs in library', Icons.music_note));
     }
 
     return ListView.builder(
       padding: const EdgeInsets.all(16),
-      itemCount: _songs.length,
+      itemCount: list.length,
       itemBuilder: (context, index) {
-        final song = _songs[index];
+        final song = list[index];
         return Container(
           margin: const EdgeInsets.only(bottom: 8),
           decoration: BoxDecoration(

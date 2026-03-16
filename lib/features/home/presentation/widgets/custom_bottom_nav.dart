@@ -19,24 +19,27 @@ class CustomBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRect(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-        child: Container(
-          height: 72,
-          decoration: BoxDecoration(
-            color: AppColors.glassBg,
-            border: Border(
-              top: BorderSide(color: AppColors.border, width: 1),
+    return SafeArea(
+      top: false,
+      child: ClipRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+          child: Container(
+            height: 72,
+            decoration: BoxDecoration(
+              color: AppColors.glassBg,
+              border: Border(
+                top: BorderSide(color: AppColors.border, width: 1),
+              ),
             ),
-          ),
-          child: Row(
-            children: [
-              _item(context, Icons.home_rounded, 'Home', 0),
-              _item(context, Icons.grid_view_rounded, 'Explore', 1),
-              _item(context, Icons.radio_rounded, 'Radio', 2),
-              _item(context, Icons.library_music_rounded, 'Library', 3),
-            ],
+            child: Row(
+              children: [
+                _item(context, Icons.home_rounded, 'Home', 0),
+                _item(context, Icons.grid_view_rounded, 'Explore', 1),
+                _item(context, Icons.radio_rounded, 'Live', 2),
+                _item(context, Icons.library_music_rounded, 'Library', 3),
+              ],
+            ),
           ),
         ),
       ),

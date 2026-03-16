@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:lugmatic_flutter/core/constants/app_colors.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {

@@ -48,14 +48,14 @@ class ExploreHubPage extends StatelessWidget {
                   context,
                   title: 'Discover Songs',
                   icon: Icons.music_note,
-                  color: const Color(0xFF10B981),
+                  color: AppColors.primary,
                   onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MusicHubPage())),
                 ),
                 _buildHubCard(
                   context,
                   title: 'Meet Artists',
                   icon: Icons.people,
-                  color: const Color(0xFF8B5CF6),
+                  color: AppColors.secondary,
                   onTap: () {
                     // Navigate to Artists Hub if it exists, or Home with filter
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -67,7 +67,7 @@ class ExploreHubPage extends StatelessWidget {
                   context,
                   title: 'Watch Videos',
                   icon: Icons.play_circle_fill,
-                  color: const Color(0xFFEF4444),
+                  color: AppColors.error,
                   onTap: () {
                     // Navigate to Video Hub
                   },
@@ -76,7 +76,7 @@ class ExploreHubPage extends StatelessWidget {
                   context,
                   title: 'AI Mixer',
                   icon: Icons.auto_awesome,
-                  color: const Color(0xFF10B981),
+                  color: AppColors.primary,
                   onTap: () => Navigator.pushNamed(context, '/mixer'),
                 ),
                 _buildHubCard(
@@ -90,7 +90,7 @@ class ExploreHubPage extends StatelessWidget {
                   context,
                   title: 'Live Now',
                   icon: Icons.live_tv_rounded,
-                  color: const Color(0xFFEF4444),
+                  color: AppColors.error,
                   onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TikTokLivePage())),
                 ),
                 _buildHubCard(
@@ -120,8 +120,9 @@ class ExploreHubPage extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildSliverAppBar(BuildContext context) {
     return SliverAppBar(

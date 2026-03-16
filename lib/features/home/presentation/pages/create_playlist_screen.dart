@@ -100,8 +100,8 @@ class _CreatePlaylistScreenState extends State<CreatePlaylistScreen> {
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                           colors: [
-                            NeumorphicTheme.accentGradientStart,
-                            NeumorphicTheme.accentGradientEnd,
+                            NeumorphicTheme.primaryAccent,
+                            NeumorphicTheme.secondaryAccent,
                           ],
                         ),
                         borderRadius: BorderRadius.circular(20),
@@ -206,8 +206,8 @@ class _CreatePlaylistScreenState extends State<CreatePlaylistScreen> {
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
-                              NeumorphicTheme.accentGradientStart,
-                              NeumorphicTheme.accentGradientEnd,
+                              NeumorphicTheme.primaryAccent,
+                              NeumorphicTheme.secondaryAccent,
                             ],
                           ),
                           borderRadius: BorderRadius.circular(12),
@@ -265,8 +265,8 @@ class _CreatePlaylistScreenState extends State<CreatePlaylistScreen> {
                   height: 60,
                   isGradient: true,
                   gradientColors: [
-                    NeumorphicTheme.accentGradientStart,
-                    NeumorphicTheme.accentGradientEnd,
+                    NeumorphicTheme.primaryAccent,
+                    NeumorphicTheme.secondaryAccent,
                   ],
                   onPressed: _createPlaylist,
                   child: const Text(
