@@ -259,7 +259,7 @@ class _HomePageState extends State<HomePage> {
         },
         onPlayTap: () {
           if (_trendingSongs.isNotEmpty) {
-            _openMusicPlayer(_trendingSongs[0]);
+            _openMusicPlayer(_trendingSongs[0], queue: _trendingSongs);
           }
         },
       ),
@@ -654,7 +654,7 @@ class _HomePageState extends State<HomePage> {
               context,
               MaterialPageRoute(builder: (_) => SongDetailPage(songId: song.id, initialData: song)),
             ),
-            onPlay: () => _openMusicPlayer(song),
+            onPlay: () => _openMusicPlayer(song, queue: _trendingSongs),
             onLike: () => print('Like ${song.title}'),
           );
         },
@@ -851,8 +851,8 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _openMusicPlayer(MusicModel music) {
-    context.read<AudioProvider>().playMusic(music);
+  void _openMusicPlayer(MusicModel music, {List<MusicModel>? queue}) {
+    context.read<AudioProvider>().playMusic(music, queue: queue);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

@@ -211,7 +211,7 @@ class _SongDetailPageState extends State<SongDetailPage> {
                     Expanded(
                       child: _ActionButton(
                         onTap: () {
-                          context.read<AudioProvider>().playMusic(song);
+                          context.read<AudioProvider>().playMusic(song, queue: [song, ..._related]);
                           showModalBottomSheet(
                             context: context,
                             isScrollControlled: true,

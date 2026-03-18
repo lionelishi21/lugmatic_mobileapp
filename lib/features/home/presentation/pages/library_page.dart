@@ -45,8 +45,8 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
       final results = await Future.wait([
         api.dio.get(ApiConfig.mobilePlaylists), // Fetches user playlists
         api.dio.get(ApiConfig.mobileFavorites, queryParameters: {'type': 'song'}), // Liked songs
-        api.dio.get(ApiConfig.albums, queryParameters: {'limit': 20}), // Global or liked albums
-        api.dio.get(ApiConfig.mobileArtists), // Following
+        api.dio.get(ApiConfig.mobileFavorites, queryParameters: {'type': 'album'}), // Liked albums
+        api.dio.get(ApiConfig.mobileFavorites, queryParameters: {'type': 'artist'}), // Following
         api.dio.get(ApiConfig.recentlyPlayed), // History
       ]);
 
@@ -64,7 +64,8 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
           final songItems = favoritesBody['data']?['items'] ?? [];
           _songs = (songItems as List).map((j) => MusicModel.fromJson(j as Map<String, dynamic>)).toList();
           
-          _albums = List<Map<String, dynamic>>.from(albumBody['data'] ?? []);
+          final albumItems = albumBody['data']?['items'] ?? [];
+          _albums = List<Map<String, dynamic>>.from(albumItems);
           
           final artistItems = artistBody['data']?['items'] ?? [];
           _artists = (artistItems as List).map((j) => ArtistModel.fromJson(j as Map<String, dynamic>)).toList();
@@ -109,7 +110,7 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
                   tabs: const [
                     Tab(text: 'Playlists'),
                     Tab(text: 'Liked Songs'),
-                    Tab(text: 'Top Charts'),
+                    Tab(text: 'Albums'),
                     Tab(text: 'Following'),
                     Tab(text: 'History'),
                   ],
@@ -129,7 +130,7 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
                 children: [
                   _buildPlaylistsTab(),
                   _buildSongsTab(), // Liked Songs
-                  _buildTopChartsTab(),
+                  _buildAlbumsTab(),
                   _buildFollowingTab(),
                   _buildSongsTab(songs: _history), // History
                 ],
@@ -450,32 +451,67 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
     );
   }
 
-  Widget _buildTopChartsTab() {
-    // Placeholder for Top Charts (Mirroring Web Feature)
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: const Color(0xFF10B981).withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.trending_up_rounded, color: Color(0xFF10B981), size: 48),
-          ),
-          const SizedBox(height: 24),
-          const Text(
-            'Global Top Charts',
-            style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Trending hits from around the world',
-            style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 14),
-          ),
-        ],
+  Widget _buildAlbumsTab() {
+    if (_albums.isEmpty) {
+      return Center(child: _buildEmptyState('No liked albums yet', Icons.album));
+    }
+
+    return GridView.builder(
+      padding: const EdgeInsets.all(16),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        mainAxisSpacing: 16,
+        crossAxisSpacing: 16,
+        childAspectRatio: 0.75,
       ),
+      itemCount: _albums.length,
+      itemBuilder: (context, index) {
+        final album = _albums[index];
+        final name = album['name']?.toString() ?? 'Unknown Album';
+        final artist = album['artist']?.toString() ?? 'Unknown Artist';
+        final coverArt = album['coverArt']?.toString() ?? '';
+
+        return GestureDetector(
+          onTap: () {
+            // Navigator.pushNamed(context, '/album_details', arguments: album);
+          },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    color: Colors.white.withOpacity(0.05),
+                    image: coverArt.isNotEmpty
+                        ? DecorationImage(
+                            image: NetworkImage(ApiConfig.resolveUrl(coverArt)),
+                            fit: BoxFit.cover,
+                          )
+                        : null,
+                  ),
+                  child: coverArt.isEmpty
+                      ? const Center(child: Icon(Icons.album, color: Colors.white24, size: 48))
+                      : null,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                name,
+                style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              Text(
+                artist,
+                style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 13),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:lugmatic_flutter/data/models/music_model.dart';
-import 'package:lugmatic_flutter/data/providers/audio_provider.dart';
-import 'package:lugmatic_flutter/ui/widgets/player_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:lugmatic_flutter/core/network/api_client.dart';
+import 'package:lugmatic_flutter/data/models/live_stream_model.dart';
+import 'package:lugmatic_flutter/data/services/live_stream_service.dart';
+import 'package:lugmatic_flutter/features/live_stream/presentation/pages/tiktok_live_page.dart';
 
 class StreamPage extends StatefulWidget {
   const StreamPage({Key? key}) : super(key: key);
@@ -12,75 +13,97 @@ class StreamPage extends StatefulWidget {
 }
 
 class _StreamPageState extends State<StreamPage> {
-  final List<MusicModel> _streamingMusic = [
-    MusicModel(
-      id: '1',
-      title: 'Live Stream Session 1',
-      artist: 'DJ Luna',
-      album: 'Live Mix',
-      imageUrl: 'https://via.placeholder.com/300x300/10B981/FFFFFF?text=Live+1',
-      audioUrl: 'https://example.com/stream1.mp3',
-      duration: const Duration(minutes: 45),
-      genre: 'Electronic',
-      releaseDate: DateTime.now(),
-    ),
-    MusicModel(
-      id: '2',
-      title: 'Midnight Vibes Stream',
-      artist: 'Chill Wave',
-      album: 'Live Performance',
-      imageUrl: 'https://via.placeholder.com/300x300/8B5CF6/FFFFFF?text=Live+2',
-      audioUrl: 'https://example.com/stream2.mp3',
-      duration: const Duration(minutes: 60),
-      genre: 'Ambient',
-      releaseDate: DateTime.now(),
-    ),
-    MusicModel(
-      id: '3',
-      title: 'Rock Night Live',
-      artist: 'Thunder Band',
-      album: 'Live Concert',
-      imageUrl: 'https://via.placeholder.com/300x300/EF4444/FFFFFF?text=Live+3',
-      audioUrl: 'https://example.com/stream3.mp3',
-      duration: const Duration(minutes: 90),
-      genre: 'Rock',
-      releaseDate: DateTime.now(),
-    ),
-  ];
+  late LiveStreamService _liveStreamService;
+  List<LiveStreamModel> _liveStreams = [];
+  List<LiveStreamModel> _upcomingStreams = [];
+  List<LiveStreamModel> _pastStreams = [];
+  bool _isLoading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _initService();
+  }
+
+  Future<void> _initService() async {
+    final apiClient = Provider.of<ApiClient>(context, listen: false);
+    _liveStreamService = LiveStreamService(apiClient: apiClient);
+    await _fetchStreams();
+  }
+
+  Future<void> _fetchStreams() async {
+    if (!mounted) return;
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    try {
+      final allStreams = await _liveStreamService.getLiveStreams();
+      if (mounted) {
+        setState(() {
+          _liveStreams = allStreams.where((s) => s.status == 'live').toList();
+          _upcomingStreams = allStreams.where((s) => s.status == 'scheduled').toList();
+          _pastStreams = allStreams.where((s) => s.status == 'ended').toList();
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = 'Failed to load streams';
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF111827),
-      body: CustomScrollView(
-        slivers: [
-          _buildAppBar(),
-          SliverToBoxAdapter(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 20),
-                _buildLiveIndicator(),
-                const SizedBox(height: 24),
-                _buildCurrentlyLive(),
-                const SizedBox(height: 32),
-                _buildSectionHeader('Live Now'),
-                const SizedBox(height: 16),
-                _buildLiveStreams(),
-                const SizedBox(height: 32),
-                _buildSectionHeader('Upcoming Streams'),
-                const SizedBox(height: 16),
-                _buildUpcomingStreams(),
-                const SizedBox(height: 32),
-                _buildSectionHeader('Past Streams'),
-                const SizedBox(height: 16),
-                _buildPastStreams(),
-                const SizedBox(height: 100),
-              ],
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator(color: Color(0xFF10B981)))
+          : RefreshIndicator(
+              onRefresh: _fetchStreams,
+              color: const Color(0xFF10B981),
+              child: CustomScrollView(
+                slivers: [
+                  _buildAppBar(),
+                  SliverToBoxAdapter(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 20),
+                        _buildLiveIndicator(),
+                        const SizedBox(height: 24),
+                        if (_liveStreams.isNotEmpty) ...[
+                          _buildCurrentlyLive(),
+                          const SizedBox(height: 32),
+                        ],
+                        _buildSectionHeader('Live Now'),
+                        const SizedBox(height: 16),
+                        _buildLiveStreams(),
+                        const SizedBox(height: 32),
+                        if (_upcomingStreams.isNotEmpty) ...[
+                          _buildSectionHeader('Upcoming Streams'),
+                          const SizedBox(height: 16),
+                          _buildUpcomingStreams(),
+                          const SizedBox(height: 32),
+                        ],
+                        if (_pastStreams.isNotEmpty) ...[
+                          _buildSectionHeader('Past Streams'),
+                          const SizedBox(height: 16),
+                          _buildPastStreams(),
+                        ],
+                        const SizedBox(height: 100),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -136,9 +159,9 @@ class _StreamPageState extends State<StreamPage> {
             ),
           ),
           const SizedBox(width: 12),
-          const Text(
-            '3 streams live now',
-            style: TextStyle(
+          Text(
+            '${_liveStreams.length} streams live now',
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -177,8 +200,10 @@ class _StreamPageState extends State<StreamPage> {
                 height: 60,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  image: const DecorationImage(
-                    image: NetworkImage('https://via.placeholder.com/300x300/10B981/FFFFFF?text=Live'),
+                  image: DecorationImage(
+                    image: NetworkImage(_liveStreams[0].coverImage.isNotEmpty 
+                      ? _liveStreams[0].coverImage 
+                      : 'https://via.placeholder.com/300x300/10B981/FFFFFF?text=Live'),
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -197,9 +222,9 @@ class _StreamPageState extends State<StreamPage> {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    const Text(
-                      'DJ Luna - Live Mix Session',
-                      style: TextStyle(
+                    Text(
+                      '${_liveStreams[0].host?.name ?? _liveStreams[0].title}',
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -207,7 +232,7 @@ class _StreamPageState extends State<StreamPage> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Electronic • 1.2K listening',
+                      '${_liveStreams[0].category} • ${_liveStreams[0].currentViewers} listening',
                       style: TextStyle(
                         color: Colors.white.withOpacity(0.7),
                         fontSize: 14,
@@ -237,7 +262,7 @@ class _StreamPageState extends State<StreamPage> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
-              onPressed: () => _openMusicPlayer(_streamingMusic[0]),
+            onPressed: () => _openLiveStream(streamId: _liveStreams[0].id),
               icon: const Icon(Icons.play_arrow, size: 20),
               label: const Text('Join Stream'),
               style: ElevatedButton.styleFrom(
@@ -275,9 +300,9 @@ class _StreamPageState extends State<StreamPage> {
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: _streamingMusic.length,
+        itemCount: _liveStreams.length,
         itemBuilder: (context, index) {
-          final stream = _streamingMusic[index];
+          final stream = _liveStreams[index];
           return Container(
             width: 160,
             margin: const EdgeInsets.only(right: 12),
@@ -294,19 +319,9 @@ class _StreamPageState extends State<StreamPage> {
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: 2,
+        itemCount: _upcomingStreams.length,
         itemBuilder: (context, index) {
-          final stream = MusicModel(
-            id: 'upcoming_$index',
-            title: 'Upcoming Stream ${index + 1}',
-            artist: 'Artist ${index + 1}',
-            album: 'Scheduled Performance',
-            imageUrl: 'https://via.placeholder.com/300x300/8B5CF6/FFFFFF?text=Soon',
-            audioUrl: '',
-            duration: const Duration(minutes: 60),
-            genre: 'Various',
-            releaseDate: DateTime.now().add(Duration(hours: index + 2)),
-          );
+          final stream = _upcomingStreams[index];
           return Container(
             width: 160,
             margin: const EdgeInsets.only(right: 12),
@@ -321,25 +336,15 @@ class _StreamPageState extends State<StreamPage> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
-        children: List.generate(3, (index) {
-          final stream = MusicModel(
-            id: 'past_$index',
-            title: 'Past Stream ${index + 1}',
-            artist: 'Artist ${index + 1}',
-            album: 'Completed Performance',
-            imageUrl: 'https://via.placeholder.com/300x300/6B7280/FFFFFF?text=Past',
-            audioUrl: '',
-            duration: const Duration(minutes: 60),
-            genre: 'Various',
-            releaseDate: DateTime.now().subtract(Duration(days: index + 1)),
-          );
+        children: List.generate(_pastStreams.length, (index) {
+          final stream = _pastStreams[index];
           return _buildPastStreamItem(stream);
         }),
       ),
     );
   }
 
-  Widget _buildStreamCard(MusicModel stream, bool isLive) {
+  Widget _buildStreamCard(LiveStreamModel stream, bool isLive) {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
@@ -351,7 +356,7 @@ class _StreamPageState extends State<StreamPage> {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => isLive ? _openMusicPlayer(stream) : null,
+          onTap: () => isLive ? _openLiveStream(streamId: stream.id) : null,
           borderRadius: BorderRadius.circular(16),
           child: Padding(
             padding: const EdgeInsets.all(12),
@@ -365,7 +370,9 @@ class _StreamPageState extends State<StreamPage> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
                         image: DecorationImage(
-                          image: NetworkImage(stream.imageUrl),
+                          image: NetworkImage(stream.coverImage.isNotEmpty 
+                            ? stream.coverImage 
+                            : 'https://via.placeholder.com/300x300/10B981/FFFFFF?text=Stream'),
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -405,7 +412,7 @@ class _StreamPageState extends State<StreamPage> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  stream.artist,
+                  stream.host?.name ?? 'Unknown',
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.7),
                     fontSize: 12,
@@ -415,7 +422,7 @@ class _StreamPageState extends State<StreamPage> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  stream.genre,
+                  stream.category,
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.5),
                     fontSize: 10,
@@ -429,7 +436,7 @@ class _StreamPageState extends State<StreamPage> {
     );
   }
 
-  Widget _buildPastStreamItem(MusicModel stream) {
+  Widget _buildPastStreamItem(LiveStreamModel stream) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -446,7 +453,9 @@ class _StreamPageState extends State<StreamPage> {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
               image: DecorationImage(
-                image: NetworkImage(stream.imageUrl),
+                image: NetworkImage(stream.coverImage.isNotEmpty 
+                  ? stream.coverImage 
+                  : 'https://via.placeholder.com/300x300/6B7280/FFFFFF?text=Past'),
                 fit: BoxFit.cover,
               ),
             ),
@@ -466,7 +475,7 @@ class _StreamPageState extends State<StreamPage> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  stream.artist,
+                  stream.host?.name ?? 'Unknown',
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.7),
                     fontSize: 14,
@@ -474,7 +483,7 @@ class _StreamPageState extends State<StreamPage> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '${stream.genre} • ${_formatDuration(stream.duration)}',
+                  '${stream.category} • ${_formatDuration(Duration(minutes: stream.duration))}',
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.5),
                     fontSize: 12,
@@ -484,7 +493,7 @@ class _StreamPageState extends State<StreamPage> {
             ),
           ),
           IconButton(
-            onPressed: () => _openMusicPlayer(stream),
+            onPressed: () => _openLiveStream(streamId: stream.id),
             icon: const Icon(Icons.play_circle_outline, color: Colors.white),
           ),
         ],
@@ -492,20 +501,18 @@ class _StreamPageState extends State<StreamPage> {
     );
   }
 
-  void _openMusicPlayer(MusicModel music) {
-    context.read<AudioProvider>().playMusic(music);
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => PlayerScreen(music: music),
+  void _openLiveStream({String? streamId}) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TikTokLivePage(initialStreamId: streamId),
+      ),
     );
   }
 
   String _formatDuration(Duration duration) {
     final hours = duration.inHours;
-    final minutes = duration.inMinutes.remainder(60);
-    
+    final minutes = duration.inMinutes % 60;
     if (hours > 0) {
       return '${hours}h ${minutes}m';
     }

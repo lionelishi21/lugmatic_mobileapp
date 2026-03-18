@@ -16,6 +16,8 @@ class AudioProvider extends ChangeNotifier {
   List<MusicModel> _queue = [];
   int _currentIndex = -1;
 
+  String? _errorMessage;
+
   AudioProvider({required MusicService musicService}) : _musicService = musicService {
     _audioPlayer = AudioPlayer();
     _initListeners();
@@ -27,6 +29,7 @@ class AudioProvider extends ChangeNotifier {
   Duration get duration => _duration;
   Duration get position => _position;
   List<MusicModel> get queue => _queue;
+  String? get errorMessage => _errorMessage;
 
   void _initListeners() {
     _audioPlayer.durationStream.listen((d) {
@@ -51,10 +54,35 @@ class AudioProvider extends ChangeNotifier {
       }
       notifyListeners();
     });
+
+    // Listen for errors
+    _audioPlayer.playbackEventStream.listen((event) {}, onError: (Object e, StackTrace st) {
+      if (e is PlayerException) {
+        _errorMessage = "Error: ${e.message}";
+      } else if (e is PlayerInterruptedException) {
+        _errorMessage = "Playback interrupted";
+      } else {
+        _errorMessage = "An unknown error occurred";
+      }
+      debugPrint("Player Error: $e");
+      notifyListeners();
+    });
   }
 
   Future<void> playMusic(MusicModel music, {List<MusicModel>? queue}) async {
-    if (_currentMusic?.id == music.id && _audioPlayer.processingState != ProcessingState.idle) {
+    _errorMessage = null; // Reset error
+
+    // If already playing this song and it hasn't finished, just resume
+    if (_currentMusic?.id == music.id && 
+        _audioPlayer.processingState != ProcessingState.idle &&
+        _audioPlayer.processingState != ProcessingState.completed) {
+      resume();
+      return;
+    }
+
+    // If it's the same song but it completed, seek to start and play
+    if (_currentMusic?.id == music.id && _audioPlayer.processingState == ProcessingState.completed) {
+      await seek(Duration.zero);
       resume();
       return;
     }
@@ -64,26 +92,35 @@ class AudioProvider extends ChangeNotifier {
       _currentMusic = music;
       _position = Duration.zero;
       _duration = Duration.zero;
+      
       if (queue != null) {
         _queue = queue;
         _currentIndex = _queue.indexWhere((m) => m.id == music.id);
+      } else if (_queue.any((m) => m.id == music.id)) {
+        // Update index if song is already in existing queue
+        _currentIndex = _queue.indexWhere((m) => m.id == music.id);
       }
+      
       notifyListeners();
 
+      // Ensure URL is trimmed and spaces are encoded
+      final encodedUrl = music.audioUrl.trim().replaceAll(' ', '%20');
+      
       final audioSource = AudioSource.uri(
-        Uri.parse(music.audioUrl),
+        Uri.parse(encodedUrl),
         tag: MediaItem(
           id: music.id,
           album: music.album.isNotEmpty ? music.album : "Lugmatic",
           title: music.title,
           artist: music.artist,
-          artUri: music.imageUrl.isNotEmpty ? Uri.parse(music.imageUrl) : null,
+          artUri: music.imageUrl.isNotEmpty ? Uri.parse(music.imageUrl.trim().replaceAll(' ', '%20')) : null,
         ),
       );
 
       await _audioPlayer.setAudioSource(audioSource);
       _audioPlayer.play();
     } catch (e) {
+      _errorMessage = "Failed to load audio";
       debugPrint("Error playing music: $e");
     } finally {
       _isLoading = false;

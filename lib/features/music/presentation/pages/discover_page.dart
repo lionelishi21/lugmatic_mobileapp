@@ -266,7 +266,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
           return Container(
             width: 160,
             margin: const EdgeInsets.only(right: 12),
-            child: _buildSongCard(song),
+            child: _buildSongCard(song, queue: _trendingSongs),
           );
         },
       ),
@@ -277,7 +277,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
-        children: _newReleases.map((song) => _buildSongListItem(song)).toList(),
+        children: _newReleases.map((song) => _buildSongListItem(song, queue: _newReleases)).toList(),
       ),
     );
   }
@@ -305,12 +305,12 @@ class _DiscoverPageState extends State<DiscoverPage> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
-        children: _trendingSongs.take(3).map((song) => _buildSongListItem(song)).toList(),
+        children: _trendingSongs.take(3).map((song) => _buildSongListItem(song, queue: _trendingSongs.take(3).toList())).toList(),
       ),
     );
   }
 
-  Widget _buildSongCard(MusicModel song) {
+  Widget _buildSongCard(MusicModel song, {List<MusicModel>? queue}) {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
@@ -320,7 +320,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => _openMusicPlayer(song),
+          onTap: () => _openMusicPlayer(song, queue: queue),
           borderRadius: BorderRadius.circular(16),
           child: Padding(
             padding: const EdgeInsets.all(12),
@@ -384,7 +384,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
     );
   }
 
-  Widget _buildSongListItem(MusicModel song) {
+  Widget _buildSongListItem(MusicModel song, {List<MusicModel>? queue}) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -456,7 +456,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
             ),
           ),
           IconButton(
-            onPressed: () => _openMusicPlayer(song),
+            onPressed: () => _openMusicPlayer(song, queue: queue),
             icon: const Icon(Icons.play_circle_outline, color: Colors.white),
           ),
         ],
@@ -547,8 +547,8 @@ class _DiscoverPageState extends State<DiscoverPage> {
     );
   }
 
-  void _openMusicPlayer(MusicModel music) {
-    context.read<AudioProvider>().playMusic(music);
+  void _openMusicPlayer(MusicModel music, {List<MusicModel>? queue}) {
+    context.read<AudioProvider>().playMusic(music, queue: queue);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

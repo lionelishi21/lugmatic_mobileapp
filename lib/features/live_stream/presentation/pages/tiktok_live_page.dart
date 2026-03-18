@@ -17,7 +17,8 @@ import '../../../../data/models/artist_model.dart';
 /// Fetches live streams from the API, connects to LiveKit for video,
 /// and uses Socket.io for real-time chat and gifts.
 class TikTokLivePage extends StatefulWidget {
-  const TikTokLivePage({Key? key}) : super(key: key);
+  final String? initialStreamId;
+  const TikTokLivePage({Key? key, this.initialStreamId}) : super(key: key);
 
   @override
   State<TikTokLivePage> createState() => _TikTokLivePageState();
@@ -109,7 +110,13 @@ class _TikTokLivePageState extends State<TikTokLivePage>
           _liveStreams = streams;
           _isLoading = false;
           if (streams.isNotEmpty) {
-            _viewerCount = streams[0].currentViewers;
+            if (widget.initialStreamId != null) {
+              final index = streams.indexWhere((s) => s.id == widget.initialStreamId);
+              if (index != -1) {
+                _currentStreamIndex = index;
+              }
+            }
+            _viewerCount = streams[_currentStreamIndex].currentViewers;
             _joinCurrentStream();
           }
         });

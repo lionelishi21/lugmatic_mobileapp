@@ -64,20 +64,7 @@ class MusicModel {
     final rawAudio = json['audioFile'] ?? json['audioFileUrl'] ?? json['audioUrl'] ?? '';
     final audioUrl = ApiConfig.resolveUrl(rawAudio is String ? rawAudio : '');
 
-    return MusicModel(
-      id: json['_id'] ?? json['id'] ?? '',
-      title: json['name'] ?? json['title'] ?? '',
-      artist: artistName,
-      artistId: artistId,
-      album: albumName,
-      imageUrl: imageUrl,
-      audioUrl: audioUrl,
-      videoUrl: ApiConfig.resolveUrl(json['videoUrl'] ?? json['videoFileUrl'] ?? ''),
-      duration: Duration(
-        seconds: (json['duration'] ?? 0) is int
-            ? json['duration']
-            : (json['duration'] as num).toInt(),
-      ),
+
     // Handle populated genre (object with name) or plain string/ObjectId
     String genreName = '';
     if (json['genre'] is Map) {
