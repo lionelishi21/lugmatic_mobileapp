@@ -28,6 +28,11 @@ class SocketService {
   final _streamEndedController = StreamController<void>.broadcast();
   final _reactionController =
       StreamController<Map<String, dynamic>>.broadcast();
+  final _clashInvitationController = StreamController<Map<String, dynamic>>.broadcast();
+  final _clashStartedController = StreamController<Map<String, dynamic>>.broadcast();
+  final _clashEndedController = StreamController<Map<String, dynamic>>.broadcast();
+  final _clashScoreController = StreamController<Map<String, dynamic>>.broadcast();
+  final _clashActionController = StreamController<Map<String, dynamic>>.broadcast();
 
   /// Real-time chat messages.
   Stream<LiveStreamChatMessage> get onChatMessage => _chatController.stream;
@@ -51,6 +56,21 @@ class SocketService {
 
   /// Reaction events.
   Stream<Map<String, dynamic>> get onReaction => _reactionController.stream;
+
+  /// Clash invitation event.
+  Stream<Map<String, dynamic>> get onClashInvitation => _clashInvitationController.stream;
+
+  /// Clash started event.
+  Stream<Map<String, dynamic>> get onClashStarted => _clashStartedController.stream;
+
+  /// Clash ended event.
+  Stream<Map<String, dynamic>> get onClashEnded => _clashEndedController.stream;
+
+  /// Clash score update event.
+  Stream<Map<String, dynamic>> get onClashScoreUpdate => _clashScoreController.stream;
+
+  /// Clash special action event.
+  Stream<Map<String, dynamic>> get onClashAction => _clashActionController.stream;
 
   SocketService._({required TokenStorage tokenStorage})
       : _tokenStorage = tokenStorage;
@@ -152,6 +172,37 @@ class SocketService {
       }
     });
 
+    // ── Clash Events ────────────────────────────────────────────────
+    _socket!.on('clash:invitation', (data) {
+      if (data is Map<String, dynamic>) {
+        _clashInvitationController.add(data);
+      }
+    });
+
+    _socket!.on('clash:started', (data) {
+      if (data is Map<String, dynamic>) {
+        _clashStartedController.add(data);
+      }
+    });
+
+    _socket!.on('clash:ended', (data) {
+      if (data is Map<String, dynamic>) {
+        _clashEndedController.add(data);
+      }
+    });
+
+    _socket!.on('clash:score-update', (data) {
+      if (data is Map<String, dynamic>) {
+        _clashScoreController.add(data);
+      }
+    });
+
+    _socket!.on('clash:action', (data) {
+      if (data is Map<String, dynamic>) {
+        _clashActionController.add(data);
+      }
+    });
+
     _socket!.connect();
   }
 
@@ -228,6 +279,11 @@ class SocketService {
     _viewerCountController.close();
     _streamEndedController.close();
     _reactionController.close();
+    _clashInvitationController.close();
+    _clashStartedController.close();
+    _clashEndedController.close();
+    _clashScoreController.close();
+    _clashActionController.close();
     _instance = null;
   }
 }

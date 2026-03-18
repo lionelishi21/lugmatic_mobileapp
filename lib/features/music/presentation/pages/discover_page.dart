@@ -1,11 +1,10 @@
-import 'package:flutter/material.dart';
-import 'package:lugmatic_flutter/data/models/music_model.dart';
-import 'package:lugmatic_flutter/data/models/artist_model.dart';
-import 'package:lugmatic_flutter/data/providers/audio_provider.dart';
-import 'package:lugmatic_flutter/ui/widgets/player_screen.dart';
-import 'package:provider/provider.dart';
-import 'package:lugmatic_flutter/core/network/api_client.dart';
 import 'package:lugmatic_flutter/data/services/home_service.dart';
+import 'package:lugmatic_flutter/data/services/music_service.dart';
+import 'package:lugmatic_flutter/data/models/genre_model.dart';
+import 'package:lugmatic_flutter/features/music/presentation/pages/genre_music_page.dart';
+import 'package:lugmatic_flutter/features/music/presentation/pages/trending_songs_page.dart';
+import '../../../home/presentation/widgets/music_card.dart';
+import '../../../../core/constants/app_colors.dart';
 
 class DiscoverPage extends StatefulWidget {
   const DiscoverPage({Key? key}) : super(key: key);
@@ -22,16 +21,15 @@ class _DiscoverPageState extends State<DiscoverPage> {
   List<MusicModel> _trendingSongs = [];
   List<MusicModel> _newReleases = [];
   List<ArtistModel> _featuredArtists = [];
-
-  final List<String> _genres = [
-    'Pop', 'Rock', 'Hip-Hop', 'Electronic', 'Jazz', 'Classical',
-    'Country', 'R&B', 'Reggae', 'Blues', 'Folk', 'Alternative'
-  ];
+  List<GenreModel> _realGenres = [];
+  late MusicService _musicService;
 
   @override
   void initState() {
     super.initState();
-    _homeService = HomeService(apiClient: context.read<ApiClient>());
+    final apiClient = context.read<ApiClient>();
+    _homeService = HomeService(apiClient: apiClient);
+    _musicService = MusicService(apiClient: apiClient);
     _loadDiscoveryData();
   }
 
@@ -44,6 +42,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
         _homeService.getTrendingSongs(),
         _homeService.getNewReleases(),
         _homeService.getFeaturedArtists(),
+        _musicService.getGenres(),
       ]);
 
       if (mounted) {
@@ -51,6 +50,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
           _trendingSongs = results[0] as List<MusicModel>;
           _newReleases = results[1] as List<MusicModel>;
           _featuredArtists = results[2] as List<ArtistModel>;
+          _realGenres = results[3] as List<GenreModel>;
           _isLoading = false;
         });
       }
@@ -196,28 +196,38 @@ class _DiscoverPageState extends State<DiscoverPage> {
           const SizedBox(height: 16),
           Wrap(
             spacing: 8,
-            runSpacing: 8,
-            children: _genres.map((genre) => _buildGenreChip(genre)).toList(),
+            runSpacing: 10,
+            children: _realGenres.map((genre) => _buildGenreChip(genre)).toList(),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildGenreChip(String genre) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+  Widget _buildGenreChip(GenreModel genre) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => GenreMusicPage(genre: genre)),
+        ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
-      ),
-      child: Text(
-        genre,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.08),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.white.withOpacity(0.1)),
+          ),
+          child: Text(
+            genre.name,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
       ),
     );
@@ -239,7 +249,16 @@ class _DiscoverPageState extends State<DiscoverPage> {
           ),
           if (action.isNotEmpty)
             TextButton(
-              onPressed: () => print('$action tapped'),
+              onPressed: () {
+                if (title == 'Trending Now') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const TrendingSongsPage()),
+                  );
+                } else {
+                  print('$action tapped');
+                }
+              },
               child: Text(
                 action,
                 style: const TextStyle(
@@ -256,17 +275,18 @@ class _DiscoverPageState extends State<DiscoverPage> {
 
   Widget _buildTrendingSongs() {
     return SizedBox(
-      height: 220,
+      height: 240,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: _trendingSongs.length,
         itemBuilder: (context, index) {
           final song = _trendingSongs[index];
-          return Container(
-            width: 160,
-            margin: const EdgeInsets.only(right: 12),
-            child: _buildSongCard(song, queue: _trendingSongs),
+          return MusicCard(
+            music: song,
+            showGlow: true,
+            onTap: () => _openMusicPlayer(song, queue: _trendingSongs),
+            onPlay: () => _openMusicPlayer(song, queue: _trendingSongs),
           );
         },
       ),

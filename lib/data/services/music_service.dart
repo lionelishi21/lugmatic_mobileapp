@@ -3,6 +3,7 @@ import '../../core/config/api_config.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/api_exception.dart';
 import '../models/music_model.dart';
+import '../models/genre_model.dart';
 
 /// Fetches songs, search results, and streaming data from the backend.
 class MusicService {
@@ -11,20 +12,46 @@ class MusicService {
   MusicService({required ApiClient apiClient}) : _apiClient = apiClient;
 
   /// Fetch all songs (paginated).
-  Future<List<MusicModel>> getSongs({int page = 1, int limit = 20}) async {
+  Future<List<MusicModel>> getSongs({int page = 1, int limit = 20, String? sort, String? genre}) async {
     try {
+      final queryParams = {
+        'page': page,
+        'limit': limit,
+      };
+      if (sort != null) queryParams['sort'] = sort;
+      if (genre != null) queryParams['genre'] = genre;
+
       final response = await _apiClient.dio.get(
         ApiConfig.songs,
-        queryParameters: {'page': page, 'limit': limit},
+        queryParameters: queryParams,
       );
       final body = response.data;
-      final items = body['data'] ?? body['songs'] ?? [];
+      final items = body['data']?['songs'] ?? body['songs'] ?? [];
       return (items as List)
           .map((json) => MusicModel.fromJson(json as Map<String, dynamic>))
           .toList();
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);
     }
+  }
+
+  /// Fetch all genres.
+  Future<List<GenreModel>> getGenres() async {
+    try {
+      final response = await _apiClient.dio.get(ApiConfig.genres);
+      final body = response.data;
+      final items = body['data']?['genres'] ?? body['genres'] ?? [];
+      return (items as List)
+          .map((json) => GenreModel.fromJson(json as Map<String, dynamic>))
+          .toList();
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// Fetch songs by genre ID/Name.
+  Future<List<MusicModel>> getSongsByGenre(String genre, {int page = 1, int limit = 20}) async {
+    return getSongs(genre: genre, page: page, limit: limit);
   }
 
   /// Fetch a single song by ID.

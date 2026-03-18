@@ -11,12 +11,14 @@ import '../../../../shared/widgets/comment_section_widget.dart';
 import '../../../../core/theme/neumorphic_theme.dart';
 import 'package:lugmatic_flutter/features/gift/presentation/pages/gift_send_page.dart';
 import '../../../../data/models/artist_model.dart';
+import 'package:lugmatic_flutter/data/models/live_clash_model.dart';
+import 'package:lugmatic_flutter/features/live_stream/presentation/widgets/battle_bar_widget.dart';
+import 'package:lugmatic_flutter/features/live_stream/presentation/widgets/clash_video_widget.dart';
 
 /// TikTok-style vertical-swiping live stream page.
 ///
 /// Fetches live streams from the API, connects to LiveKit for video,
 /// and uses Socket.io for real-time chat and gifts.
-class TikTokLivePage extends StatefulWidget {
   final String? initialStreamId;
   const TikTokLivePage({Key? key, this.initialStreamId}) : super(key: key);
 
@@ -44,10 +46,16 @@ class _TikTokLivePageState extends State<TikTokLivePage>
   int _likeCount = 0;
   bool _isLoading = true;
   String? _error;
+  LiveClashModel? _activeClash;
 
   StreamSubscription? _chatSub;
   StreamSubscription? _viewerCountSub;
   StreamSubscription? _streamEndedSub;
+  StreamSubscription? _clashStartedSub;
+  StreamSubscription? _clashEndedSub;
+  StreamSubscription? _clashScoreSub;
+  StreamSubscription? _clashActionSub;
+  StreamSubscription? _clashInvitationSub;
 
   @override
   void initState() {
@@ -100,6 +108,137 @@ class _TikTokLivePageState extends State<TikTokLivePage>
         );
       }
     });
+
+    _clashStartedSub = _socketService.onClashStarted.listen((data) {
+      if (mounted) {
+        setState(() {
+          _activeClash = LiveClashModel.fromJson(data);
+        });
+      }
+    });
+
+    _clashEndedSub = _socketService.onClashEnded.listen((data) {
+      if (mounted) {
+        setState(() {
+          _activeClash = null;
+        });
+        final winnerName = data['winnerName'] ?? 'Someone';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Clash Ended! Winner: $winnerName')),
+        );
+      }
+    });
+
+    _clashInvitationSub = _socketService.onClashInvitation.listen((data) {
+      if (mounted) {
+        _showClashInvitationDialog(data);
+      }
+    });
+
+    _clashScoreSub = _socketService.onClashScoreUpdate.listen((data) {
+      if (mounted && _activeClash != null) {
+        setState(() {
+          _activeClash = LiveClashModel(
+            id: _activeClash!.id,
+            challenger: _activeClash!.challenger,
+            opponent: _activeClash!.opponent,
+            status: _activeClash!.status,
+            duration: _activeClash!.duration,
+            challengerScore: (data['challengerScore'] ?? 0).toDouble(),
+            opponentScore: (data['opponentScore'] ?? 0).toDouble(),
+            startTime: _activeClash!.startTime,
+          );
+        });
+      }
+    });
+  }
+
+  void _showClashInvitationDialog(Map<String, dynamic> data) {
+    final challengerName = data['challengerName'] ?? 'An Artist';
+    final clashId = data['clashId'];
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        backgroundColor: NeumorphicTheme.backgroundColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('🔥 CLASH CHALLENGE!',
+            style: TextStyle(
+                color: NeumorphicTheme.primaryAccent,
+                fontWeight: FontWeight.bold)),
+        content: Text(
+            '$challengerName wants to clash with you! The lyrcial war is on!',
+            style: const TextStyle(color: NeumorphicTheme.textPrimary)),
+        actions: [
+          TextButton(
+            onPressed: () {
+              _liveStreamService.rejectClash(clashId);
+              Navigator.pop(context);
+            },
+            child: const Text('REJECT', style: TextStyle(color: Colors.red)),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              try {
+                await _liveStreamService.acceptClash(clashId);
+                Navigator.pop(context);
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Failed to accept: $e')));
+                Navigator.pop(context);
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+            child: const Text('ACCEPT'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _handleClashAction(Map<String, dynamic> data) {
+    // Basic implementation: show toast or brief overlay
+    final action = data['action'];
+    if (action == 'flame_overlay') {
+      // Trigger flame animation
+    } else if (action == 'noise') {
+      // Play sound
+    }
+  }
+
+  void _inviteToClash() async {
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Invite Artist to Clash'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(hintText: 'Enter Artist ID'),
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () async {
+              try {
+                await _liveStreamService.inviteToClash(
+                    controller.text.trim(), 300);
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Invitation sent!')));
+              } catch (e) {
+                ScaffoldMessenger.of(context)
+                    .showSnackBar(SnackBar(content: Text('Failed to invite: $e')));
+              }
+            },
+            child: const Text('Invite'),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _fetchStreams() async {
@@ -167,6 +306,10 @@ class _TikTokLivePageState extends State<TikTokLivePage>
     _chatSub?.cancel();
     _viewerCountSub?.cancel();
     _streamEndedSub?.cancel();
+    _clashStartedSub?.cancel();
+    _clashEndedSub?.cancel();
+    _clashScoreSub?.cancel();
+    _clashActionSub?.cancel();
     if (_liveStreams.isNotEmpty) {
       _socketService.leaveStream(_liveStreams[_currentStreamIndex].id);
     }
@@ -326,11 +469,39 @@ class _TikTokLivePageState extends State<TikTokLivePage>
                 _currentStreamIndex = index;
               });
               _joinCurrentStream();
+              _activeClash = null;
             },
             itemCount: _liveStreams.length,
             itemBuilder: (context, index) {
               final stream = _liveStreams[index];
               final tokenData = _tokenCache[stream.id];
+              
+              if (_activeClash != null) {
+                return Stack(
+                  children: [
+                    ClashVideoWidget(
+                      tokenData: tokenData!,
+                      challengerId: _activeClash!.challenger.id,
+                      opponentId: _activeClash!.opponent.id,
+                      isHost: tokenData.isHost,
+                    ),
+                    SafeArea(
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 60),
+                        child: BattleBarWidget(
+                          challengerScore: _activeClash!.challengerScore,
+                          opponentScore: _activeClash!.opponentScore,
+                          challengerName: _activeClash!.challenger.name,
+                          opponentName: _activeClash!.opponent.name,
+                          durationSeconds: _activeClash!.duration,
+                          startTime: _activeClash!.startTime,
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }
+
               if (tokenData != null) {
                 return LiveVideoWidget(
                   tokenData: tokenData,
@@ -757,6 +928,41 @@ class _TikTokLivePageState extends State<TikTokLivePage>
                 const SizedBox(height: 4),
                 const Text(
                   'Feedback',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Clash Invite button (visible to hosts/artists)
+          GestureDetector(
+            onTap: _inviteToClash,
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.5),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Colors.red,
+                      width: 2,
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.flash_on,
+                    color: Colors.red,
+                    size: 28,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Clash',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 12,

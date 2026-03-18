@@ -102,6 +102,14 @@ class ApiConfig {
   static const String songVideos = '/video/song'; // + /:id
   static const String videoView = '/video/view'; // + /:id
 
+  // ── Clash endpoints ─────────────────────────────────────────────
+  static const String clash = '/clash';
+  static const String clashInvite = '/clash/invite';
+  static const String clashAccept = '/clash/accept'; // + /:id
+  static const String clashReject = '/clash/reject'; // + /:id
+  static const String clashDetails = '/clash'; // + /:id
+  static const String clashRankings = '/clash/rankings';
+
   // ── LiveKit ────────────────────────────────────────────────────
   static const String livekitUrl = String.fromEnvironment(
     'LIVEKIT_URL',

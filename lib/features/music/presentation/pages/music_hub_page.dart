@@ -61,12 +61,12 @@ class _MusicHubPageState extends State<MusicHubPage>
           ),
           tabs: const [
             Tab(
-              icon: Icon(Icons.live_tv, size: 24),
-              text: 'Stream',
+              icon: Icon(Icons.explore, size: 24),
+              text: 'Explore',
             ),
             Tab(
-              icon: Icon(Icons.explore, size: 24),
-              text: 'Discover',
+              icon: Icon(Icons.live_tv, size: 24),
+              text: 'Live',
             ),
           ],
         ),
@@ -74,8 +74,8 @@ class _MusicHubPageState extends State<MusicHubPage>
       body: TabBarView(
         controller: _tabController,
         children: const [
-          StreamPage(),
           DiscoverPage(),
+          StreamPage(),
         ],
       ),
     );

@@ -17,7 +17,7 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
   late TabController _tabController;
 
   bool _isLoading = true;
-  List<Map<String, dynamic>> _playlists = [];
+  List<PlaylistModel> _playlists = [];
   List<MusicModel> _songs = [];
   List<Map<String, dynamic>> _albums = [];
   List<ArtistModel> _artists = [];
@@ -58,7 +58,8 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
         final historyBody = results[4].data;
 
         setState(() {
-          _playlists = List<Map<String, dynamic>>.from(playlistBody['data'] ?? []);
+          final playlistsRaw = playlistBody['data'] ?? [];
+          _playlists = (playlistsRaw as List).map((p) => PlaylistModel.fromJson(p as Map<String, dynamic>)).toList();
           
           // Fix: favorites and artists return { items: [...], nextCursor: ... }
           final songItems = favoritesBody['data']?['items'] ?? [];
@@ -218,8 +219,11 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
 
   Widget _buildCreatePlaylistCard() {
     return GestureDetector(
-      onTap: () {
-        // Navigator.pushNamed(context, '/create_playlist');
+      onTap: () async {
+        final result = await Navigator.pushNamed(context, '/create_playlist');
+        if (result == true) {
+          _loadData(); // Refresh if created
+        }
       },
       child: Container(
         padding: const EdgeInsets.all(20),
@@ -258,9 +262,7 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
     );
   }
 
-  Widget _buildPlaylistItem(Map<String, dynamic> playlist) {
-    final name = playlist['name']?.toString() ?? 'Untitled';
-    final songCount = (playlist['songs'] is List) ? (playlist['songs'] as List).length : 0;
+  Widget _buildPlaylistItem(PlaylistModel playlist) {
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -274,7 +276,7 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
       ),
       child: ListTile(
         onTap: () {
-          // Navigator.pushNamed(context, '/playlist_details', arguments: playlist);
+          Navigator.pushNamed(context, '/playlist_details', arguments: playlist);
         },
         leading: Container(
           width: 50, height: 50,
@@ -282,19 +284,19 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
             color: Colors.white.withOpacity(0.1),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: (playlist['songs'] is List && (playlist['songs'] as List).isNotEmpty && (playlist['songs'][0] is Map && playlist['songs'][0]['coverArt'] != null))
+          child: playlist.imageUrl.isNotEmpty
               ? ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: Image.network(
-                    ApiConfig.resolveUrl(playlist['songs'][0]['coverArt']),
+                    ApiConfig.resolveUrl(playlist.imageUrl),
                     fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) => const Icon(Icons.library_music, color: Colors.white, size: 24),
                   ),
                 )
               : const Icon(Icons.library_music, color: Colors.white, size: 24),
         ),
-        title: Text(name, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
-        subtitle: Text('$songCount songs', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 14)),
+        title: Text(playlist.title, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
+        subtitle: Text('${playlist.songs.length} songs', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 14)),
         trailing: IconButton(
           icon: Icon(Icons.more_vert, color: Colors.white.withOpacity(0.7)),
           onPressed: () {},

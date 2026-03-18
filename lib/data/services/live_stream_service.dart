@@ -3,6 +3,7 @@ import '../../core/config/api_config.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/api_exception.dart';
 import '../models/live_stream_model.dart';
+import '../models/live_clash_model.dart';
 
 /// Handles all live-stream related API calls.
 class LiveStreamService {
@@ -60,6 +61,85 @@ class LiveStreamService {
       final body = response.data;
       final data = body['data'] ?? body;
       return LiveStreamTokenData.fromJson(data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// Invite an artist to a clash.
+  Future<LiveClashModel> inviteToClash(String opponentId, int duration) async {
+    try {
+      final response = await _apiClient.dio.post(
+        ApiConfig.clashInvite,
+        data: {
+          'opponentId': opponentId,
+          'duration': duration,
+        },
+      );
+
+      final body = response.data;
+      final data = body['data'] ?? body;
+      return LiveClashModel.fromJson(data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// Accept a clash invitation.
+  Future<LiveClashModel> acceptClash(String clashId) async {
+    try {
+      final response = await _apiClient.dio.post(
+        '${ApiConfig.clashAccept}/$clashId',
+      );
+
+      final body = response.data;
+      final data = body['data'] ?? body;
+      return LiveClashModel.fromJson(data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// Reject a clash invitation.
+  Future<void> rejectClash(String clashId) async {
+    try {
+      await _apiClient.dio.post(
+        '${ApiConfig.clashReject}/$clashId',
+      );
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// Get clash details.
+  Future<LiveClashModel> getClashDetails(String clashId) async {
+    try {
+      final response = await _apiClient.dio.get(
+        '${ApiConfig.clashDetails}/$clashId',
+      );
+
+      final body = response.data;
+      final data = body['data'] ?? body;
+      return LiveClashModel.fromJson(data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// Get clash rankings.
+  Future<List<Map<String, dynamic>>> getClashRankings(String period) async {
+    try {
+      final response = await _apiClient.dio.get(
+        ApiConfig.clashRankings,
+        queryParameters: {'period': period},
+      );
+
+      final body = response.data;
+      final data = body['data'] ?? body;
+      if (data is List) {
+        return data.map((json) => json as Map<String, dynamic>).toList();
+      }
+      return [];
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);
     }

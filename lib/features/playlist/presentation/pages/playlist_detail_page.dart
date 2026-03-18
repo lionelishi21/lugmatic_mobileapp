@@ -6,6 +6,8 @@ import 'package:lugmatic_flutter/data/providers/audio_provider.dart';
 import 'package:lugmatic_flutter/ui/widgets/player_screen.dart';
 import 'package:provider/provider.dart';
 import '../../../../shared/widgets/comment_section_widget.dart';
+import '../../../../core/network/api_client.dart';
+import '../../../../data/services/playlist_service.dart';
 
 class PlaylistDetailPage extends StatefulWidget {
   final PlaylistModel playlist;
@@ -22,13 +24,105 @@ class PlaylistDetailPage extends StatefulWidget {
 class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
   bool _isLiked = false;
   bool _isShuffled = false;
+  bool _isLoading = true;
+  PlaylistModel? _playlist;
+  late PlaylistService _playlistService;
 
   final List<MusicModel> _songs = [];
 
   final List<ArtistModel> _contributors = [];
 
   @override
+  void initState() {
+    super.initState();
+    _playlistService = PlaylistService(apiClient: context.read<ApiClient>());
+    _loadPlaylistDetails();
+  }
+
+  Future<void> _loadPlaylistDetails() async {
+    try {
+      final details = await _playlistService.getPlaylistDetails(widget.playlist.id);
+      if (mounted) {
+        setState(() {
+          _playlist = details;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading playlist: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
+  void _duplicatePlaylist() async {
+    if (_playlist == null) return;
+
+    try {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Copying playlist...'), duration: Duration(seconds: 1)),
+      );
+
+      final newPlaylist = await _playlistService.copyPlaylist(_playlist!.id);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('"${_playlist!.title}" copied to your library!'),
+            backgroundColor: const Color(0xFF10B981),
+            action: SnackBarAction(
+              label: 'View',
+              textColor: Colors.white,
+              onPressed: () {
+                Navigator.pushNamed(
+                  context,
+                  '/playlist_details',
+                  arguments: newPlaylist,
+                );
+              },
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to copy playlist: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        backgroundColor: const Color(0xFF111827),
+        body: Center(child: CircularProgressIndicator(color: Color(0xFF10B981))),
+      );
+    }
+
+    if (_playlist == null) {
+      return Scaffold(
+        backgroundColor: const Color(0xFF111827),
+        appBar: AppBar(
+          backgroundColor: const Color(0xFF111827),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
+        body: Center(
+          child: Text(
+            'Playlist not found or an error occurred.',
+            style: TextStyle(color: Colors.white, fontSize: 16),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFF111827),
       body: CustomScrollView(
@@ -211,153 +305,163 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
   }
 
   Widget _buildPlaylistHeader() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.white.withOpacity(0.08),
-            Colors.white.withOpacity(0.03),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.12),
-          width: 1,
-        ),
-      ),
-      child: Row(
+    if (_playlist == null) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(
         children: [
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              image: DecorationImage(
-                image: NetworkImage(widget.playlist.imageUrl),
-                fit: BoxFit.cover,
+          Hero(
+            tag: 'playlist_art_${_playlist!.id}',
+            child: Container(
+              width: 220,
+              height: 220,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.5),
+                    blurRadius: 40,
+                    offset: const Offset(0, 20),
+                  ),
+                ],
+                image: DecorationImage(
+                  image: NetworkImage(ApiConfig.resolveUrl(_playlist!.imageUrl)),
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.playlist.title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  widget.playlist.subtitle,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.7),
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF10B981).withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        widget.playlist.type.toUpperCase(),
-                        style: const TextStyle(
-                          color: Color(0xFF10B981),
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '${_songs.length} songs',
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.5),
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+          const SizedBox(height: 32),
+          Text(
+            _playlist!.title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 32,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.5,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            _playlist!.subtitle,
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.6),
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          _buildPlaylistMetadata(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPlaylistMetadata() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (_playlist!.ownerName != null) ...[
+          CircleAvatar(
+            radius: 12,
+            backgroundColor: const Color(0xFF10B981).withOpacity(0.2),
+            child: Text(
+              _playlist!.ownerName![0].toUpperCase(),
+              style: const TextStyle(color: Color(0xFF10B981), fontSize: 10, fontWeight: FontWeight.bold),
             ),
           ),
+          const SizedBox(width: 8),
+          Text(
+            _playlist!.ownerName!,
+            style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+          ),
+          _buildDot(),
         ],
+        Text(
+          '${_playlist!.songs.length} songs',
+          style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 14),
+        ),
+        _buildDot(),
+        Text(
+          _playlist!.type.toUpperCase(),
+          style: const TextStyle(
+            color: Color(0xFF10B981),
+            fontSize: 12,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 1,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDot() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 12),
+      width: 4,
+      height: 4,
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.2),
+        shape: BoxShape.circle,
       ),
     );
   }
 
   Widget _buildActionButtons() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Row(
         children: [
           Expanded(
-            child: ElevatedButton.icon(
-              onPressed: () {
-                if (_songs.isNotEmpty) {
-                  context.read<AudioProvider>().playMusic(_songs[0], queue: _songs);
-                }
-              },
-              icon: const Icon(Icons.play_arrow, size: 20),
-              label: const Text('Play All'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF10B981),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+            child: Container(
+              height: 56,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF10B981), Color(0xFF059669)],
+                ),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF10B981).withOpacity(0.3),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: _playPlaylist,
+                  borderRadius: BorderRadius.circular(16),
+                  child: const Center(
+                    child: Text(
+                      'Play Now',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
-          const SizedBox(width: 12),
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.white.withOpacity(0.2)),
-            ),
-            child: IconButton(
-              onPressed: () => setState(() => _isShuffled = !_isShuffled),
-              icon: Icon(
-                _isShuffled ? Icons.shuffle : Icons.shuffle_outlined,
-                color: _isShuffled ? const Color(0xFF10B981) : Colors.white,
-                size: 24,
-              ),
-            ),
+          const SizedBox(width: 16),
+          _buildCircleAction(
+            _isShuffled ? Icons.shuffle : Icons.shuffle,
+            _isShuffled ? const Color(0xFF10B981) : Colors.white.withOpacity(0.8),
+            () => setState(() => _isShuffled = !_isShuffled),
           ),
           const SizedBox(width: 12),
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.white.withOpacity(0.2)),
-            ),
-            child: IconButton(
-              onPressed: () => setState(() => _isLiked = !_isLiked),
-              icon: Icon(
-                _isLiked ? Icons.favorite : Icons.favorite_border,
-                color: _isLiked ? Colors.red : Colors.white,
-                size: 24,
-              ),
-            ),
+          _buildCircleAction(
+            _isLiked ? Icons.favorite : Icons.favorite_border,
+            _isLiked ? Colors.red : Colors.white.withOpacity(0.8),
+            () => setState(() => _isLiked = !_isLiked),
           ),
         ],
       ),
@@ -420,10 +524,22 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
   }
 
   Widget _buildSongsList() {
+    if (_playlist == null || _playlist!.songs.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 40),
+          child: Text(
+            'No songs in this playlist',
+            style: TextStyle(color: Colors.white.withOpacity(0.5)),
+          ),
+        ),
+      );
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
-        children: _songs.asMap().entries.map((entry) {
+        children: _playlist!.songs.asMap().entries.map((entry) {
           final index = entry.key;
           final song = entry.value;
           return _buildSongItem(song, index + 1);
@@ -467,7 +583,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
                     image: DecorationImage(
-                      image: NetworkImage(song.imageUrl),
+                      image: NetworkImage(ApiConfig.resolveUrl(song.imageUrl)),
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -637,6 +753,8 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
   }
 
   Widget _buildPlaylistInfo() {
+    if (_playlist == null) return const SizedBox.shrink();
+    
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(20),
@@ -658,7 +776,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
           ),
           const SizedBox(height: 12),
           Text(
-            'A curated collection of ${widget.playlist.subtitle.toLowerCase()} music featuring ${_contributors.length} artists. This playlist was created to showcase the best tracks in the genre.',
+            _playlist!.description ?? 'A curated collection of ${_playlist!.subtitle.toLowerCase()} music.',
             style: TextStyle(
               color: Colors.white.withOpacity(0.7),
               fontSize: 14,
@@ -669,13 +787,13 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
           Row(
             children: [
               Icon(
-                Icons.access_time,
+                Icons.calendar_today,
                 color: Colors.white.withOpacity(0.5),
                 size: 16,
               ),
               const SizedBox(width: 8),
               Text(
-                'Created ${_formatDate(DateTime.now().subtract(const Duration(days: 30)))}',
+                'Updated recently',
                 style: TextStyle(
                   color: Colors.white.withOpacity(0.5),
                   fontSize: 12,
@@ -689,13 +807,14 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
   }
 
   void _playPlaylist() {
-    if (_songs.isNotEmpty) {
-      _playSong(_songs[0]);
+    if (_playlist != null && _playlist!.songs.isNotEmpty) {
+      context.read<AudioProvider>().playMusic(_playlist!.songs[0], queue: _playlist!.songs);
     }
   }
 
   void _playSong(MusicModel song) {
-    context.read<AudioProvider>().playMusic(song, queue: _songs);
+    if (_playlist == null) return;
+    context.read<AudioProvider>().playMusic(song, queue: _playlist!.songs);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -829,7 +948,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
               title: const Text('Duplicate Playlist', style: TextStyle(color: Colors.white)),
               onTap: () {
                 Navigator.pop(context);
-                print('Duplicate playlist');
+                _duplicatePlaylist();
               },
             ),
             ListTile(

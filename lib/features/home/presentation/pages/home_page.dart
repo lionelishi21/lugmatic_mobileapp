@@ -31,6 +31,7 @@ import 'package:lugmatic_flutter/features/gift/presentation/pages/gift_hub_page.
 import 'package:lugmatic_flutter/features/playlist/presentation/pages/playlist_detail_page.dart';
 import 'package:lugmatic_flutter/features/home/data/models/playlist_model.dart';
 import 'package:lugmatic_flutter/features/live_stream/presentation/pages/tiktok_live_page.dart';
+import 'package:lugmatic_flutter/features/video/presentation/pages/videos_page.dart';
 import 'package:lugmatic_flutter/features/home/presentation/pages/artist_detail_page.dart';
 import 'package:lugmatic_flutter/features/song/presentation/pages/song_detail_page.dart';
 
@@ -67,30 +68,38 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _loadData() async {
-    setState(() => _isLoading = true);
-    try {
-      final apiClient = context.read<ApiClient>();
-      final results = await Future.wait([
-        _homeService.getTrendingSongs(),
-        _homeService.getFeaturedArtists(),
-        _homeService.getFeaturedPodcasts(),
-        _loadGenres(apiClient),
-        _loadPlaylists(apiClient),
-      ]);
-      if (mounted) {
-        setState(() {
-          _trendingSongs = results[0] as List<MusicModel>;
-          _featuredArtists = results[1] as List<ArtistModel>;
-          _featuredPodcasts = results[2] as List<PodcastModel>;
-          _genres = results[3] as List<Map<String, dynamic>>;
-          _playlists = results[4] as List<Map<String, dynamic>>;
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) setState(() => _isLoading = false);
-    }
+    final apiClient = context.read<ApiClient>();
+    
+    // Load unread notifications separately (not part of the main UI blocks)
     _loadNotifications();
+
+    // Start loading each section independently for "Granular Loading"
+    setState(() => _isLoading = false); // We stop the global full-screen spinner earlier
+
+    // Trending Songs
+    _homeService.getTrendingSongs().then((songs) {
+      if (mounted) setState(() => _trendingSongs = songs);
+    });
+
+    // Featured Artists
+    _homeService.getFeaturedArtists().then((artists) {
+      if (mounted) setState(() => _featuredArtists = artists);
+    });
+
+    // Featured Podcasts
+    _homeService.getFeaturedPodcasts().then((podcasts) {
+      if (mounted) setState(() => _featuredPodcasts = podcasts);
+    });
+
+    // Genres
+    _loadGenres(apiClient).then((genres) {
+      if (mounted) setState(() => _genres = genres);
+    });
+
+    // Playlists
+    _loadPlaylists(apiClient).then((playlists) {
+      if (mounted) setState(() => _playlists = playlists);
+    });
   }
 
   Future<List<Map<String, dynamic>>> _loadGenres(ApiClient apiClient) async {
@@ -245,7 +254,8 @@ class _HomePageState extends State<HomePage> {
         children: [
           _buildHomePage(),
           const ExploreHubPage(),
-          const RadioPage(),
+          const TikTokLivePage(),
+          const VideosPage(),
           const LibraryPage(),
         ],
       ),
@@ -268,16 +278,24 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildWelcomeSection() {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
       decoration: BoxDecoration(
-        gradient: AppColors.screenGradient,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.border),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.primary.withOpacity(0.2),
+            AppColors.secondary.withOpacity(0.15),
+            Colors.black.withOpacity(0.4),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: Colors.white.withOpacity(0.08)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+            color: AppColors.primary.withOpacity(0.05),
+            blurRadius: 30,
+            spreadRadius: -5,
           ),
         ],
       ),
@@ -287,38 +305,48 @@ class _HomePageState extends State<HomePage> {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(10),
+                width: 52,
+                height: 52,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
+                  gradient: LinearGradient(
+                    colors: [AppColors.primary, AppColors.primaryDim],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withOpacity(0.3),
+                      blurRadius: 15,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
                 ),
                 child: const Icon(
-                  Icons.wb_sunny_outlined,
-                  color: Colors.white,
-                  size: 24,
+                  Icons.auto_awesome_rounded,
+                  color: Colors.black,
+                  size: 26,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 16),
               const Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-            'Good Morning!',
-            style: TextStyle(
-              color: Colors.white,
-                        fontSize: 26,
-                        fontWeight: FontWeight.w800,
+                      'Discover New Hits',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w900,
                         letterSpacing: -0.5,
                       ),
                     ),
-                    SizedBox(height: 4),
+                    SizedBox(height: 2),
                     Text(
-                      'Ready to discover new music?',
-            style: TextStyle(
-              color: AppColors.mutedForeground,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w400,
+                      'Welcome to Lugmatic Music',
+                      style: TextStyle(
+                        color: AppColors.mutedForeground,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
@@ -326,109 +354,90 @@ class _HomePageState extends State<HomePage> {
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 28),
           Row(
             children: [
               Expanded(
-                child: Container(
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const CreatePlaylistScreen(),
-                      ),
-                    );
-                  },
-                      borderRadius: BorderRadius.circular(12),
-                      child: const Center(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.add_circle_outline, color: AppColors.primary, size: 20),
-                            SizedBox(width: 8),
-                            Text(
-                              'Create Playlist',
-                              style: TextStyle(
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 15,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
+                child: _buildWelcomeAction(
+                  icon: Icons.add_rounded,
+                  label: 'Add New',
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CreatePlaylistScreen())),
+                  isPrimary: true,
                 ),
               ),
               const SizedBox(width: 12),
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.white.withOpacity(0.3), width: 1.5),
-                ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () {
-                    if (_featuredArtists.isNotEmpty) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const TikTokLivePage(),
-                        ),
-                      );
-                    }
-                  },
-                    borderRadius: BorderRadius.circular(12),
-                    child: const Icon(Icons.live_tv_rounded, color: Colors.white, size: 24),
-                  ),
-                ),
+              _buildWelcomeActionSmall(
+                icon: Icons.live_tv_rounded,
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TikTokLivePage())),
               ),
               const SizedBox(width: 12),
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.white.withOpacity(0.3), width: 1.5),
-                ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) => const DemandArtistDialog(),
-                      );
-                    },
-                    borderRadius: BorderRadius.circular(12),
-                    child: const Icon(Icons.person_add_alt_1_rounded, color: Colors.white, size: 22),
-                  ),
-                ),
+              _buildWelcomeActionSmall(
+                icon: Icons.person_add_alt_1_rounded,
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => const DemandArtistDialog(),
+                  );
+                },
               ),
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildWelcomeAction({required IconData icon, required String label, required VoidCallback onTap, bool isPrimary = false}) {
+    return Container(
+      height: 52,
+      decoration: BoxDecoration(
+        color: isPrimary ? AppColors.white : Colors.white.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(14),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, color: isPrimary ? Colors.black : Colors.white, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: isPrimary ? Colors.black : Colors.white,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWelcomeActionSmall({required IconData icon, required VoidCallback onTap}) {
+    return Container(
+      width: 52,
+      height: 52,
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.white.withOpacity(0.05)),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(14),
+          child: Icon(icon, color: Colors.white, size: 22),
+        ),
       ),
     );
   }
@@ -586,9 +595,9 @@ class _HomePageState extends State<HomePage> {
           title,
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 22,
-            fontWeight: FontWeight.w800,
-            letterSpacing: -0.5,
+            fontSize: 20,
+            fontWeight: FontWeight.w900,
+            letterSpacing: -0.3,
           ),
         ),
         if (action.isNotEmpty)
