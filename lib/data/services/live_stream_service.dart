@@ -143,5 +143,24 @@ class LiveStreamService {
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);
     }
+  /// Get recent clashes for the public feed.
+  Future<List<LiveClashModel>> getRecentClashes({int limit = 10, int skip = 0}) async {
+    try {
+      final response = await _apiClient.dio.get(
+        ApiConfig.clashList,
+        queryParameters: {'limit': limit, 'skip': skip},
+      );
+
+      final body = response.data;
+      final data = body['data'] ?? [];
+      if (data is List) {
+        return data
+            .map((json) => LiveClashModel.fromJson(json as Map<String, dynamic>))
+            .toList();
+      }
+      return [];
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
   }
 }

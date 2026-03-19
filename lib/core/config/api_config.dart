@@ -109,6 +109,7 @@ class ApiConfig {
   static const String clashReject = '/clash/reject'; // + /:id
   static const String clashDetails = '/clash'; // + /:id
   static const String clashRankings = '/clash/rankings';
+  static const String clashList = '/clash/list';
 
   // ── LiveKit ────────────────────────────────────────────────────
   static const String livekitUrl = String.fromEnvironment(

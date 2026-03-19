@@ -34,6 +34,9 @@ import 'package:lugmatic_flutter/features/live_stream/presentation/pages/tiktok_
 import 'package:lugmatic_flutter/features/video/presentation/pages/videos_page.dart';
 import 'package:lugmatic_flutter/features/home/presentation/pages/artist_detail_page.dart';
 import 'package:lugmatic_flutter/features/song/presentation/pages/song_detail_page.dart';
+import 'package:lugmatic_flutter/data/models/live_clash_model.dart';
+import 'package:lugmatic_flutter/data/services/live_stream_service.dart';
+import 'package:lugmatic_flutter/features/live_stream/presentation/pages/clash_details_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -54,6 +57,7 @@ class _HomePageState extends State<HomePage> {
   List<PodcastModel> _featuredPodcasts = [];
   List<Map<String, dynamic>> _genres = [];
   List<Map<String, dynamic>> _playlists = [];
+  List<LiveClashModel> _recentClashes = [];
   int _unreadNotifications = 0;
 
   @override
@@ -99,6 +103,12 @@ class _HomePageState extends State<HomePage> {
     // Playlists
     _loadPlaylists(apiClient).then((playlists) {
       if (mounted) setState(() => _playlists = playlists);
+    });
+
+    // Recent Clashes
+    final liveStreamService = LiveStreamService(apiClient: apiClient);
+    liveStreamService.getRecentClashes().then((clashes) {
+      if (mounted) setState(() => _recentClashes = clashes);
     });
   }
 
@@ -175,6 +185,14 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(height: 18),
             _buildLiveSection(),
             const SizedBox(height: 36),
+
+            // Recent Clashes section
+            if (_recentClashes.isNotEmpty) ...[
+              _buildSectionHeader('Recent Clashes', 'Review'),
+              const SizedBox(height: 18),
+              _buildClashHistorySection(),
+              const SizedBox(height: 36),
+            ],
 
             // Trending Songs
             _buildSectionHeader('Trending Now', 'See All'),
@@ -1335,5 +1353,138 @@ class _HomePageState extends State<HomePage> {
   void dispose() {
     _pageController.dispose();
     super.dispose();
+  }
+
+  Widget _buildClashHistorySection() {
+    return SizedBox(
+      height: 160,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: _recentClashes.length,
+        itemBuilder: (context, index) {
+          final clash = _recentClashes[index];
+          return GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ClashDetailsPage(
+                    clashId: clash.id,
+                    initialData: clash,
+                  ),
+                ),
+              );
+            },
+            child: Container(
+              width: 280,
+              margin: const EdgeInsets.only(right: 16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Colors.black.withOpacity(0.6),
+                    AppColors.primary.withOpacity(0.1),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Stack(
+                children: [
+                  // Background Decoration
+                  Positioned(
+                    right: -20,
+                    bottom: -20,
+                    child: Icon(
+                      Icons.emoji_events,
+                      size: 100,
+                      color: AppColors.primary.withOpacity(0.05),
+                    ),
+                  ),
+                  
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Text(
+                                'CLASH',
+                                style: TextStyle(
+                                  color: AppColors.primary,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.black,
+                                ),
+                              ),
+                            ),
+                            const Spacer(),
+                            const Text(
+                              'REVIEW',
+                              style: TextStyle(
+                                color: AppColors.mutedForeground,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            _buildMiniArtist(clash.challenger.name, clash.challenger.image),
+                            const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 12),
+                              child: Text('VS', style: TextStyle(color: Colors.white24, fontWeight: FontWeight.w900, fontSize: 12)),
+                            ),
+                            _buildMiniArtist(clash.opponent.name, clash.opponent.image),
+                          ],
+                        ),
+                        const Spacer(),
+                        Text(
+                          'Winner: ${clash.winnerId == clash.challenger.id ? clash.challenger.name : (clash.winnerId == clash.opponent.id ? clash.opponent.name : 'Draw')}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildMiniArtist(String name, String image) {
+    return Row(
+      children: [
+        CircleAvatar(
+          radius: 14,
+          backgroundImage: NetworkImage(ApiConfig.resolveUrl(image)),
+        ),
+        const SizedBox(width: 8),
+        SizedBox(
+          width: 60,
+          child: Text(
+            name,
+            style: const TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.bold),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
   }
 }
