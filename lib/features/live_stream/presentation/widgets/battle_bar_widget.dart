@@ -207,7 +207,7 @@ class _BattleBarWidgetState extends State<BattleBarWidget> {
                   'VS',
                   style: TextStyle(
                     color: Colors.black,
-                    fontWeight: FontWeight.black,
+                    fontWeight: FontWeight.w900,
                     fontSize: 10,
                   ),
                 ),

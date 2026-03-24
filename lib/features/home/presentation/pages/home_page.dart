@@ -29,7 +29,7 @@ import 'package:lugmatic_flutter/features/music/presentation/pages/music_hub_pag
 import 'package:lugmatic_flutter/features/podcast/presentation/pages/podcast_hub_page.dart';
 import 'package:lugmatic_flutter/features/gift/presentation/pages/gift_hub_page.dart';
 import 'package:lugmatic_flutter/features/playlist/presentation/pages/playlist_detail_page.dart';
-import 'package:lugmatic_flutter/features/home/data/models/playlist_model.dart';
+import 'package:lugmatic_flutter/data/models/playlist_model.dart';
 import 'package:lugmatic_flutter/features/live_stream/presentation/pages/tiktok_live_page.dart';
 import 'package:lugmatic_flutter/features/video/presentation/pages/videos_page.dart';
 import 'package:lugmatic_flutter/features/home/presentation/pages/artist_detail_page.dart';
@@ -1421,7 +1421,7 @@ class _HomePageState extends State<HomePage> {
                                 style: TextStyle(
                                   color: AppColors.primary,
                                   fontSize: 10,
-                                  fontWeight: FontWeight.black,
+                                  fontWeight: FontWeight.w900,
                                 ),
                               ),
                             ),

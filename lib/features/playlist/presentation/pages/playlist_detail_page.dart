@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:lugmatic_flutter/data/models/music_model.dart';
 import 'package:lugmatic_flutter/data/models/artist_model.dart';
-import 'package:lugmatic_flutter/features/home/data/models/playlist_model.dart';
+import 'package:lugmatic_flutter/data/models/playlist_model.dart';
 import 'package:lugmatic_flutter/data/providers/audio_provider.dart';
 import 'package:lugmatic_flutter/ui/widgets/player_screen.dart';
 import 'package:provider/provider.dart';
 import '../../../../shared/widgets/comment_section_widget.dart';
 import '../../../../core/network/api_client.dart';
+import '../../../../core/config/api_config.dart';
 import '../../../../data/services/playlist_service.dart';
 
 class PlaylistDetailPage extends StatefulWidget {
@@ -1012,5 +1013,25 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
     if (difference < 30) return '${(difference / 7).floor()} weeks ago';
     if (difference < 365) return '${(difference / 30).floor()} months ago';
     return '${(difference / 365).floor()} years ago';
+  }
+
+  Widget _buildCircleAction(IconData icon, Color color, VoidCallback onTap) {
+    return Container(
+      width: 56,
+      height: 56,
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.05),
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white.withOpacity(0.1)),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(28),
+          child: Icon(icon, color: color, size: 24),
+        ),
+      ),
+    );
   }
 }

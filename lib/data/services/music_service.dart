@@ -14,7 +14,7 @@ class MusicService {
   /// Fetch all songs (paginated).
   Future<List<MusicModel>> getSongs({int page = 1, int limit = 20, String? sort, String? genre}) async {
     try {
-      final queryParams = {
+      final Map<String, dynamic> queryParams = {
         'page': page,
         'limit': limit,
       };

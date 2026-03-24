@@ -1,9 +1,17 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:lugmatic_flutter/core/config/api_config.dart';
+import 'package:lugmatic_flutter/core/network/api_client.dart';
+import 'package:lugmatic_flutter/data/models/music_model.dart';
+import 'package:lugmatic_flutter/data/models/artist_model.dart';
+import 'package:lugmatic_flutter/data/models/genre_model.dart';
+import 'package:lugmatic_flutter/data/providers/audio_provider.dart';
 import 'package:lugmatic_flutter/data/services/home_service.dart';
 import 'package:lugmatic_flutter/data/services/music_service.dart';
-import 'package:lugmatic_flutter/data/models/genre_model.dart';
 import 'package:lugmatic_flutter/features/music/presentation/pages/genre_music_page.dart';
 import 'package:lugmatic_flutter/features/music/presentation/pages/trending_songs_page.dart';
 import '../../../home/presentation/widgets/music_card.dart';
+import '../../../../ui/widgets/player_screen.dart';
 import '../../../../core/constants/app_colors.dart';
 
 class DiscoverPage extends StatefulWidget {

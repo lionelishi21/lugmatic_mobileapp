@@ -108,7 +108,11 @@ class _LiveVideoWidgetState extends State<LiveVideoWidget>
 
     // First, check remote participants for a video track (viewer mode)
     for (final participant in _room!.remoteParticipants.values) {
-      for (final pub in participant.videoTrackPublications) {
+      final pubs = participant is LocalParticipant 
+          ? participant.videoTrackPublications 
+          : (participant is RemoteParticipant ? participant.videoTrackPublications : []);
+          
+      for (final pub in pubs) {
         if (pub.track != null && pub.subscribed == true) {
           track = pub.track as VideoTrack;
           break;
@@ -119,7 +123,8 @@ class _LiveVideoWidgetState extends State<LiveVideoWidget>
 
     // If host, check local participant
     if (track == null && widget.isHost && _room!.localParticipant != null) {
-      for (final pub in _room!.localParticipant!.videoTrackPublications) {
+      final localPubs = _room!.localParticipant?.videoTrackPublications ?? [];
+      for (final pub in localPubs) {
         if (pub.track != null) {
           track = pub.track as VideoTrack;
           break;

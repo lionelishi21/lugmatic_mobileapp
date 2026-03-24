@@ -5,6 +5,7 @@ import '../features/home/presentation/pages/album_detail_page.dart';
 import '../features/song/presentation/pages/song_detail_page.dart';
 import '../features/store/presentation/pages/store_page.dart';
 import '../features/mixer/presentation/pages/mixer_page.dart';
+import '../features/live_stream/presentation/pages/tiktok_live_page.dart';
 
 class AppRouter {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
@@ -63,6 +64,9 @@ class AppRouter {
 
       case '/mixer':
         return MaterialPageRoute(builder: (_) => const MixerPage());
+
+      case '/live':
+        return MaterialPageRoute(builder: (_) => const TikTokLivePage());
 
       default:
         return _notFound();

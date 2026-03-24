@@ -144,8 +144,8 @@ class AudioProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void seek(Duration position) {
-    _audioPlayer.seek(position);
+  Future<void> seek(Duration position) async {
+    await _audioPlayer.seek(position);
   }
 
   void next() {

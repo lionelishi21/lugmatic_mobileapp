@@ -56,7 +56,7 @@ class ArtistModel {
     return ArtistModel(
       id: json['_id'] ?? json['id'] ?? '',
       name: json['name'] ?? '',
-      imageUrl: json['image'] ?? json['imageUrl'] ?? '',
+      imageUrl: json['image'] ?? json['imageUrl'] ?? json['artwork'] ?? '',
       bio: json['bio'] ?? '',
       followers: followerCount,
       genres: List<String>.from(json['genres'] ?? []),

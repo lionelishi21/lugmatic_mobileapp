@@ -4,6 +4,7 @@ import '../../../../core/config/api_config.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../data/models/music_model.dart';
 import '../../../../data/models/artist_model.dart';
+import '../../../../data/models/playlist_model.dart';
 import '../../../../data/providers/audio_provider.dart';
 
 class LibraryPage extends StatefulWidget {

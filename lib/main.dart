@@ -5,6 +5,7 @@ import 'package:just_audio_background/just_audio_background.dart';
 import 'features/premium/presentation/pages/subscription_page.dart';
 import 'core/network/api_client.dart';
 import 'core/network/token_storage.dart';
+import 'navigation/app_router.dart';
 import 'data/providers/auth_provider.dart';
 import 'data/services/auth_service.dart';
 import 'features/auth/presentation/pages/login_screen.dart';
@@ -128,6 +129,7 @@ class LugmaticApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       home: const SplashScreen(),
+      onGenerateRoute: AppRouter.onGenerateRoute,
       routes: {
         '/home': (context) => const HomePage(),
         '/login': (context) => const LoginScreen(),

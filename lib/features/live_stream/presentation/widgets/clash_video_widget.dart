@@ -84,10 +84,16 @@ class _ClashVideoWidgetState extends State<ClashVideoWidget> {
     for (final participant in allParticipants) {
       // identify participant by metadata or identity
       // For now, let's assume identity matches the artist ID passed in
-      final identity = participant.identity;
+      final identity = participant is LocalParticipant 
+          ? participant.identity 
+          : (participant is RemoteParticipant ? participant.identity : '');
       
       VideoTrack? track;
-      for (final pub in participant.videoTrackPublications) {
+      final pubs = participant is LocalParticipant 
+          ? participant.videoTrackPublications 
+          : (participant is RemoteParticipant ? participant.videoTrackPublications : []);
+          
+      for (final pub in pubs) {
         if (pub.track != null && pub.track is VideoTrack) {
           track = pub.track as VideoTrack;
           break;
@@ -108,13 +114,17 @@ class _ClashVideoWidgetState extends State<ClashVideoWidget> {
     if (challenger == null && opponent == null) {
       int count = 0;
       for (final participant in allParticipants) {
-        for (final pub in participant.videoTrackPublications) {
-          if (pub.track != null && pub.track is VideoTrack) {
-            if (count == 0) challenger = pub.track as VideoTrack;
-            else if (count == 1) opponent = pub.track as VideoTrack;
-            count++;
-          }
+      final pubs = participant is LocalParticipant 
+          ? participant.videoTrackPublications 
+          : (participant is RemoteParticipant ? participant.videoTrackPublications : []);
+          
+      for (final pub in pubs) {
+        if (pub.track != null && pub.track is VideoTrack) {
+          if (count == 0) challenger = pub.track as VideoTrack;
+          else if (count == 1) opponent = pub.track as VideoTrack;
+          count++;
         }
+      }
       }
     }
 

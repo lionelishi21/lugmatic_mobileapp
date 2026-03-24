@@ -15,12 +15,9 @@ import 'package:lugmatic_flutter/data/models/live_clash_model.dart';
 import 'package:lugmatic_flutter/features/live_stream/presentation/widgets/battle_bar_widget.dart';
 import 'package:lugmatic_flutter/features/live_stream/presentation/widgets/clash_video_widget.dart';
 
-/// TikTok-style vertical-swiping live stream page.
-///
-/// Fetches live streams from the API, connects to LiveKit for video,
-/// and uses Socket.io for real-time chat and gifts.
+class TikTokLivePage extends StatefulWidget {
   final String? initialStreamId;
-  const TikTokLivePage({Key? key, this.initialStreamId}) : super(key: key);
+  const TikTokLivePage({super.key, this.initialStreamId});
 
   @override
   State<TikTokLivePage> createState() => _TikTokLivePageState();

@@ -143,6 +143,8 @@ class LiveStreamService {
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);
     }
+  }
+
   /// Get recent clashes for the public feed.
   Future<List<LiveClashModel>> getRecentClashes({int limit = 10, int skip = 0}) async {
     try {

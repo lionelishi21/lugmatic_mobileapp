@@ -14,9 +14,18 @@ class HomeService {
   /// Handles both {success, data: [...]} and raw [...] responses.
   List _extractList(dynamic body, List<String> keys) {
     if (body is List) return body;
+    if (body is! Map) return [];
+
     for (final key in keys) {
       final val = body[key];
       if (val is List) return val;
+
+      // Handle nested structures like { data: { items: [...] } }
+      if (val is Map) {
+        for (final nestedKey in keys) {
+          if (val[nestedKey] is List) return val[nestedKey];
+        }
+      }
     }
     return [];
   }
