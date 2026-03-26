@@ -12,6 +12,8 @@ class NeumorphicTheme {
   // ── Accents ───────────────────────────────────────────────────
   static const Color primaryAccent = AppColors.primary;
   static const Color secondaryAccent = AppColors.secondary;
+  static const Color accentGradientStart = AppColors.primary;
+  static const Color accentGradientEnd = AppColors.secondary;
 
   // ── Text ──────────────────────────────────────────────────────
   static const Color textPrimary = AppColors.foreground;

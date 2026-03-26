@@ -1,13 +1,16 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import '../models/music_model.dart';
 import '../services/music_service.dart';
 
+enum RepeatMode { off, all, one }
+
 class AudioProvider extends ChangeNotifier {
   final MusicService _musicService;
   late AudioPlayer _audioPlayer;
-  
+
   MusicModel? _currentMusic;
   bool _isPlaying = false;
   bool _isLoading = false;
@@ -15,6 +18,9 @@ class AudioProvider extends ChangeNotifier {
   Duration _position = Duration.zero;
   List<MusicModel> _queue = [];
   int _currentIndex = -1;
+  RepeatMode _repeatMode = RepeatMode.off;
+  bool _shuffle = false;
+  final Random _random = Random();
 
   String? _errorMessage;
 
@@ -30,6 +36,28 @@ class AudioProvider extends ChangeNotifier {
   Duration get position => _position;
   List<MusicModel> get queue => _queue;
   String? get errorMessage => _errorMessage;
+  RepeatMode get repeatMode => _repeatMode;
+  bool get shuffle => _shuffle;
+
+  void toggleRepeat() {
+    switch (_repeatMode) {
+      case RepeatMode.off:
+        _repeatMode = RepeatMode.all;
+        break;
+      case RepeatMode.all:
+        _repeatMode = RepeatMode.one;
+        break;
+      case RepeatMode.one:
+        _repeatMode = RepeatMode.off;
+        break;
+    }
+    notifyListeners();
+  }
+
+  void toggleShuffle() {
+    _shuffle = !_shuffle;
+    notifyListeners();
+  }
 
   void _initListeners() {
     _audioPlayer.durationStream.listen((d) {
@@ -48,14 +76,13 @@ class AudioProvider extends ChangeNotifier {
       _isPlaying = state.playing;
       _isLoading = state.processingState == ProcessingState.loading ||
           state.processingState == ProcessingState.buffering;
-      
+
       if (state.processingState == ProcessingState.completed) {
         _handlePlaybackCompleted();
       }
       notifyListeners();
     });
 
-    // Listen for errors
     _audioPlayer.playbackEventStream.listen((event) {}, onError: (Object e, StackTrace st) {
       if (e is PlayerException) {
         _errorMessage = "Error: ${e.message}";
@@ -70,17 +97,15 @@ class AudioProvider extends ChangeNotifier {
   }
 
   Future<void> playMusic(MusicModel music, {List<MusicModel>? queue}) async {
-    _errorMessage = null; // Reset error
+    _errorMessage = null;
 
-    // If already playing this song and it hasn't finished, just resume
-    if (_currentMusic?.id == music.id && 
+    if (_currentMusic?.id == music.id &&
         _audioPlayer.processingState != ProcessingState.idle &&
         _audioPlayer.processingState != ProcessingState.completed) {
       resume();
       return;
     }
 
-    // If it's the same song but it completed, seek to start and play
     if (_currentMusic?.id == music.id && _audioPlayer.processingState == ProcessingState.completed) {
       await seek(Duration.zero);
       resume();
@@ -92,20 +117,18 @@ class AudioProvider extends ChangeNotifier {
       _currentMusic = music;
       _position = Duration.zero;
       _duration = Duration.zero;
-      
+
       if (queue != null) {
         _queue = queue;
         _currentIndex = _queue.indexWhere((m) => m.id == music.id);
       } else if (_queue.any((m) => m.id == music.id)) {
-        // Update index if song is already in existing queue
         _currentIndex = _queue.indexWhere((m) => m.id == music.id);
       }
-      
+
       notifyListeners();
 
-      // Ensure URL is trimmed and spaces are encoded
       final encodedUrl = music.audioUrl.trim().replaceAll(' ', '%20');
-      
+
       final audioSource = AudioSource.uri(
         Uri.parse(encodedUrl),
         tag: MediaItem(
@@ -113,7 +136,9 @@ class AudioProvider extends ChangeNotifier {
           album: music.album.isNotEmpty ? music.album : "Lugmatic",
           title: music.title,
           artist: music.artist,
-          artUri: music.imageUrl.isNotEmpty ? Uri.parse(music.imageUrl.trim().replaceAll(' ', '%20')) : null,
+          artUri: music.imageUrl.isNotEmpty
+              ? Uri.parse(music.imageUrl.trim().replaceAll(' ', '%20'))
+              : null,
         ),
       );
 
@@ -149,22 +174,55 @@ class AudioProvider extends ChangeNotifier {
   }
 
   void next() {
-    if (_queue.isNotEmpty && _currentIndex < _queue.length - 1) {
+    if (_queue.isEmpty) return;
+
+    if (_shuffle && _queue.length > 1) {
+      int newIndex;
+      do {
+        newIndex = _random.nextInt(_queue.length);
+      } while (newIndex == _currentIndex);
+      playMusic(_queue[newIndex]);
+    } else if (_currentIndex < _queue.length - 1) {
       playMusic(_queue[_currentIndex + 1]);
+    } else if (_repeatMode == RepeatMode.all) {
+      playMusic(_queue[0]);
     }
   }
 
   void previous() {
-    if (_queue.isNotEmpty && _currentIndex > 0) {
+    if (_queue.isEmpty) {
+      seek(Duration.zero);
+      return;
+    }
+
+    // If more than 3 seconds in, restart current track
+    if (_position.inSeconds > 3) {
+      seek(Duration.zero);
+      return;
+    }
+
+    if (_currentIndex > 0) {
       playMusic(_queue[_currentIndex - 1]);
+    } else if (_repeatMode == RepeatMode.all) {
+      playMusic(_queue[_queue.length - 1]);
     } else {
       seek(Duration.zero);
     }
   }
 
   void _handlePlaybackCompleted() {
-    if (_queue.isNotEmpty && _currentIndex < _queue.length - 1) {
+    if (_repeatMode == RepeatMode.one) {
+      seek(Duration.zero).then((_) => resume());
+    } else if (_shuffle && _queue.length > 1) {
+      int newIndex;
+      do {
+        newIndex = _random.nextInt(_queue.length);
+      } while (newIndex == _currentIndex);
+      playMusic(_queue[newIndex]);
+    } else if (_queue.isNotEmpty && _currentIndex < _queue.length - 1) {
       next();
+    } else if (_repeatMode == RepeatMode.all && _queue.isNotEmpty) {
+      playMusic(_queue[0]);
     } else {
       _isPlaying = false;
       notifyListeners();
