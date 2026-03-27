@@ -30,6 +30,9 @@ flutter_ios_podfile_setup
 target 'Runner' do
   use_frameworks!
 
+  # Pin SDWebImage to 5.18.x — versions 5.19+ use iOS 17 HDR APIs not in Xcode 14.2 SDK
+  pod 'SDWebImage', '~> 5.18.0'
+
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
   target 'RunnerTests' do
     inherit! :search_paths
@@ -39,5 +42,32 @@ end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
+    target.build_configurations.each do |config|
+      # Disable strict concurrency to allow livekit_client to build on Xcode 14
+      config.build_settings['SWIFT_STRICT_CONCURRENCY'] = 'minimal'
+    end
+  end
+
+  # Patch SDWebImage: UIImage.isHighDynamicRange is iOS 17+ and not in Xcode 14.2 SDK
+  sdwebimage_file = File.join(installer.sandbox.root, 'SDWebImage/SDWebImage/Core/UIImage+Metadata.m')
+  if File.exist?(sdwebimage_file)
+    content = File.read(sdwebimage_file)
+    patched = content.gsub(
+      /- \(BOOL\)sd_isHighDynamicRange \{.*?^\}/m,
+      "- (BOOL)sd_isHighDynamicRange {\n    return [SDImageCoderHelper CGImageIsHDR:self.CGImage];\n}"
+    )
+    File.write(sdwebimage_file, patched) if patched != content
+  end
+
+  # Patch flutter_webrtc: AVCaptureDeviceTypeContinuityCamera/External are iOS 17+ only
+  webrtc_file = Dir[File.join(installer.sandbox.root, '../.pub-cache/hosted/pub.dev/flutter_webrtc-*/ios/Classes/FlutterRTCMediaStream.m')].first
+  webrtc_file ||= Dir["#{Dir.home}/.pub-cache/hosted/pub.dev/flutter_webrtc-*/ios/Classes/FlutterRTCMediaStream.m"].first
+  if webrtc_file && File.exist?(webrtc_file)
+    content = File.read(webrtc_file)
+    patched = content.gsub(
+      /if \(@available\(iOS 17\.0.*?AVCaptureDeviceTypeExternal.*?\]\);\s*\}/m,
+      '// AVCaptureDeviceTypeContinuityCamera / External require iOS 17+ SDK — skipped for Xcode 14'
+    )
+    File.write(webrtc_file, patched) if patched != content
   end
 end

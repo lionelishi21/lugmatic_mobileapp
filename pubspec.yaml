@@ -35,7 +35,7 @@ dependencies:
   socket_io_client: ^3.0.2 # Real-time chat/gifts via Socket.io
 
   # Live Streaming
-  livekit_client: ^2.3.2 # WebRTC video/audio via LiveKit
+  livekit_client: ">=2.3.2 <2.5.0" # WebRTC video/audio via LiveKit
 
   # Secure Storage
   flutter_secure_storage: ^9.2.4 # Encrypted token storage (Keychain/Keystore)
@@ -48,7 +48,7 @@ dependencies:
   flutter_svg: ^2.0.10+1 # For rendering SVG files
 
   # In-App Purchases & Monetization
-  flutter_stripe: ^10.1.1 # Native Stripe payments
+  flutter_stripe: ^9.0.0 # Native Stripe payments
   # in_app_purchase: ^3.2.0 # To handle in-app purchases for virtual gifts (temporarily disabled for demo)
 
   # Device & Permissions
@@ -57,7 +57,7 @@ dependencies:
   permission_handler: ^12.0.1 # To request and check for device permissions (e.g., storage)
 
   # Utilities & Social
-  share_plus: ^11.1.0 # For sharing songs, playlists, or podcasts to other apps
+  share_plus: ^10.0.0 # For sharing songs, playlists, or podcasts to other apps
 
   # Notifications
   # firebase_messaging: ^16.0.1 # To handle push notifications (disabled for demo)
