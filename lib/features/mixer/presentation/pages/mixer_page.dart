@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:lugmatic_flutter/data/models/music_model.dart';
-import 'package:lugmatic_flutter/data/services/music_service.dart';
-import 'package:lugmatic_flutter/core/theme/neumorphic_theme.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import '../../../../data/models/mix_model.dart';
+import '../../../../data/services/mixer_service.dart';
+import '../../../../core/config/api_config.dart';
 import 'dart:math' as math;
-import 'dart:async';
 
 class MixerPage extends StatefulWidget {
   const MixerPage({Key? key}) : super(key: key);
@@ -16,24 +16,34 @@ class MixerPage extends StatefulWidget {
 
 class _MixerPageState extends State<MixerPage> with SingleTickerProviderStateMixin {
   late AudioPlayer _player;
-  late AnimationController _avatarController;
-  
+  late AnimationController _pulseController;
+
+  // Generation state
   String _selectedMood = 'hype';
-  String _selectedTempo = 'medium';
-  double _bassGain = 0.5;
-  double _echoAmount = 0.2;
-  double _crossfadeSpeed = 3.0;
-  
-  List<MusicModel> _queue = [];
-  int _currentIndex = 0;
+  String? _selectedGenre;
+  int _songCount = 8;
+  bool _isGenerating = false;
+  bool _isSaving = false;
+  String? _generateError;
+
+  // Current mix
+  MixModel? _currentMix;
+  bool _mixSaved = false;
+
+  // Playback state
+  int _currentSongIndex = 0;
+  bool _isPlayingTransition = false;
   bool _isPlaying = false;
-  
-  final Map<String, double> _tempoMap = {
-    'slow': 0.85,
-    'medium': 1.0,
-    'fast': 1.15,
-    'turbo': 1.3,
-  };
+  Duration _position = Duration.zero;
+  Duration _duration = Duration.zero;
+
+  // Saved mixes
+  List<MixModel> _savedMixes = [];
+  bool _showSavedMixes = false;
+
+  static const _green = Color(0xFF10B981);
+  static const _purple = Color(0xFF8B5CF6);
+  static const _bg = Color(0xFF0F172A);
 
   final List<Map<String, dynamic>> _moods = [
     {'id': 'hype', 'label': 'Hype', 'emoji': '🔥'},
@@ -42,124 +52,226 @@ class _MixerPageState extends State<MixerPage> with SingleTickerProviderStateMix
     {'id': 'chill', 'label': 'Chill', 'emoji': '😌'},
     {'id': 'workout', 'label': 'Workout', 'emoji': '💪'},
     {'id': 'romance', 'label': 'Romance', 'emoji': '💕'},
+    {'id': 'dancehall', 'label': 'Dancehall', 'emoji': '🎵'},
+    {'id': 'reggae', 'label': 'Reggae', 'emoji': '🌴'},
   ];
 
   @override
   void initState() {
     super.initState();
     _player = AudioPlayer();
-    _avatarController = AnimationController(
+    _pulseController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1000),
+      duration: const Duration(milliseconds: 900),
     )..repeat(reverse: true);
-    
+
     _player.playerStateStream.listen((state) {
-      if (mounted) {
-        setState(() {
-          _isPlaying = state.playing;
-        });
-        if (state.processingState == ProcessingState.completed) {
-          _handleTrackEnded();
-        }
+      if (mounted) setState(() => _isPlaying = state.playing);
+      if (state.processingState == ProcessingState.completed && mounted) {
+        _onTrackComplete();
       }
     });
+    _player.positionStream.listen((p) { if (mounted) setState(() => _position = p); });
+    _player.durationStream.listen((d) { if (mounted) setState(() => _duration = d ?? Duration.zero); });
 
-    _loadInitialMix();
-  }
-
-  Future<void> _loadInitialMix() async {
-    try {
-      final musicService = context.read<MusicService>();
-      final songs = await musicService.getSongs();
-      if (mounted && songs.isNotEmpty) {
-        setState(() {
-          _queue = songs.take(8).toList();
-        });
-      }
-    } catch (e) {
-      debugPrint('Error loading initial mix: $e');
-    }
+    _loadSavedMixes();
   }
 
   @override
   void dispose() {
     _player.dispose();
-    _avatarController.dispose();
+    _pulseController.dispose();
     super.dispose();
   }
 
-  void _handleTrackEnded() {
-    if (_currentIndex < _queue.length - 1) {
-      _currentIndex++;
-      _playCurrentTrack();
-    } else {
+  Future<void> _loadSavedMixes() async {
+    try {
+      final service = context.read<MixerService>();
+      final mixes = await service.getMixes();
+      if (mounted) setState(() => _savedMixes = mixes);
+    } catch (_) {}
+  }
+
+  Future<void> _generateMix() async {
+    setState(() { _isGenerating = true; _generateError = null; _currentMix = null; _mixSaved = false; });
+    await _player.stop();
+
+    try {
+      final service = context.read<MixerService>();
+      final mix = await service.generateMix(
+        mood: _selectedMood,
+        genre: _selectedGenre,
+        songCount: _songCount,
+      );
       setState(() {
-        _isPlaying = false;
+        _currentMix = mix;
+        _currentSongIndex = 0;
+        _isGenerating = false;
       });
+    } catch (e) {
+      setState(() { _isGenerating = false; _generateError = e.toString(); });
     }
   }
 
-  Future<void> _playCurrentTrack() async {
-    if (_queue.isEmpty) return;
-    
-    final track = _queue[_currentIndex];
-    final url = track.audioUrl;
-
+  Future<void> _saveMix() async {
+    if (_currentMix == null || _isSaving) return;
+    setState(() => _isSaving = true);
     try {
-      await _player.setAudioSource(AudioSource.uri(Uri.parse(url)));
-      await _player.setSpeed(_tempoMap[_selectedTempo] ?? 1.0);
-      _player.play();
+      final service = context.read<MixerService>();
+      await service.saveMix(_currentMix!);
+      setState(() { _mixSaved = true; _isSaving = false; });
+      await _loadSavedMixes();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Mix saved! 🔥'), backgroundColor: _green),
+        );
+      }
     } catch (e) {
-      debugPrint('Error playing track: $e');
+      setState(() => _isSaving = false);
+    }
+  }
+
+  Future<void> _deleteSavedMix(MixModel mix) async {
+    if (mix.id == null) return;
+    try {
+      final service = context.read<MixerService>();
+      await service.deleteMix(mix.id!);
+      await _loadSavedMixes();
+    } catch (_) {}
+  }
+
+  void _loadSavedMixForPlayback(MixModel mix) {
+    setState(() {
+      _currentMix = mix;
+      _currentSongIndex = 0;
+      _showSavedMixes = false;
+      _mixSaved = true;
+    });
+  }
+
+  String _resolveUrl(String url) {
+    if (url.startsWith('http')) return url;
+    return '${ApiConfig.storageBaseUrl}$url';
+  }
+
+  Future<void> _playCurrentSong() async {
+    final mix = _currentMix;
+    if (mix == null || mix.songs.isEmpty) return;
+    final song = mix.songs[_currentSongIndex];
+    if (song.audioFile.isEmpty) return;
+
+    // Play transition audio if available (intro = afterSongIndex 0, between = afterSongIndex == next song index)
+    final transition = mix.transitions.where((t) => t.afterSongIndex == _currentSongIndex).firstOrNull;
+    if (transition?.audioUrl != null && transition!.audioUrl!.isNotEmpty) {
+      setState(() => _isPlayingTransition = true);
+      try {
+        await _player.setAudioSource(AudioSource.uri(Uri.parse(transition.audioUrl!)));
+        await _player.play();
+        // Wait for transition to finish
+        await _player.playerStateStream.firstWhere(
+          (s) => s.processingState == ProcessingState.completed,
+        );
+      } catch (_) {}
+      setState(() => _isPlayingTransition = false);
+    }
+
+    if (!mounted) return;
+    try {
+      await _player.setAudioSource(AudioSource.uri(Uri.parse(_resolveUrl(song.audioFile))));
+      await _player.play();
+    } catch (e) {
+      debugPrint('Error playing song: $e');
+    }
+  }
+
+  void _onTrackComplete() {
+    if (_isPlayingTransition) return;
+    final mix = _currentMix;
+    if (mix == null) return;
+    if (_currentSongIndex < mix.songs.length - 1) {
+      setState(() => _currentSongIndex++);
+      _playCurrentSong();
+    } else {
+      setState(() => _isPlaying = false);
     }
   }
 
   void _togglePlay() {
     if (_isPlaying) {
       _player.pause();
+    } else if (_player.audioSource == null) {
+      _playCurrentSong();
     } else {
-      if (_player.audioSource == null) {
-        _playCurrentTrack();
-      } else {
-        _player.play();
-      }
+      _player.play();
+    }
+  }
+
+  void _skipNext() {
+    final mix = _currentMix;
+    if (mix == null) return;
+    if (_currentSongIndex < mix.songs.length - 1) {
+      setState(() => _currentSongIndex++);
+      _playCurrentSong();
+    }
+  }
+
+  void _skipPrev() {
+    if (_position.inSeconds > 3) {
+      _player.seek(Duration.zero);
+    } else if (_currentSongIndex > 0) {
+      setState(() => _currentSongIndex--);
+      _playCurrentSong();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: _bg,
       body: CustomScrollView(
         slivers: [
           _buildAppBar(),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildDJStage(),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 20),
                   _buildMoodSection(),
-                  const SizedBox(height: 24),
-                  _buildTempoAndEffects(),
-                  const SizedBox(height: 24),
-                  _buildQueueSection(),
-                  const SizedBox(height: 100),
+                  const SizedBox(height: 20),
+                  _buildSongCountRow(),
+                  const SizedBox(height: 20),
+                  _buildGenerateButton(),
+                  if (_generateError != null) ...[
+                    const SizedBox(height: 12),
+                    Text(_generateError!, style: const TextStyle(color: Colors.redAccent, fontSize: 13)),
+                  ],
+                  if (_currentMix != null) ...[
+                    const SizedBox(height: 24),
+                    _buildMixHeader(),
+                    const SizedBox(height: 12),
+                    _buildMixQueue(),
+                  ],
+                  if (_showSavedMixes) ...[
+                    const SizedBox(height: 24),
+                    _buildSavedMixesList(),
+                  ],
+                  const SizedBox(height: 120),
                 ],
               ),
             ),
           ),
         ],
       ),
-      bottomNavigationBar: _buildBottomControls(),
+      bottomNavigationBar: _currentMix != null ? _buildBottomControls() : null,
     );
   }
 
   Widget _buildAppBar() {
     return SliverAppBar(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: _bg,
       pinned: true,
       elevation: 0,
       leading: IconButton(
@@ -168,22 +280,16 @@ class _MixerPageState extends State<MixerPage> with SingleTickerProviderStateMix
       ),
       title: const Row(
         children: [
-          Icon(Icons.auto_awesome, color: Color(0xFF10B981), size: 20),
+          Icon(Icons.auto_awesome, color: _green, size: 20),
           SizedBox(width: 8),
-          Text(
-            'AI MIXER',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.2,
-            ),
-          ),
+          Text('SELECTOR AI MIXER', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16, letterSpacing: 1.2)),
         ],
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.share_outlined, color: Colors.white),
-          onPressed: () {},
+          icon: Icon(_showSavedMixes ? Icons.close : Icons.library_music_outlined, color: Colors.white),
+          onPressed: () => setState(() => _showSavedMixes = !_showSavedMixes),
+          tooltip: 'Saved Mixes',
         ),
       ],
     );
@@ -191,85 +297,65 @@ class _MixerPageState extends State<MixerPage> with SingleTickerProviderStateMix
 
   Widget _buildDJStage() {
     return Container(
-      height: 220,
+      height: 180,
       width: double.infinity,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            const Color(0xFF10B981).withOpacity(0.1),
-            const Color(0xFF8B5CF6).withOpacity(0.1),
-          ],
+          colors: [_green.withOpacity(0.15), _purple.withOpacity(0.15)],
         ),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        border: Border.all(color: Colors.white.withOpacity(0.06)),
       ),
       child: Stack(
         children: [
-          // Animated Background Pulse
           Center(
             child: AnimatedBuilder(
-              animation: _avatarController,
-              builder: (context, child) {
-                return Container(
-                  width: 150 + (30 * _avatarController.value),
-                  height: 150 + (30 * _avatarController.value),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF10B981).withOpacity(0.2 * _avatarController.value),
-                        blurRadius: 40,
-                        spreadRadius: 20,
-                      ),
-                    ],
-                  ),
-                );
-              },
+              animation: _pulseController,
+              builder: (_, __) => Container(
+                width: 120 + 30 * _pulseController.value,
+                height: 120 + 30 * _pulseController.value,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  boxShadow: [BoxShadow(color: _green.withOpacity(0.25 * _pulseController.value), blurRadius: 40, spreadRadius: 20)],
+                ),
+              ),
             ),
           ),
-          // DJ Avatar Simple Visualization
           Center(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.headphones, size: 80, color: Colors.white),
-                const SizedBox(height: 12),
-                AnimatedBuilder(
-                  animation: _avatarController,
-                  builder: (context, child) {
-                    return Text(
-                      _moods.firstWhere((m) => m['id'] == _selectedMood)['emoji'],
-                      style: TextStyle(fontSize: 32 + (8 * _avatarController.value)),
-                    );
-                  },
+                const Text('🎧', style: TextStyle(fontSize: 52)),
+                const SizedBox(height: 8),
+                Text(
+                  _isGenerating ? 'Generating di mix...' :
+                  _isPlayingTransition ? 'Selecta inna di dance! 🔥' :
+                  _currentMix != null ? _currentMix!.mixName : 'Jamaican Selector Vibes',
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                  textAlign: TextAlign.center,
                 ),
               ],
             ),
           ),
-          // Waveform Overlay (Mock)
           Positioned(
-            bottom: 20,
-            left: 20,
-            right: 20,
+            bottom: 16, left: 16, right: 16,
             child: SizedBox(
-              height: 40,
+              height: 32,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: List.generate(20, (index) {
+                children: List.generate(24, (i) {
                   return AnimatedBuilder(
-                    animation: _avatarController,
-                    builder: (context, child) {
-                      final random = math.Random(index);
-                      final height = 10 + (30 * random.nextDouble() * _avatarController.value);
+                    animation: _pulseController,
+                    builder: (_, __) {
+                      final h = (_isPlaying || _isGenerating)
+                          ? 6 + 24 * math.Random(i + (_isGenerating ? DateTime.now().millisecond : 0)).nextDouble() * _pulseController.value
+                          : 4.0;
                       return Container(
-                        width: 4,
-                        height: height,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF10B981).withOpacity(0.6),
-                          borderRadius: BorderRadius.circular(2),
-                        ),
+                        width: 3,
+                        height: h,
+                        decoration: BoxDecoration(color: _green.withOpacity(0.7), borderRadius: BorderRadius.circular(2)),
                       );
                     },
                   );
@@ -286,274 +372,348 @@ class _MixerPageState extends State<MixerPage> with SingleTickerProviderStateMix
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Select Mood',
-          style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 16),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 10,
-            childAspectRatio: 1.5,
-          ),
-          itemCount: _moods.length,
-          itemBuilder: (context, index) {
-            final mood = _moods[index];
-            final isSelected = _selectedMood == mood['id'];
+        const Text('Select Vibe', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: _moods.map((mood) {
+            final selected = _selectedMood == mood['id'];
             return GestureDetector(
-              onTap: () {
-                setState(() => _selectedMood = mood['id']);
-                // Logic to filter queue would go here
-              },
-              child: Container(
+              onTap: () => setState(() => _selectedMood = mood['id']),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 decoration: BoxDecoration(
-                  color: isSelected ? const Color(0xFF10B981).withOpacity(0.2) : Colors.white.withOpacity(0.05),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: isSelected ? const Color(0xFF10B981) : Colors.white.withOpacity(0.1),
-                  ),
+                  color: selected ? _green.withOpacity(0.25) : Colors.white.withOpacity(0.06),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: selected ? _green : Colors.white.withOpacity(0.12)),
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(mood['emoji'], style: const TextStyle(fontSize: 20)),
-                    const SizedBox(height: 4),
-                    Text(
-                      mood['label'],
-                      style: TextStyle(
-                        color: isSelected ? const Color(0xFF10B981) : Colors.white70,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    Text(mood['emoji'], style: const TextStyle(fontSize: 16)),
+                    const SizedBox(width: 6),
+                    Text(mood['label'], style: TextStyle(color: selected ? _green : Colors.white70, fontWeight: FontWeight.w600, fontSize: 13)),
                   ],
                 ),
               ),
             );
-          },
+          }).toList(),
         ),
       ],
     );
   }
 
-  Widget _buildTempoAndEffects() {
+  Widget _buildSongCountRow() {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          flex: 1,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Tempo', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 12),
-              ..._tempoMap.keys.map((t) {
-                final isSelected = _selectedTempo == t;
-                return GestureDetector(
-                  onTap: () {
-                    setState(() => _selectedTempo = t);
-                    _player.setSpeed(_tempoMap[t]!);
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                    margin: const EdgeInsets.only(bottom: 6),
-                    decoration: BoxDecoration(
-                      color: isSelected ? const Color(0xFF10B981) : Colors.white.withOpacity(0.05),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Center(
-                      child: Text(
-                        t.toUpperCase(),
-                        style: TextStyle(
-                          color: isSelected ? Colors.black : Colors.white70,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              }).toList(),
-            ],
-          ),
-        ),
-        const SizedBox(width: 20),
-        Expanded(
-          flex: 2,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Effects', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 16),
-              _buildEffectSlider('Bass Boost', _bassGain, (v) => setState(() => _bassGain = v)),
-              _buildEffectSlider('Echo', _echoAmount, (v) => setState(() => _echoAmount = v)),
-              _buildEffectSlider('Crossfade', _crossfadeSpeed / 10, (v) => setState(() => _crossfadeSpeed = v * 10)),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildEffectSlider(String label, double value, ValueChanged<double> onChanged) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(label, style: const TextStyle(color: Colors.white60, fontSize: 12)),
-            Text('${(value * 100).toInt()}%', style: const TextStyle(color: Color(0xFF10B981), fontSize: 10, fontWeight: FontWeight.bold)),
-          ],
-        ),
-        Slider(
-          value: value,
-          onChanged: onChanged,
-          activeColor: const Color(0xFF10B981),
-          inactiveColor: Colors.white10,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildQueueSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'Mix Queue',
-              style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            Text(
-              '${_queue.length}/8',
-              style: const TextStyle(color: Colors.white60, fontSize: 14),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        if (_queue.isEmpty)
-          const Center(
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 20.0),
-              child: Text('Add songs to start mixing', style: TextStyle(color: Colors.white38)),
-            ),
-          )
-        else
-          ..._queue.asMap().entries.map((entry) {
-            final idx = entry.key;
-            final song = entry.value;
-            final isCurrent = idx == _currentIndex;
-            return Container(
-              margin: const EdgeInsets.only(bottom: 8),
-              padding: const EdgeInsets.all(12),
+        const Text('Songs in mix:', style: TextStyle(color: Colors.white70, fontSize: 14)),
+        const SizedBox(width: 16),
+        ...[4, 6, 8, 10, 12].map((n) {
+          final sel = _songCount == n;
+          return GestureDetector(
+            onTap: () => setState(() => _songCount = n),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              margin: const EdgeInsets.only(right: 8),
+              width: 36, height: 36,
               decoration: BoxDecoration(
-                color: isCurrent ? const Color(0xFF10B981).withOpacity(0.1) : Colors.white.withOpacity(0.03),
-                borderRadius: BorderRadius.circular(16),
-                border: isCurrent ? Border.all(color: const Color(0xFF10B981).withOpacity(0.5)) : null,
+                color: sel ? _green : Colors.white.withOpacity(0.06),
+                shape: BoxShape.circle,
+                border: Border.all(color: sel ? _green : Colors.white12),
               ),
-              child: Row(
+              child: Center(child: Text('$n', style: TextStyle(color: sel ? Colors.black : Colors.white70, fontWeight: FontWeight.bold, fontSize: 13))),
+            ),
+          );
+        }),
+      ],
+    );
+  }
+
+  Widget _buildGenerateButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 52,
+      child: ElevatedButton(
+        onPressed: _isGenerating ? null : _generateMix,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: _green,
+          disabledBackgroundColor: _green.withOpacity(0.4),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        ),
+        child: _isGenerating
+            ? const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      song.imageUrl,
-                      width: 40,
-                      height: 40,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(color: Colors.white10, child: const Icon(Icons.music_note, color: Colors.white30)),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                  Text(song.title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14)),
-                  Text(song.artist, style: const TextStyle(color: Colors.white60, fontSize: 12)),
-                      ],
-                    ),
-                  ),
-                  if (isCurrent && _isPlaying)
-                    const Icon(Icons.equalizer, color: Color(0xFF10B981), size: 20),
+                  SizedBox(width: 18, height: 18, child: CircularProgressIndicator(color: Colors.black, strokeWidth: 2)),
+                  SizedBox(width: 12),
+                  Text('Selecta ah work di magic... 🔥', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                ],
+              )
+            : const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.auto_awesome, color: Colors.black, size: 20),
+                  SizedBox(width: 8),
+                  Text('Generate Selector Mix', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16)),
                 ],
               ),
-            );
-          }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildMixHeader() {
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(_currentMix!.mixName, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+              Text('${_currentMix!.songs.length} tracks · ${_selectedMood} vibe', style: const TextStyle(color: Colors.white54, fontSize: 13)),
+            ],
+          ),
+        ),
+        if (!_mixSaved)
+          TextButton.icon(
+            onPressed: _isSaving ? null : _saveMix,
+            icon: _isSaving
+                ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: _green))
+                : const Icon(Icons.bookmark_add_outlined, color: _green, size: 18),
+            label: Text(_isSaving ? 'Saving...' : 'Save Mix', style: const TextStyle(color: _green, fontSize: 13)),
+          )
+        else
+          const Row(
+            children: [
+              Icon(Icons.bookmark, color: _green, size: 16),
+              SizedBox(width: 4),
+              Text('Saved', style: TextStyle(color: _green, fontSize: 13)),
+            ],
+          ),
+      ],
+    );
+  }
+
+  Widget _buildMixQueue() {
+    final mix = _currentMix!;
+    return Column(
+      children: [
+        ...mix.songs.asMap().entries.map((e) {
+          final idx = e.key;
+          final song = e.value;
+          final isCurrent = idx == _currentSongIndex;
+
+          // Find transition that plays before this song
+          final transition = mix.transitions.where((t) => t.afterSongIndex == idx).firstOrNull;
+
+          return Column(
+            children: [
+              if (transition != null)
+                Container(
+                  margin: const EdgeInsets.symmetric(vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: _purple.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: _purple.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Text('🎤', style: TextStyle(fontSize: 14)),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          transition.text,
+                          style: const TextStyle(color: Color(0xFFBB86FC), fontSize: 12, fontStyle: FontStyle.italic),
+                        ),
+                      ),
+                      if (transition.audioUrl != null)
+                        const Icon(Icons.volume_up, color: Color(0xFFBB86FC), size: 14),
+                    ],
+                  ),
+                ),
+              GestureDetector(
+                onTap: () {
+                  setState(() => _currentSongIndex = idx);
+                  _playCurrentSong();
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  margin: const EdgeInsets.only(bottom: 6),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: isCurrent ? _green.withOpacity(0.12) : Colors.white.withOpacity(0.03),
+                    borderRadius: BorderRadius.circular(14),
+                    border: isCurrent ? Border.all(color: _green.withOpacity(0.5)) : null,
+                  ),
+                  child: Row(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: song.coverArt != null && song.coverArt!.isNotEmpty
+                            ? CachedNetworkImage(imageUrl: _resolveUrl(song.coverArt!), width: 44, height: 44, fit: BoxFit.cover,
+                                errorWidget: (_, __, ___) => _fallbackArt())
+                            : _fallbackArt(),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(song.name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14), maxLines: 1, overflow: TextOverflow.ellipsis),
+                            Text(song.artist, style: const TextStyle(color: Colors.white54, fontSize: 12)),
+                          ],
+                        ),
+                      ),
+                      if (isCurrent && _isPlaying)
+                        const Icon(Icons.equalizer, color: _green, size: 20)
+                      else
+                        Text('${idx + 1}', style: const TextStyle(color: Colors.white30, fontSize: 12)),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          );
+        }),
+      ],
+    );
+  }
+
+  Widget _buildSavedMixesList() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Saved Mixes', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 12),
+        if (_savedMixes.isEmpty)
+          const Center(child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 20),
+            child: Text('No saved mixes yet. Generate one!', style: TextStyle(color: Colors.white38)),
+          ))
+        else
+          ..._savedMixes.map((mix) => Container(
+            margin: const EdgeInsets.only(bottom: 8),
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.04),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: Colors.white.withOpacity(0.08)),
+            ),
+            child: Row(
+              children: [
+                const Text('🎵', style: TextStyle(fontSize: 24)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(mix.mixName, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      Text('${mix.songs.length} tracks · ${mix.mood}', style: const TextStyle(color: Colors.white54, fontSize: 12)),
+                    ],
+                  ),
+                ),
+                IconButton(icon: const Icon(Icons.play_circle, color: _green, size: 28), onPressed: () => _loadSavedMixForPlayback(mix)),
+                IconButton(icon: const Icon(Icons.delete_outline, color: Colors.white30, size: 20), onPressed: () => _deleteSavedMix(mix)),
+              ],
+            ),
+          )),
       ],
     );
   }
 
   Widget _buildBottomControls() {
+    final mix = _currentMix!;
+    final currentSong = mix.songs.isNotEmpty ? mix.songs[_currentSongIndex] : null;
+    final progress = (_duration.inMilliseconds > 0)
+        ? (_position.inMilliseconds / _duration.inMilliseconds).clamp(0.0, 1.0)
+        : 0.0;
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
       decoration: BoxDecoration(
-        color: const Color(0xFF1F2937),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.5), blurRadius: 20, offset: const Offset(0, -5)),
-        ],
+        color: const Color(0xFF1A2435),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.6), blurRadius: 20, offset: const Offset(0, -5))],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('NOW MIXING', style: TextStyle(color: Color(0xFF10B981), fontSize: 10, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 4),
-              SizedBox(
-                width: 150,
-                child: Text(
-                  _queue.isEmpty ? 'No Track Selected' : _queue[_currentIndex].title,
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
-                  overflow: TextOverflow.ellipsis,
-                ),
+          if (_isPlayingTransition)
+            Container(
+              margin: const EdgeInsets.only(bottom: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(color: _purple.withOpacity(0.2), borderRadius: BorderRadius.circular(8)),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.mic, color: Color(0xFFBB86FC), size: 14),
+                  SizedBox(width: 6),
+                  Text('Selecta drop...', style: TextStyle(color: Color(0xFFBB86FC), fontSize: 12)),
+                ],
               ),
-            ],
-          ),
+            ),
           Row(
             children: [
-              IconButton(
-                icon: const Icon(Icons.shuffle, color: Colors.white70),
-                onPressed: () {
-                  setState(() {
-                    _queue.shuffle();
-                  });
-                },
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      currentSong?.name ?? 'No Track',
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(currentSong?.artist ?? '', style: const TextStyle(color: Colors.white54, fontSize: 12)),
+                  ],
+                ),
               ),
-              const SizedBox(width: 8),
+              IconButton(icon: const Icon(Icons.skip_previous, color: Colors.white70), onPressed: _skipPrev),
               GestureDetector(
                 onTap: _togglePlay,
                 child: Container(
-                  width: 56,
-                  height: 56,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF10B981),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    _isPlaying ? Icons.pause : Icons.play_arrow,
-                    color: Colors.black,
-                    size: 32,
-                  ),
+                  width: 52, height: 52,
+                  decoration: const BoxDecoration(color: _green, shape: BoxShape.circle),
+                  child: Icon(_isPlaying ? Icons.pause : Icons.play_arrow, color: Colors.black, size: 30),
                 ),
               ),
-              const SizedBox(width: 8),
-              IconButton(
-                icon: const Icon(Icons.skip_next, color: Colors.white70),
-                onPressed: _handleTrackEnded,
-              ),
+              IconButton(icon: const Icon(Icons.skip_next, color: Colors.white70), onPressed: _skipNext),
+            ],
+          ),
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: progress.toDouble(),
+              backgroundColor: Colors.white12,
+              valueColor: const AlwaysStoppedAnimation<Color>(_green),
+              minHeight: 3,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(_formatDuration(_position), style: const TextStyle(color: Colors.white38, fontSize: 10)),
+              Text('${_currentSongIndex + 1} / ${mix.songs.length}', style: const TextStyle(color: Colors.white38, fontSize: 10)),
+              Text(_formatDuration(_duration), style: const TextStyle(color: Colors.white38, fontSize: 10)),
             ],
           ),
         ],
       ),
     );
+  }
+
+  Widget _fallbackArt() => Container(
+    width: 44, height: 44,
+    color: Colors.white10,
+    child: const Icon(Icons.music_note, color: Colors.white30, size: 20),
+  );
+
+  String _formatDuration(Duration d) {
+    final m = d.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final s = d.inSeconds.remainder(60).toString().padLeft(2, '0');
+    return '$m:$s';
   }
 }

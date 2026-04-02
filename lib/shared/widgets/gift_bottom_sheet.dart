@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/config/api_config.dart';
@@ -32,7 +33,8 @@ class GiftBottomSheet extends StatefulWidget {
   State<GiftBottomSheet> createState() => _GiftBottomSheetState();
 }
 
-class _GiftBottomSheetState extends State<GiftBottomSheet> {
+class _GiftBottomSheetState extends State<GiftBottomSheet> with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
   List<GiftModel> _gifts = [];
   int _coinBalance = 0;
   bool _loading = true;
@@ -41,7 +43,17 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> {
   @override
   void initState() {
     super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
     _loadData();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadData() async {
@@ -68,6 +80,7 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> {
           _coinBalance = coins is int ? coins : (coins as num).toInt();
           _loading = false;
         });
+        _animationController.forward(from: 0);
       }
     } catch (e) {
       if (mounted) setState(() => _loading = false);
@@ -133,16 +146,19 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return DraggableScrollableSheet(
-      initialChildSize: 0.65,
-      minChildSize: 0.45,
-      maxChildSize: 0.92,
-      builder: (_, scrollController) => Container(
-        decoration: const BoxDecoration(
-          color: Color(0xFF1A2332),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-        ),
-        child: Column(
+    return BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+      child: DraggableScrollableSheet(
+        initialChildSize: 0.65,
+        minChildSize: 0.45,
+        maxChildSize: 0.92,
+        builder: (_, scrollController) => Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF1A2332).withOpacity(0.85),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+            border: Border.all(color: Colors.white.withOpacity(0.1)),
+          ),
+          child: Column(
           children: [
             // Handle
             Padding(
@@ -243,11 +259,31 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> {
                             final gift = _gifts[index];
                             final isSending = _sendingId == gift.id;
                             final canAfford = _coinBalance >= gift.price.toInt();
-                            return _GiftCard(
-                              gift: gift,
-                              isSending: isSending,
-                              canAfford: canAfford,
-                              onSend: () => _sendGift(gift),
+                            return AnimatedBuilder(
+                              animation: _animationController,
+                              builder: (context, child) {
+                                final delay = (index % 3) * 0.1 + (index ~/ 3) * 0.05;
+                                final animation = CurvedAnimation(
+                                  parent: _animationController,
+                                  curve: Interval(
+                                    (delay).clamp(0, 1.0),
+                                    (delay + 0.4).clamp(0, 1.0),
+                                    curve: Curves.easeOutBack,
+                                  ),
+                                );
+                                return FadeTransition(
+                                  opacity: animation,
+                                  child: ScaleTransition(
+                                    scale: animation,
+                                    child: _GiftCard(
+                                      gift: gift,
+                                      isSending: isSending,
+                                      canAfford: canAfford,
+                                      onSend: () => _sendGift(gift),
+                                    ),
+                                  ),
+                                );
+                              },
                             );
                           },
                         ),
@@ -281,10 +317,14 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> {
             ),
           ],
         ),
+        ),
       ),
     );
   }
 }
+
+
+
 
 class _GiftCard extends StatelessWidget {
   final GiftModel gift;
@@ -303,22 +343,50 @@ class _GiftCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final imageUrl = ApiConfig.resolveUrl(gift.imageUrl);
 
+    final isLegendary = gift.rarity?.toLowerCase() == 'legendary';
+    final isEpic = gift.rarity?.toLowerCase() == 'epic';
+
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Colors.white.withOpacity(0.07),
-            Colors.white.withOpacity(0.03),
-          ],
+          colors: isLegendary
+              ? [
+                  const Color(0xFFFBBF24).withOpacity(0.2),
+                  const Color(0xFFF59E0B).withOpacity(0.1),
+                ]
+              : isEpic
+                  ? [
+                      const Color(0xFF9333EA).withOpacity(0.25),
+                      const Color(0xFFC026D3).withOpacity(0.1),
+                    ]
+                  : [
+                      Colors.white.withOpacity(0.08),
+                      Colors.white.withOpacity(0.03),
+                    ],
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: canAfford
-              ? Colors.white.withOpacity(0.12)
-              : Colors.white.withOpacity(0.05),
+          color: isLegendary
+              ? const Color(0xFFFBBF24).withOpacity(0.4)
+              : isEpic
+                  ? const Color(0xFF9333EA).withOpacity(0.4)
+                  : canAfford
+                      ? Colors.white.withOpacity(0.15)
+                      : Colors.white.withOpacity(0.05),
+          width: (isLegendary || isEpic) ? 1.5 : 1.0,
         ),
+        boxShadow: (isLegendary || isEpic)
+            ? [
+                BoxShadow(
+                  color: (isLegendary ? const Color(0xFFFBBF24) : const Color(0xFF9333EA))
+                      .withOpacity(0.2),
+                  blurRadius: 12,
+                  spreadRadius: 2,
+                )
+              ]
+            : [],
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -331,16 +399,31 @@ class _GiftCard extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: imageUrl.isNotEmpty
-                ? ClipOval(
-                    child: Image.network(
-                      imageUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const Icon(
-                        Icons.card_giftcard,
-                        color: Color(0xFF10B981),
-                        size: 28,
+                ? Stack(
+                    children: [
+                      ClipOval(
+                        child: Image.network(
+                          imageUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => const Icon(
+                            Icons.card_giftcard,
+                            color: Color(0xFF10B981),
+                            size: 28,
+                          ),
+                        ),
                       ),
-                    ),
+                      if (isLegendary)
+                        Positioned(
+                          top: 0, right: 0,
+                          child: Container(
+                            width: 8, height: 8,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFFBBF24),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ),
+                    ],
                   )
                 : const Icon(Icons.card_giftcard, color: Color(0xFF10B981), size: 28),
           ),

@@ -13,6 +13,7 @@ class GiftModel {
   final String artistName;
   final DateTime createdAt;
   final DateTime? expiresAt;
+  final String? rarity;
 
   GiftModel({
     required this.id,
@@ -29,6 +30,7 @@ class GiftModel {
     required this.artistName,
     required this.createdAt,
     this.expiresAt,
+    this.rarity,
   });
 
   factory GiftModel.fromJson(Map<String, dynamic> json) {
@@ -47,6 +49,7 @@ class GiftModel {
       artistName: json['artistName'] ?? '',
       createdAt: json['createdAt'] != null ? DateTime.tryParse(json['createdAt'].toString()) ?? DateTime.now() : DateTime.now(),
       expiresAt: json['seasonalEnd'] != null ? DateTime.tryParse(json['seasonalEnd'].toString()) : json['expiresAt'] != null ? DateTime.tryParse(json['expiresAt'].toString()) : null,
+      rarity: json['rarity']?.toString().toLowerCase(),
     );
   }
 
@@ -66,6 +69,7 @@ class GiftModel {
       'artistName': artistName,
       'createdAt': createdAt.toIso8601String(),
       'expiresAt': expiresAt?.toIso8601String(),
+      'rarity': rarity,
     };
   }
 }

@@ -19,6 +19,7 @@ import 'data/services/gift_service.dart';
 import 'data/services/stripe_service.dart';
 import 'data/services/music_service.dart';
 import 'data/services/subscription_service.dart';
+import 'data/services/mixer_service.dart';
 import 'data/providers/audio_provider.dart';
 import 'features/store/presentation/pages/store_page.dart';
 import 'features/mixer/presentation/pages/mixer_page.dart';
@@ -77,6 +78,7 @@ void main() async {
     final stripeService = StripeService(giftService: giftService);
     final musicService = MusicService(apiClient: apiClient);
     final subscriptionService = SubscriptionService(apiClient: apiClient);
+    final mixerService = MixerService(apiClient: apiClient);
 
     runApp(
       MultiProvider(
@@ -97,6 +99,7 @@ void main() async {
           Provider<StripeService>.value(value: stripeService),
           Provider<MusicService>.value(value: musicService),
           Provider<SubscriptionService>.value(value: subscriptionService),
+          Provider<MixerService>.value(value: mixerService),
           ChangeNotifierProvider(
             create: (_) => AudioProvider(musicService: musicService),
           ),
