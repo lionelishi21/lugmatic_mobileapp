@@ -35,7 +35,7 @@ dependencies:
   socket_io_client: ^3.0.2 # Real-time chat/gifts via Socket.io
 
   # Live Streaming
-  livekit_client: ">=2.3.2 <2.5.0" # WebRTC video/audio via LiveKit
+  livekit_client: ">=2.4.9 <2.5.0" # WebRTC video/audio via LiveKit
 
   # Secure Storage
   flutter_secure_storage: ^9.2.4 # Encrypted token storage (Keychain/Keystore)
