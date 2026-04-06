@@ -55,7 +55,7 @@ class _GenreMusicPageState extends State<GenreMusicPage> {
 
     try {
       final newSongs = await _musicService.getSongsByGenre(
-        widget.genre.name,
+        widget.genre.id,
         page: _currentPage,
         limit: 20,
       );

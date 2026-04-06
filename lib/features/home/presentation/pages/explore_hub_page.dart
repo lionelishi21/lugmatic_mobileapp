@@ -7,6 +7,8 @@ import 'package:lugmatic_flutter/features/store/presentation/pages/store_page.da
 import 'package:lugmatic_flutter/features/mixer/presentation/pages/mixer_page.dart';
 import 'package:lugmatic_flutter/shared/widgets/demand_artist_dialog.dart';
 import 'package:lugmatic_flutter/features/home/presentation/pages/browse_page.dart';
+import 'package:lugmatic_flutter/features/video/presentation/pages/videos_page.dart';
+import 'package:lugmatic_flutter/features/music/presentation/pages/discover_page.dart';
 
 class ExploreHubPage extends StatelessWidget {
   const ExploreHubPage({Key? key}) : super(key: key);
@@ -56,21 +58,14 @@ class ExploreHubPage extends StatelessWidget {
                   title: 'Meet Artists',
                   icon: Icons.people,
                   color: AppColors.secondary,
-                  onTap: () {
-                    // Navigate to Artists Hub if it exists, or Home with filter
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Artist Discovery coming soon!')),
-                    );
-                  },
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const DiscoverPage())),
                 ),
                 _buildHubCard(
                   context,
                   title: 'Watch Videos',
                   icon: Icons.play_circle_fill,
                   color: AppColors.error,
-                  onTap: () {
-                    // Navigate to Video Hub
-                  },
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const VideosPage())),
                 ),
                 _buildHubCard(
                   context,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../features/home/presentation/pages/home_page.dart';
 import '../features/home/presentation/pages/artist_detail_page.dart';
 import '../features/home/presentation/pages/album_detail_page.dart';
+import '../features/home/presentation/pages/create_playlist_screen.dart';
 import '../features/song/presentation/pages/song_detail_page.dart';
 import '../features/store/presentation/pages/store_page.dart';
 import '../features/mixer/presentation/pages/mixer_page.dart';
@@ -58,6 +59,12 @@ class AppRouter {
           return MaterialPageRoute(builder: (_) => AlbumDetailPage(albumId: args));
         }
         return _notFound();
+
+      case '/create_playlist':
+        return MaterialPageRoute(
+          fullscreenDialog: true,
+          builder: (_) => const CreatePlaylistScreen(),
+        );
 
       case '/store':
         return MaterialPageRoute(builder: (_) => const StorePage());

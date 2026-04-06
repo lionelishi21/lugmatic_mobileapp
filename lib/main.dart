@@ -140,20 +140,7 @@ class LugmaticApp extends StatelessWidget {
         '/mixer': (context) => const MixerPage(),
         '/premium': (context) => const SubscriptionPage(),
       },
-      builder: (context, child) {
-        return Stack(
-          children: [
-            child!,
-            const Align(
-              alignment: Alignment.bottomCenter,
-              child: SafeArea(
-                top: false,
-                child: MiniPlayer(),
-              ),
-            ),
-          ],
-        );
-      },
+      builder: (context, child) => child!,
     );
   }
 }

@@ -11,16 +11,19 @@ class LiveStreamService {
 
   LiveStreamService({required ApiClient apiClient}) : _apiClient = apiClient;
 
-  /// Fetch live streams, optionally filtered by status.
+  /// Fetch live streams. Uses /active endpoint for live status, /scheduled for upcoming.
   Future<List<LiveStreamModel>> getLiveStreams({String? status}) async {
     try {
-      final queryParams = <String, dynamic>{};
-      if (status != null) queryParams['status'] = status;
+      final String endpoint;
+      if (status == 'live' || status == 'active') {
+        endpoint = '${ApiConfig.liveStreams}/active';
+      } else if (status == 'scheduled') {
+        endpoint = '${ApiConfig.liveStreams}/scheduled';
+      } else {
+        endpoint = '${ApiConfig.liveStreams}/active';
+      }
 
-      final response = await _apiClient.dio.get(
-        ApiConfig.liveStreams,
-        queryParameters: queryParams,
-      );
+      final response = await _apiClient.dio.get(endpoint);
 
       final body = response.data;
       final data = body['data'] ?? body;

@@ -26,7 +26,8 @@ class MusicService {
         queryParameters: queryParams,
       );
       final body = response.data;
-      final items = body['data']?['songs'] ?? body['songs'] ?? [];
+      final rawData = body['data'];
+      final items = rawData is List ? rawData : rawData?['songs'] ?? body['songs'] ?? [];
       return (items as List)
           .map((json) => MusicModel.fromJson(json as Map<String, dynamic>))
           .toList();
@@ -40,7 +41,8 @@ class MusicService {
     try {
       final response = await _apiClient.dio.get(ApiConfig.genres);
       final body = response.data;
-      final items = body['data']?['genres'] ?? body['genres'] ?? [];
+      final rawData = body['data'];
+      final items = rawData is List ? rawData : rawData?['genres'] ?? body['genres'] ?? [];
       return (items as List)
           .map((json) => GenreModel.fromJson(json as Map<String, dynamic>))
           .toList();
@@ -105,7 +107,8 @@ class MusicService {
         queryParameters: {'genre': genre, 'limit': 10},
       );
       final body = response.data;
-      final items = body['data'] ?? body['songs'] ?? [];
+      final rawData = body['data'];
+      final items = rawData is List ? rawData : rawData?['songs'] ?? body['songs'] ?? [];
       final songs = (items as List)
           .map((json) => MusicModel.fromJson(json as Map<String, dynamic>))
           .toList();

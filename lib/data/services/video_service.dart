@@ -15,7 +15,8 @@ class VideoService {
     try {
       final response = await _apiClient.dio.get(ApiConfig.videos);
       final body = response.data;
-      final items = body['data'] ?? body['videos'] ?? [];
+      final rawData = body['data'];
+      final items = rawData is List ? rawData : rawData?['videos'] ?? body['videos'] ?? [];
       return (items as List)
           .map((json) => VideoModel.fromJson(json as Map<String, dynamic>))
           .toList();
@@ -24,17 +25,26 @@ class VideoService {
     }
   }
 
-  /// Fetch discovery feed videos.
+  /// Fetch discovery feed videos. Falls back to all videos if feed is empty.
   Future<List<VideoModel>> getFeedVideos() async {
     try {
       final response = await _apiClient.dio.get(ApiConfig.videoFeed);
       final body = response.data;
-      final items = body['data'] ?? body['videos'] ?? [];
-      return (items as List)
+      final rawData = body['data'];
+      final items = rawData is List ? rawData : rawData?['videos'] ?? body['videos'] ?? [];
+      final videos = (items as List)
           .map((json) => VideoModel.fromJson(json as Map<String, dynamic>))
           .toList();
+      if (videos.isNotEmpty) return videos;
+      // Feed is empty — fall back to all videos
+      return getVideos();
     } on DioException catch (e) {
-      throw ApiException.fromDioException(e);
+      // Feed endpoint failed — try all videos
+      try {
+        return getVideos();
+      } catch (_) {
+        throw ApiException.fromDioException(e);
+      }
     }
   }
 

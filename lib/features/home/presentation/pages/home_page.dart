@@ -35,8 +35,11 @@ import 'package:lugmatic_flutter/features/video/presentation/pages/videos_page.d
 import 'package:lugmatic_flutter/features/home/presentation/pages/artist_detail_page.dart';
 import 'package:lugmatic_flutter/features/song/presentation/pages/song_detail_page.dart';
 import 'package:lugmatic_flutter/data/models/live_clash_model.dart';
+import 'package:lugmatic_flutter/ui/widgets/mini_player.dart';
 import 'package:lugmatic_flutter/data/services/live_stream_service.dart';
 import 'package:lugmatic_flutter/features/live_stream/presentation/pages/clash_details_page.dart';
+import 'package:lugmatic_flutter/data/models/genre_model.dart';
+import 'package:lugmatic_flutter/features/music/presentation/pages/genre_music_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -277,19 +280,24 @@ class _HomePageState extends State<HomePage> {
           const LibraryPage(),
         ],
       ),
-      // floatingActionButton and floatingActionButtonLocation removed because MiniPlayer overlays bottom bar now
-      bottomNavigationBar: CustomBottomNav(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        onPlayTap: () {
-          if (_trendingSongs.isNotEmpty) {
-            _openMusicPlayer(_trendingSongs[0], queue: _trendingSongs);
-          }
-        },
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const MiniPlayer(),
+          CustomBottomNav(
+            currentIndex: _currentIndex,
+            onTap: (index) {
+              setState(() {
+                _currentIndex = index;
+              });
+            },
+            onPlayTap: () {
+              if (_trendingSongs.isNotEmpty) {
+                _openMusicPlayer(_trendingSongs[0], queue: _trendingSongs);
+              }
+            },
+          ),
+        ],
       ),
     );
   }
@@ -798,31 +806,62 @@ class _HomePageState extends State<HomePage> {
         final genre = _genres[i];
         final name = genre['name']?.toString() ?? '';
         final colors = genreColors[i % genreColors.length];
+        final imageUrl = genre['image']?.toString() ?? '';
         return GestureDetector(
           onTap: () {
-            // Navigate to browse page filtered by genre
-            setState(() => _currentIndex = 1);
+            final genreModel = GenreModel.fromJson(genre);
+            Navigator.push(context, MaterialPageRoute(
+              builder: (_) => GenreMusicPage(genre: genreModel),
+            ));
           },
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: colors,
-              ),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Stack(
+              fit: StackFit.expand,
               children: [
-                const Icon(Icons.library_music, color: AppColors.mutedForeground, size: 22),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    name,
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 15),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                // Background: image or gradient fallback
+                if (imageUrl.isNotEmpty)
+                  Image.network(
+                    ApiConfig.resolveUrl(imageUrl),
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: colors,
+                        ),
+                      ),
+                    ),
+                  )
+                else
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: colors,
+                      ),
+                    ),
+                  ),
+                // Dark overlay for readability
+                Container(color: Colors.black.withOpacity(0.45)),
+                // Text
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      name,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 15,
+                        shadows: [Shadow(color: Colors.black54, blurRadius: 4)],
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ),
               ],

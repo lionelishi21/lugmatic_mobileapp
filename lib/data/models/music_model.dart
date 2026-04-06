@@ -56,12 +56,12 @@ class MusicModel {
       albumName = json['album']?.toString() ?? '';
     }
 
-    // Image: prefer coverArt on the song, then album coverArt
-    final rawImage = json['coverArt'] ?? json['coverArtUrl'] ?? albumCoverArt ?? '';
+    // Image: prefer already-resolved coverArtUrl, fall back to raw coverArt key/path
+    final rawImage = json['coverArtUrl'] ?? json['coverArt'] ?? albumCoverArt ?? '';
     final imageUrl = ApiConfig.resolveUrl(rawImage is String ? rawImage : '');
 
-    // Audio URL: resolve relative paths to absolute
-    final rawAudio = json['audioFile'] ?? json['audioFileUrl'] ?? json['audioUrl'] ?? '';
+    // Audio URL: prefer already-resolved audioFileUrl, fall back to audioFile (raw key/path)
+    final rawAudio = json['audioFileUrl'] ?? json['audioFile'] ?? json['audioUrl'] ?? '';
     final audioUrl = ApiConfig.resolveUrl(rawAudio is String ? rawAudio : '');
 
 
