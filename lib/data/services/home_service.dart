@@ -34,8 +34,8 @@ class HomeService {
   Future<List<MusicModel>> getTrendingSongs() async {
     try {
       final response = await _apiClient.dio.get(
-        ApiConfig.songs,
-        queryParameters: {'limit': 20, 'sort': '-playCount'},
+        ApiConfig.billboard,
+        queryParameters: {'limit': 20, 'period': 'week'},
       );
       final items = _extractList(response.data, ['data', 'songs']);
       return (items)

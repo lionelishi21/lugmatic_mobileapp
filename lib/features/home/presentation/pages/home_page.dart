@@ -197,8 +197,8 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(height: 36),
             ],
 
-            // Trending Songs
-            _buildSectionHeader('Trending Now', 'See All'),
+            // Billboard Charts
+            _buildSectionHeader('Billboard Charts', 'See All'),
             const SizedBox(height: 18),
             _buildTrendingSongs(),
             const SizedBox(height: 36),
@@ -685,6 +685,7 @@ class _HomePageState extends State<HomePage> {
           final song = _trendingSongs[index];
           return MusicCard(
             music: song,
+            rank: index + 1,
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => SongDetailPage(songId: song.id, initialData: song)),

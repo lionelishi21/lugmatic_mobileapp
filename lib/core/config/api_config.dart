@@ -44,6 +44,7 @@ class ApiConfig {
 
   // ── Song endpoints ──────────────────────────────────────────────
   static const String songs = '/song/list';
+  static const String billboard = '/song/billboard';
   static const String songDetails = '/song/details'; // + /:id
 
   // ── Artist endpoints ────────────────────────────────────────────

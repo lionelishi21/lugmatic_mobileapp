@@ -8,6 +8,7 @@ class MusicCard extends StatelessWidget {
   final VoidCallback? onPlay;
   final VoidCallback? onLike;
   final bool showGlow;
+  final int? rank;
 
   const MusicCard({
     Key? key,
@@ -16,6 +17,7 @@ class MusicCard extends StatelessWidget {
     this.onPlay,
     this.onLike,
     this.showGlow = false,
+    this.rank,
   }) : super(key: key);
 
   @override
@@ -65,6 +67,35 @@ class MusicCard extends StatelessWidget {
                     ),
                   ),
                 ),
+                // Rank badge for Billboard
+                if (rank != null)
+                  Positioned(
+                    top: 10,
+                    left: 10,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withOpacity(0.4),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        '#$rank',
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w900,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ),
+                  ),
                 // Play button overlay
                 Positioned(
                   bottom: 12,
