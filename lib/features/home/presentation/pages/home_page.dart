@@ -40,6 +40,7 @@ import 'package:lugmatic_flutter/data/services/live_stream_service.dart';
 import 'package:lugmatic_flutter/features/live_stream/presentation/pages/clash_details_page.dart';
 import 'package:lugmatic_flutter/data/models/genre_model.dart';
 import 'package:lugmatic_flutter/features/music/presentation/pages/genre_music_page.dart';
+import 'package:lugmatic_flutter/features/home/presentation/widgets/billboard_list_item.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -198,7 +199,7 @@ class _HomePageState extends State<HomePage> {
             ],
 
             // Billboard Charts
-            _buildSectionHeader('Billboard Charts', 'See All'),
+            _buildSectionHeader('Billboard Top 10', 'See All'),
             const SizedBox(height: 18),
             _buildTrendingSongs(),
             const SizedBox(height: 36),
@@ -672,29 +673,30 @@ class _HomePageState extends State<HomePage> {
     if (_trendingSongs.isEmpty) {
       return _buildEmptyPlaceholder(
         icon: Icons.music_note_outlined,
-        title: 'No trending songs yet',
-        subtitle: 'Check back soon for trending hits',
+        title: 'No billboard hits yet',
+        subtitle: 'The charts are currently being calculated',
       );
     }
-    return SizedBox(
-      height: 200,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: _trendingSongs.length,
-        itemBuilder: (context, index) {
-          final song = _trendingSongs[index];
-          return MusicCard(
-            music: song,
-            rank: index + 1,
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => SongDetailPage(songId: song.id, initialData: song)),
-            ),
-            onPlay: () => _openMusicPlayer(song, queue: _trendingSongs),
-            onLike: () => print('Like ${song.title}'),
-          );
-        },
-      ),
+    
+    // Show only top 10 in a vertical list on home
+    final displaySongs = _trendingSongs.length > 10 
+        ? _trendingSongs.take(10).toList() 
+        : _trendingSongs;
+
+    return Column(
+      children: displaySongs.asMap().entries.map((entry) {
+        final index = entry.key;
+        final song = entry.value;
+        return BillboardListItem(
+          music: song,
+          rank: index + 1,
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => SongDetailPage(songId: song.id, initialData: song)),
+          ),
+          onPlay: () => _openMusicPlayer(song, queue: _trendingSongs),
+        );
+      }).toList(),
     );
   }
 

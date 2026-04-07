@@ -15,6 +15,7 @@ class MusicModel {
   final int playCount;
   final DateTime releaseDate;
   final bool isArtistVerified;
+  final Map<String, dynamic>? billboardStats;
 
   MusicModel({
     required this.id,
@@ -31,6 +32,7 @@ class MusicModel {
     this.playCount = 0,
     required this.releaseDate,
     this.isArtistVerified = false,
+    this.billboardStats,
   });
 
   factory MusicModel.fromJson(Map<String, dynamic> json) {
@@ -94,6 +96,7 @@ class MusicModel {
           ? DateTime.tryParse(json['releaseDate'].toString()) ?? DateTime.now()
           : DateTime.now(),
       isArtistVerified: isVerified,
+      billboardStats: json['billboardStats'] as Map<String, dynamic>?,
     );
   }
 
@@ -113,6 +116,7 @@ class MusicModel {
       'playCount': playCount,
       'releaseDate': releaseDate.toIso8601String(),
       'isArtistVerified': isArtistVerified,
+      'billboardStats': billboardStats,
     };
   }
 }
