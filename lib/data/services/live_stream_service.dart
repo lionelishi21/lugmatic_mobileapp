@@ -75,7 +75,7 @@ class LiveStreamService {
       final response = await _apiClient.dio.post(
         ApiConfig.clashInvite,
         data: {
-          'opponentId': opponentId,
+          'opponentArtistId': opponentId,
           'duration': duration,
         },
       );
@@ -92,7 +92,7 @@ class LiveStreamService {
   Future<LiveClashModel> acceptClash(String clashId) async {
     try {
       final response = await _apiClient.dio.post(
-        '${ApiConfig.clashAccept}/$clashId',
+        '${ApiConfig.clash}/$clashId/accept',
       );
 
       final body = response.data;
@@ -107,7 +107,7 @@ class LiveStreamService {
   Future<void> rejectClash(String clashId) async {
     try {
       await _apiClient.dio.post(
-        '${ApiConfig.clashReject}/$clashId',
+        '${ApiConfig.clash}/$clashId/reject',
       );
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);
@@ -161,6 +161,28 @@ class LiveStreamService {
       if (data is List) {
         return data
             .map((json) => LiveClashModel.fromJson(json as Map<String, dynamic>))
+            .toList();
+      }
+      return [];
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// Get recorded streams (VOD).
+  Future<List<LiveStreamModel>> getRecordedStreams({int page = 1, int limit = 20}) async {
+    try {
+      final response = await _apiClient.dio.get(
+        ApiConfig.liveStreamRecorded,
+        queryParameters: {'page': page, 'limit': limit},
+      );
+
+      final body = response.data;
+      final data = body['data'] ?? body;
+
+      if (data is List) {
+        return data
+            .map((json) => LiveStreamModel.fromJson(json as Map<String, dynamic>))
             .toList();
       }
       return [];
