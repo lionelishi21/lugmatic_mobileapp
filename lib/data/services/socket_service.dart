@@ -34,6 +34,7 @@ class SocketService {
   final _clashScoreController = StreamController<Map<String, dynamic>>.broadcast();
   final _clashActionController = StreamController<Map<String, dynamic>>.broadcast();
   final _clashRealmChangedController = StreamController<Map<String, dynamic>>.broadcast();
+  final _clashGlobalStartedController = StreamController<Map<String, dynamic>>.broadcast();
   final _notificationController = StreamController<Map<String, dynamic>>.broadcast();
   final _hostSwitchedSessionController = StreamController<Map<String, dynamic>>.broadcast();
 
@@ -77,6 +78,9 @@ class SocketService {
 
   /// Clash realm changed event.
   Stream<Map<String, dynamic>> get onRealmChanged => _clashRealmChangedController.stream;
+
+  /// Global broadcast when any clash starts anywhere on the platform.
+  Stream<Map<String, dynamic>> get onClashGlobalStarted => _clashGlobalStartedController.stream;
 
   /// Real-time notification event.
   Stream<Map<String, dynamic>> get onNotification => _notificationController.stream;
@@ -227,6 +231,12 @@ class SocketService {
       }
     });
 
+    _socket!.on('clash:global-started', (data) {
+      if (data is Map<String, dynamic>) {
+        _clashGlobalStartedController.add(data);
+      }
+    });
+
     _socket!.on('notification:new', (data) {
       debugPrint('[Socket] New notification received: $data');
       if (data is Map<String, dynamic>) {
@@ -324,6 +334,7 @@ class SocketService {
     _clashScoreController.close();
     _clashActionController.close();
     _clashRealmChangedController.close();
+    _clashGlobalStartedController.close();
     _notificationController.close();
     _hostSwitchedSessionController.close();
     _instance = null;

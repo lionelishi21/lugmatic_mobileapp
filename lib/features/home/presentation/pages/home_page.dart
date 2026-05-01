@@ -40,6 +40,9 @@ import 'package:lugmatic_flutter/ui/widgets/mini_player.dart';
 import 'package:lugmatic_flutter/data/services/live_stream_service.dart';
 import 'package:lugmatic_flutter/data/models/live_stream_model.dart';
 import 'package:lugmatic_flutter/features/live_stream/presentation/pages/clash_details_page.dart';
+import 'package:lugmatic_flutter/features/live_stream/presentation/pages/clash_view_page.dart';
+import 'package:lugmatic_flutter/data/services/socket_service.dart';
+import 'package:lugmatic_flutter/core/network/token_storage.dart';
 import 'package:lugmatic_flutter/data/models/genre_model.dart';
 import 'package:lugmatic_flutter/features/music/presentation/pages/genre_music_page.dart';
 import 'package:lugmatic_flutter/features/home/presentation/widgets/billboard_list_item.dart';
@@ -67,6 +70,8 @@ class _HomePageState extends State<HomePage> {
   List<LiveStreamModel> _liveStreams = [];
   int _unreadNotifications = 0;
 
+  StreamSubscription? _clashGlobalSub;
+
   @override
   void initState() {
     super.initState();
@@ -75,7 +80,83 @@ class _HomePageState extends State<HomePage> {
         apiClient: context.read<ApiClient>(),
       );
       _loadData();
+      _listenForGlobalClash();
     });
+  }
+
+  void _listenForGlobalClash() {
+    try {
+      final socket = SocketService.getInstance(tokenStorage: context.read<TokenStorage>());
+      socket.connect();
+      _clashGlobalSub = socket.onClashGlobalStarted.listen((data) {
+        if (!mounted) return;
+        final clashId = data['clashId']?.toString() ?? '';
+        final challengerName = data['challengerName'] ?? 'Artist';
+        final opponentName = data['opponentName'] ?? 'Artist';
+        final realmLabel = data['realmLabel'] ?? '';
+
+        ScaffoldMessenger.of(context).showMaterialBanner(
+          MaterialBanner(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            backgroundColor: const Color(0xFF1A1A2E),
+            content: Row(
+              children: [
+                const Icon(Icons.sports_kabaddi, color: Color(0xFFE94560), size: 28),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text('⚔️ Clash Started!',
+                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      Text('$challengerName vs $opponentName • $realmLabel',
+                          style: const TextStyle(color: Colors.white60, fontSize: 12),
+                          overflow: TextOverflow.ellipsis),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
+                },
+                child: const Text('Dismiss', style: TextStyle(color: Colors.white54)),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFE94560),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                ),
+                onPressed: () {
+                  ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ClashViewPage(
+                        clashId: clashId,
+                        challengerName: challengerName,
+                        opponentName: opponentName,
+                      ),
+                    ),
+                  );
+                },
+                child: const Text('Watch Now'),
+              ),
+            ],
+          ),
+        );
+      });
+    } catch (_) { /* socket unavailable */ }
+  }
+
+  @override
+  void dispose() {
+    _clashGlobalSub?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadData() async {
