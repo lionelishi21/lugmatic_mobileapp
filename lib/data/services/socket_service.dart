@@ -33,6 +33,7 @@ class SocketService {
   final _clashEndedController = StreamController<Map<String, dynamic>>.broadcast();
   final _clashScoreController = StreamController<Map<String, dynamic>>.broadcast();
   final _clashActionController = StreamController<Map<String, dynamic>>.broadcast();
+  final _clashRealmChangedController = StreamController<Map<String, dynamic>>.broadcast();
   final _notificationController = StreamController<Map<String, dynamic>>.broadcast();
   final _hostSwitchedSessionController = StreamController<Map<String, dynamic>>.broadcast();
 
@@ -73,6 +74,9 @@ class SocketService {
 
   /// Clash special action event.
   Stream<Map<String, dynamic>> get onClashAction => _clashActionController.stream;
+
+  /// Clash realm changed event.
+  Stream<Map<String, dynamic>> get onRealmChanged => _clashRealmChangedController.stream;
 
   /// Real-time notification event.
   Stream<Map<String, dynamic>> get onNotification => _notificationController.stream;
@@ -217,6 +221,12 @@ class SocketService {
       }
     });
 
+    _socket!.on('clash:realm-changed', (data) {
+      if (data is Map<String, dynamic>) {
+        _clashRealmChangedController.add(data);
+      }
+    });
+
     _socket!.on('notification:new', (data) {
       debugPrint('[Socket] New notification received: $data');
       if (data is Map<String, dynamic>) {
@@ -313,6 +323,7 @@ class SocketService {
     _clashEndedController.close();
     _clashScoreController.close();
     _clashActionController.close();
+    _clashRealmChangedController.close();
     _notificationController.close();
     _hostSwitchedSessionController.close();
     _instance = null;

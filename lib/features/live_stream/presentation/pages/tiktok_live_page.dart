@@ -14,6 +14,8 @@ import '../../../../data/models/artist_model.dart';
 import 'package:lugmatic_flutter/data/models/live_clash_model.dart';
 import 'package:lugmatic_flutter/features/live_stream/presentation/widgets/battle_bar_widget.dart';
 import 'package:lugmatic_flutter/features/live_stream/presentation/widgets/clash_video_widget.dart';
+import 'package:lugmatic_flutter/core/network/api_exception.dart';
+import 'package:lugmatic_flutter/features/live_stream/presentation/widgets/clash_artist_picker.dart';
 
 class TikTokLivePage extends StatefulWidget {
   final String? initialStreamId;
@@ -44,6 +46,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
   bool _isLoading = true;
   String? _error;
   LiveClashModel? _activeClash;
+  LiveStreamTokenData? _clashRoomTokenData; // token for the shared clash LiveKit room
 
   StreamSubscription? _chatSub;
   StreamSubscription? _viewerCountSub;
@@ -53,6 +56,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
   StreamSubscription? _clashScoreSub;
   StreamSubscription? _clashActionSub;
   StreamSubscription? _clashInvitationSub;
+  StreamSubscription? _hostSwitchedSessionSub;
 
   @override
   void initState() {
@@ -106,11 +110,23 @@ class _TikTokLivePageState extends State<TikTokLivePage>
       }
     });
 
-    _clashStartedSub = _socketService.onClashStarted.listen((data) {
-      if (mounted) {
-        setState(() {
-          _activeClash = LiveClashModel.fromJson(data);
-        });
+    _clashStartedSub = _socketService.onClashStarted.listen((data) async {
+      if (!mounted) return;
+      final clash = LiveClashModel.fromJson(data);
+      setState(() => _activeClash = clash);
+
+      // Fetch shared clash room token so ClashVideoWidget connects to the right room
+      if (clash.id.isNotEmpty) {
+        try {
+          final tokenMap = await _liveStreamService.getClashToken(clash.id);
+          if (mounted) {
+            setState(() {
+              _clashRoomTokenData = LiveStreamTokenData.fromJson(tokenMap);
+            });
+          }
+        } catch (e) {
+          debugPrint('Could not get clash room token: $e');
+        }
       }
     });
 
@@ -118,6 +134,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
       if (mounted) {
         setState(() {
           _activeClash = null;
+          _clashRoomTokenData = null;
         });
         final winnerName = data['winnerName'] ?? 'Someone';
         ScaffoldMessenger.of(context).showSnackBar(
@@ -135,17 +152,30 @@ class _TikTokLivePageState extends State<TikTokLivePage>
     _clashScoreSub = _socketService.onClashScoreUpdate.listen((data) {
       if (mounted && _activeClash != null) {
         setState(() {
-          _activeClash = LiveClashModel(
-            id: _activeClash!.id,
-            challenger: _activeClash!.challenger,
-            opponent: _activeClash!.opponent,
-            status: _activeClash!.status,
-            duration: _activeClash!.duration,
+          _activeClash = _activeClash!.copyWith(
             challengerScore: (data['challengerScore'] ?? 0).toDouble(),
             opponentScore: (data['opponentScore'] ?? 0).toDouble(),
-            startTime: _activeClash!.startTime,
           );
         });
+      }
+    });
+
+    // Realm change from any participant
+    _socketService.onRealmChanged.listen((data) {
+      if (mounted && _activeClash != null) {
+        setState(() => _activeClash = _activeClash!.copyWith(realm: data['realm'] as String?));
+      }
+    });
+
+    _hostSwitchedSessionSub = _socketService.onHostSwitchedSession.listen((_) {
+      final current = _liveStreams.isNotEmpty ? _liveStreams[_currentStreamIndex] : null;
+      final token = current != null ? _tokenCache[current.id] : null;
+      if (mounted && token != null && token.isHost) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Live control moved to another session. This session is now read-only.'),
+          ),
+        );
       }
     });
   }
@@ -205,37 +235,30 @@ class _TikTokLivePageState extends State<TikTokLivePage>
   }
 
   void _inviteToClash() async {
-    final controller = TextEditingController();
-    showDialog(
+    final currentStream = _liveStreams[_currentStreamIndex];
+    final opponentId = await showModalBottomSheet<String>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Invite Artist to Clash'),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(hintText: 'Enter Artist ID'),
-        ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel')),
-          ElevatedButton(
-            onPressed: () async {
-              try {
-                await _liveStreamService.inviteToClash(
-                    controller.text.trim(), 300);
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Invitation sent!')));
-              } catch (e) {
-                ScaffoldMessenger.of(context)
-                    .showSnackBar(SnackBar(content: Text('Failed to invite: $e')));
-              }
-            },
-            child: const Text('Invite'),
-          ),
-        ],
-      ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => ClashArtistPicker(currentStreamId: currentStream.id),
     );
+
+    if (opponentId != null) {
+      try {
+        await _liveStreamService.inviteToClash(opponentId, 300);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Invitation sent! 🔥')),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to invite: $e')),
+          );
+        }
+      }
+    }
   }
 
   Future<void> _fetchStreams() async {
@@ -292,7 +315,21 @@ class _TikTokLivePageState extends State<TikTokLivePage>
         setState(() {
           _tokenCache[streamId] = tokenData;
         });
+        if (tokenData.switchedSession) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Live control switched to this session.'),
+            ),
+          );
+        }
       }
+    } on ApiException catch (e) {
+      if (mounted && e.statusCode == 409) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message)),
+        );
+      }
+      debugPrint('Failed to fetch token for stream $streamId: $e');
     } catch (e) {
       debugPrint('Failed to fetch token for stream $streamId: $e');
     }
@@ -307,6 +344,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
     _clashEndedSub?.cancel();
     _clashScoreSub?.cancel();
     _clashActionSub?.cancel();
+    _hostSwitchedSessionSub?.cancel();
     if (_liveStreams.isNotEmpty) {
       _socketService.leaveStream(_liveStreams[_currentStreamIndex].id);
     }
@@ -473,14 +511,15 @@ class _TikTokLivePageState extends State<TikTokLivePage>
               final stream = _liveStreams[index];
               final tokenData = _tokenCache[stream.id];
               
-              if (_activeClash != null) {
+              if (_activeClash != null && _clashRoomTokenData != null) {
                 return Stack(
                   children: [
                     ClashVideoWidget(
-                      tokenData: tokenData!,
-                      challengerId: _activeClash!.challenger.id,
-                      opponentId: _activeClash!.opponent.id,
-                      isHost: tokenData.isHost,
+                      tokenData: _clashRoomTokenData!,
+                      // Match by user ID (LiveKit participant identity), not artist ID
+                      challengerId: _activeClash!.challengerUserId ?? _activeClash!.challenger.id,
+                      opponentId:   _activeClash!.opponentUserId   ?? _activeClash!.opponent.id,
+                      isHost: _clashRoomTokenData!.isHost,
                     ),
                     SafeArea(
                       child: Padding(

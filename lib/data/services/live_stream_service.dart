@@ -114,6 +114,28 @@ class LiveStreamService {
     }
   }
 
+  /// Get a LiveKit token for the shared clash room (viewer or host).
+  Future<Map<String, dynamic>> getClashToken(String clashId) async {
+    try {
+      final response = await _apiClient.dio.get('${ApiConfig.clash}/$clashId/token');
+      return (response.data['data'] ?? response.data) as Map<String, dynamic>;
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// Update the clash realm (only participants can do this).
+  Future<void> updateClashRealm(String clashId, String realm) async {
+    try {
+      await _apiClient.dio.patch(
+        '${ApiConfig.clash}/$clashId/realm',
+        data: {'realm': realm},
+      );
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
   /// Get clash details.
   Future<LiveClashModel> getClashDetails(String clashId) async {
     try {
@@ -186,6 +208,43 @@ class LiveStreamService {
             .toList();
       }
       return [];
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// Create a new live stream (pre-setup).
+  Future<LiveStreamModel> createStream({required String title, String? description, String? category}) async {
+    try {
+      final response = await _apiClient.dio.post(
+        ApiConfig.liveStreams,
+        data: {
+          'title': title,
+          'description': description ?? '',
+          'category': category ?? 'Entertainment',
+        },
+      );
+      final body = response.data;
+      final data = body['data'] ?? body;
+      return LiveStreamModel.fromJson(data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// Start a previously created stream.
+  Future<void> startStream(String streamId) async {
+    try {
+      await _apiClient.dio.put('${ApiConfig.liveStreams}/$streamId/start');
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// End a live stream.
+  Future<void> endStream(String streamId) async {
+    try {
+      await _apiClient.dio.put('${ApiConfig.liveStreams}/$streamId/end');
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);
     }
