@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:just_audio_background/just_audio_background.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'core/navigation/app_navigator_key.dart';
+import 'data/services/fcm_service.dart';
 import 'features/premium/presentation/pages/subscription_page.dart';
 import 'core/network/api_client.dart';
 import 'core/network/token_storage.dart';
@@ -20,6 +24,8 @@ import 'data/services/stripe_service.dart';
 import 'data/services/music_service.dart';
 import 'data/services/subscription_service.dart';
 import 'data/services/mixer_service.dart';
+import 'data/services/management_service.dart';
+import 'data/services/artist_service.dart';
 import 'data/providers/audio_provider.dart';
 import 'features/store/presentation/pages/store_page.dart';
 import 'features/mixer/presentation/pages/mixer_page.dart';
@@ -44,6 +50,15 @@ void main() async {
     androidNotificationOngoing: true,
   );
     
+    // Initialize Firebase
+    try {
+      appStatus.value = "Initializing Firebase...";
+      await Firebase.initializeApp();
+    } catch (e) {
+      appStatus.value = "Firebase Error: $e";
+      debugPrint("Firebase init error: $e");
+    }
+
     // Initialize Stripe SDK (non-fatal — app still launches if this fails)
     try {
       appStatus.value = "Initializing Stripe...";
@@ -79,27 +94,43 @@ void main() async {
     final musicService = MusicService(apiClient: apiClient);
     final subscriptionService = SubscriptionService(apiClient: apiClient);
     final mixerService = MixerService(apiClient: apiClient);
+    final managementService = ManagementService(apiClient: apiClient);
+    
+    // Initialize FCM
+    final fcmService = FcmService(notificationService: notificationService);
+    try {
+      appStatus.value = "Initializing Notifications...";
+      await fcmService.init();
+      FirebaseMessaging.onBackgroundMessage(FcmService.onBackgroundMessage);
+    } catch (e) {
+      debugPrint("FCM Init Error: $e");
+    }
 
     runApp(
       MultiProvider(
         providers: [
           Provider<TokenStorage>.value(value: tokenStorage),
           Provider<ApiClient>.value(value: apiClient),
+          Provider<AuthService>.value(value: authService),
           ChangeNotifierProvider(
             create: (_) => AuthProvider(
               authService: authService,
               tokenStorage: tokenStorage,
+              fcmService: fcmService,
             ),
           ),
           Provider<CommentService>.value(value: commentService),
           Provider<NotificationService>.value(value: notificationService),
+          Provider<FcmService>.value(value: fcmService),
           Provider<ArtistRequestService>.value(value: artistRequestService),
+          Provider<ArtistService>(create: (context) => ArtistService(apiClient: context.read<ApiClient>())),
           Provider<VideoService>.value(value: videoService),
           Provider<GiftService>.value(value: giftService),
           Provider<StripeService>.value(value: stripeService),
           Provider<MusicService>.value(value: musicService),
           Provider<SubscriptionService>.value(value: subscriptionService),
           Provider<MixerService>.value(value: mixerService),
+          Provider<ManagementService>.value(value: managementService),
           ChangeNotifierProvider(
             create: (_) => AudioProvider(musicService: musicService),
           ),
@@ -130,6 +161,7 @@ class LugmaticApp extends StatelessWidget {
     return MaterialApp(
       title: 'Lugmatic',
       debugShowCheckedModeBanner: false,
+      navigatorKey: appNavigatorKey,
       theme: AppTheme.lightTheme,
       home: const SplashScreen(),
       onGenerateRoute: AppRouter.onGenerateRoute,

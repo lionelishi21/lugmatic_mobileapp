@@ -90,4 +90,17 @@ class GiftService {
       throw ApiException.fromDioException(e);
     }
   }
+
+  /// Verify a completed Stripe payment intent and credit coins to the user.
+  Future<Map<String, dynamic>> verifyPurchase(String paymentIntentId) async {
+    try {
+      final response = await _apiClient.dio.post(
+        ApiConfig.verifyPurchase,
+        data: {'paymentIntentId': paymentIntentId},
+      );
+      return response.data['data'] ?? {};
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
 }

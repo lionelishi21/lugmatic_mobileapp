@@ -33,6 +33,8 @@ class SocketService {
   final _clashEndedController = StreamController<Map<String, dynamic>>.broadcast();
   final _clashScoreController = StreamController<Map<String, dynamic>>.broadcast();
   final _clashActionController = StreamController<Map<String, dynamic>>.broadcast();
+  final _notificationController = StreamController<Map<String, dynamic>>.broadcast();
+  final _hostSwitchedSessionController = StreamController<Map<String, dynamic>>.broadcast();
 
   /// Real-time chat messages.
   Stream<LiveStreamChatMessage> get onChatMessage => _chatController.stream;
@@ -72,6 +74,10 @@ class SocketService {
   /// Clash special action event.
   Stream<Map<String, dynamic>> get onClashAction => _clashActionController.stream;
 
+  /// Real-time notification event.
+  Stream<Map<String, dynamic>> get onNotification => _notificationController.stream;
+  Stream<Map<String, dynamic>> get onHostSwitchedSession => _hostSwitchedSessionController.stream;
+
   SocketService._({required TokenStorage tokenStorage})
       : _tokenStorage = tokenStorage;
 
@@ -96,15 +102,23 @@ class SocketService {
           .setTransports(['websocket', 'polling'])
           .setAuth({'token': token ?? ''})
           .disableAutoConnect()
+          .enableReconnection()
+          .setReconnectionAttempts(10)
+          .setReconnectionDelay(2000)
           .build(),
     );
 
     _socket!.onConnect((_) {
       debugPrint('[Socket] Connected');
+      // Re-join the active stream room after reconnect
+      if (_currentStreamId != null) {
+        _socket!.emit('stream:join', {'streamId': _currentStreamId});
+        debugPrint('[Socket] Re-joined stream $_currentStreamId after reconnect');
+      }
     });
 
     _socket!.onDisconnect((_) {
-      debugPrint('[Socket] Disconnected');
+      debugPrint('[Socket] Disconnected — will attempt reconnect');
     });
 
     _socket!.onConnectError((err) {
@@ -141,8 +155,8 @@ class SocketService {
     _socket!.on('stream:viewer-joined', (data) {
       if (data is Map<String, dynamic>) {
         _viewerJoinedController.add(data);
-        if (data['viewerCount'] != null) {
-          _viewerCountController.add(data['viewerCount'] as int);
+        if (data['currentViewers'] != null) {
+          _viewerCountController.add(data['currentViewers'] as int);
         }
       }
     });
@@ -150,8 +164,8 @@ class SocketService {
     _socket!.on('stream:viewer-left', (data) {
       if (data is Map<String, dynamic>) {
         _viewerLeftController.add(data);
-        if (data['viewerCount'] != null) {
-          _viewerCountController.add(data['viewerCount'] as int);
+        if (data['currentViewers'] != null) {
+          _viewerCountController.add(data['currentViewers'] as int);
         }
       }
     });
@@ -167,8 +181,8 @@ class SocketService {
     });
 
     _socket!.on('stream:state', (data) {
-      if (data is Map<String, dynamic> && data['viewerCount'] != null) {
-        _viewerCountController.add(data['viewerCount'] as int);
+      if (data is Map<String, dynamic> && data['currentViewers'] != null) {
+        _viewerCountController.add(data['currentViewers'] as int);
       }
     });
 
@@ -200,6 +214,21 @@ class SocketService {
     _socket!.on('clash:action', (data) {
       if (data is Map<String, dynamic>) {
         _clashActionController.add(data);
+      }
+    });
+
+    _socket!.on('notification:new', (data) {
+      debugPrint('[Socket] New notification received: $data');
+      if (data is Map<String, dynamic>) {
+        _notificationController.add(data);
+      }
+    });
+
+    _socket!.on('stream:host-switched-session', (data) {
+      if (data is Map<String, dynamic>) {
+        _hostSwitchedSessionController.add(data);
+      } else {
+        _hostSwitchedSessionController.add({'timestamp': DateTime.now().toIso8601String()});
       }
     });
 
@@ -284,6 +313,8 @@ class SocketService {
     _clashEndedController.close();
     _clashScoreController.close();
     _clashActionController.close();
+    _notificationController.close();
+    _hostSwitchedSessionController.close();
     _instance = null;
   }
 }

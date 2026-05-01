@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lugmatic_flutter/ui/screens/profile_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:lugmatic_flutter/core/config/api_config.dart';
 import 'package:lugmatic_flutter/core/network/api_client.dart';
@@ -37,6 +38,7 @@ import 'package:lugmatic_flutter/features/song/presentation/pages/song_detail_pa
 import 'package:lugmatic_flutter/data/models/live_clash_model.dart';
 import 'package:lugmatic_flutter/ui/widgets/mini_player.dart';
 import 'package:lugmatic_flutter/data/services/live_stream_service.dart';
+import 'package:lugmatic_flutter/data/models/live_stream_model.dart';
 import 'package:lugmatic_flutter/features/live_stream/presentation/pages/clash_details_page.dart';
 import 'package:lugmatic_flutter/data/models/genre_model.dart';
 import 'package:lugmatic_flutter/features/music/presentation/pages/genre_music_page.dart';
@@ -62,6 +64,7 @@ class _HomePageState extends State<HomePage> {
   List<Map<String, dynamic>> _genres = [];
   List<Map<String, dynamic>> _playlists = [];
   List<LiveClashModel> _recentClashes = [];
+  List<LiveStreamModel> _liveStreams = [];
   int _unreadNotifications = 0;
 
   @override
@@ -109,8 +112,11 @@ class _HomePageState extends State<HomePage> {
       if (mounted) setState(() => _playlists = playlists);
     });
 
-    // Recent Clashes
+    // Live streams and recent clashes
     final liveStreamService = LiveStreamService(apiClient: apiClient);
+    liveStreamService.getLiveStreams(status: 'live').then((streams) {
+      if (mounted) setState(() => _liveStreams = streams);
+    });
     liveStreamService.getRecentClashes().then((clashes) {
       if (mounted) setState(() => _recentClashes = clashes);
     });
@@ -263,8 +269,7 @@ class _HomePageState extends State<HomePage> {
                 ).then((_) => _loadNotifications());
               },
               onProfileTap: () {
-                // Navigate to profile page
-                print('Profile tapped');
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen()));
               },
               onStoreTap: () {
                 Navigator.pushNamed(context, '/store');
@@ -722,64 +727,126 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildLiveSection() {
-    // No real live data — show a compelling placeholder
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppColors.error.withOpacity(0.15),
-            const Color(0xFFDC2626).withOpacity(0.08),
-          ],
+    if (_liveStreams.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.error.withOpacity(0.15),
+              const Color(0xFFDC2626).withOpacity(0.08),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppColors.error.withOpacity(0.25)),
         ),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.error.withOpacity(0.25)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 52, height: 52,
-            decoration: BoxDecoration(
-              color: AppColors.error.withOpacity(0.2),
-              shape: BoxShape.circle,
-              border: Border.all(color: AppColors.error.withOpacity(0.4)),
-            ),
-            child: const Icon(Icons.live_tv_rounded, color: Color(0xFFEF4444), size: 28),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'No live streams right now',
-                  style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Artists go live here — follow them to get notified',
-                  style: TextStyle(color: Colors.white.withOpacity(0.55), fontSize: 13),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          GestureDetector(
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TikTokLivePage())),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Row(
+          children: [
+            Container(
+              width: 52, height: 52,
               decoration: BoxDecoration(
-                color: AppColors.error.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(12),
+                color: AppColors.error.withOpacity(0.2),
+                shape: BoxShape.circle,
                 border: Border.all(color: AppColors.error.withOpacity(0.4)),
               ),
-              child: const Text('Browse', style: TextStyle(color: Color(0xFFEF4444), fontWeight: FontWeight.w700, fontSize: 13)),
+              child: const Icon(Icons.live_tv_rounded, color: Color(0xFFEF4444), size: 28),
             ),
-          ),
-        ],
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'No live streams right now',
+                    style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Artists go live here — follow them to get notified',
+                    style: TextStyle(color: Colors.white.withOpacity(0.55), fontSize: 13),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            GestureDetector(
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TikTokLivePage())),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: AppColors.error.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.error.withOpacity(0.4)),
+                ),
+                child: const Text('Browse', style: TextStyle(color: Color(0xFFEF4444), fontWeight: FontWeight.w700, fontSize: 13)),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return SizedBox(
+      height: 200,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: _liveStreams.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 12),
+        itemBuilder: (context, i) {
+          final stream = _liveStreams[i];
+          return GestureDetector(
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TikTokLivePage())),
+            child: Container(
+              width: 160,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                color: Colors.white.withOpacity(0.05),
+                border: Border.all(color: AppColors.error.withOpacity(0.4)),
+                image: stream.coverImage.isNotEmpty
+                    ? DecorationImage(image: NetworkImage(stream.coverImage), fit: BoxFit.cover, colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.45), BlendMode.darken))
+                    : null,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(color: AppColors.error, borderRadius: BorderRadius.circular(6)),
+                      child: const Text('LIVE', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w800)),
+                    ),
+                    const Spacer(),
+                    Text(
+                      stream.host?.name ?? 'Artist',
+                      style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      stream.title,
+                      style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 11),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        const Icon(Icons.remove_red_eye_outlined, size: 12, color: Colors.white54),
+                        const SizedBox(width: 4),
+                        Text('${stream.currentViewers}', style: const TextStyle(color: Colors.white54, fontSize: 11)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }

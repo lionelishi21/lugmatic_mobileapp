@@ -741,9 +741,9 @@ class _GiftSendPageState extends State<GiftSendPage> {
               style: TextStyle(color: Colors.white70),
             ),
             const SizedBox(height: 8),
-            const Text(
-              '\$25.50',
-              style: TextStyle(
+            Text(
+              '$_userCoins 🪙',
+              style: const TextStyle(
                 color: Color(0xFFFFD700),
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
