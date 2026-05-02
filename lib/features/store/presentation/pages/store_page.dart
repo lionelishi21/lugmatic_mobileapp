@@ -105,18 +105,23 @@ class _StorePageState extends State<StorePage> {
     setState(() => _purchasingAmount = amount);
     try {
       final stripeService = context.read<StripeService>();
-      final success = await stripeService.purchaseCoins(amount);
-      
-      if (success) {
+      final error = await stripeService.purchaseCoins(amount);
+
+      if (!mounted) return;
+
+      if (error == null) {
+        // Success
         await _fetchBalance();
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Successfully purchased $amount coins!'),
-              backgroundColor: Colors.green,
-            ),
-          );
-        }
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('🪙 $amount coins added to your wallet!'),
+          backgroundColor: Colors.green,
+        ));
+      } else if (error.isNotEmpty) {
+        // Real error (empty string = user cancelled, show nothing)
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(error),
+          backgroundColor: Colors.redAccent,
+        ));
       }
     } finally {
       if (mounted) setState(() => _purchasingAmount = null);
