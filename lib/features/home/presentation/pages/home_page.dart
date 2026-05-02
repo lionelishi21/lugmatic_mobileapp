@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:lugmatic_flutter/ui/screens/profile_screen.dart';
 import 'package:provider/provider.dart';
@@ -151,12 +152,6 @@ class _HomePageState extends State<HomePage> {
         );
       });
     } catch (_) { /* socket unavailable */ }
-  }
-
-  @override
-  void dispose() {
-    _clashGlobalSub?.cancel();
-    super.dispose();
   }
 
   Future<void> _loadData() async {
@@ -1541,6 +1536,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void dispose() {
+    _clashGlobalSub?.cancel();
     _pageController.dispose();
     super.dispose();
   }
