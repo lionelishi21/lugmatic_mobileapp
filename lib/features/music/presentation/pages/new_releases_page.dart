@@ -7,14 +7,14 @@ import '../../../../core/network/api_client.dart';
 import '../../../../data/providers/audio_provider.dart';
 import '../../../../ui/widgets/player_screen.dart';
 
-class TrendingSongsPage extends StatefulWidget {
-  const TrendingSongsPage({Key? key}) : super(key: key);
+class NewReleasesPage extends StatefulWidget {
+  const NewReleasesPage({Key? key}) : super(key: key);
 
   @override
-  State<TrendingSongsPage> createState() => _TrendingSongsPageState();
+  State<NewReleasesPage> createState() => _NewReleasesPageState();
 }
 
-class _TrendingSongsPageState extends State<TrendingSongsPage> {
+class _NewReleasesPageState extends State<NewReleasesPage> {
   late MusicService _musicService;
   List<MusicModel> _songs = [];
   bool _isLoading = true;
@@ -52,7 +52,7 @@ class _TrendingSongsPageState extends State<TrendingSongsPage> {
       final newSongs = await _musicService.getSongs(
         page: _currentPage,
         limit: 20,
-        sort: '-playCount', // Fetch trending songs
+        sort: '-releaseDate', // Fetch latest songs
       );
 
       if (mounted) {
@@ -69,7 +69,7 @@ class _TrendingSongsPageState extends State<TrendingSongsPage> {
       if (mounted) {
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading trending songs: $e')),
+          SnackBar(content: Text('Error loading new releases: $e')),
         );
       }
     }
@@ -111,7 +111,7 @@ class _TrendingSongsPageState extends State<TrendingSongsPage> {
         onPressed: () => Navigator.pop(context),
       ),
       title: const Text(
-        'Trending Now',
+        'New Releases',
         style: TextStyle(
           color: Colors.white,
           fontSize: 22,
@@ -127,32 +127,20 @@ class _TrendingSongsPageState extends State<TrendingSongsPage> {
       delegate: SliverChildBuilderDelegate(
         (context, index) {
           final song = _songs[index];
-          return _buildSongListItem(song, index + 1);
+          return _buildSongListItem(song);
         },
         childCount: _songs.length,
       ),
     );
   }
 
-  Widget _buildSongListItem(MusicModel song, int rank) {
+  Widget _buildSongListItem(MusicModel song) {
     return InkWell(
       onTap: () => _openPlayer(song),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(
           children: [
-            SizedBox(
-              width: 30,
-              child: Text(
-                rank.toString(),
-                style: TextStyle(
-                  color: rank <= 3 ? AppColors.primary : Colors.white.withOpacity(0.5),
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: Image.network(
@@ -203,12 +191,10 @@ class _TrendingSongsPageState extends State<TrendingSongsPage> {
             ),
             IconButton(
               icon: Icon(
-                Icons.more_vert_rounded,
-                color: Colors.white.withOpacity(0.5),
+                Icons.play_circle_outline,
+                color: AppColors.primary,
               ),
-              onPressed: () {
-                // Show options menu
-              },
+              onPressed: () => _openPlayer(song),
             ),
           ],
         ),

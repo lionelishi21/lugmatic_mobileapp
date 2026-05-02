@@ -1,4 +1,4 @@
-package com.example.lugmatic_flutter
+package com.lugmatic.lugmatic
 
 import io.flutter.embedding.android.FlutterActivity
 import com.ryanheise.audioservice.AudioServiceActivity

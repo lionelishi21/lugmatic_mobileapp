@@ -118,11 +118,21 @@ class AudioProvider extends ChangeNotifier {
       _position = Duration.zero;
       _duration = Duration.zero;
 
-      if (queue != null) {
+      if (queue != null && queue.isNotEmpty) {
         _queue = queue;
         _currentIndex = _queue.indexWhere((m) => m.id == music.id);
+        if (_currentIndex == -1) {
+          // If the song isn't in the provided queue, just insert it and play it.
+          _queue.insert(0, music);
+          _currentIndex = 0;
+        }
       } else if (_queue.any((m) => m.id == music.id)) {
         _currentIndex = _queue.indexWhere((m) => m.id == music.id);
+      } else {
+        // Essential fallback: If no queue is provided, make this single track the queue
+        // so it doesn't break queue logic downstream.
+        _queue = [music];
+        _currentIndex = 0;
       }
 
       notifyListeners();
@@ -141,6 +151,9 @@ class AudioProvider extends ChangeNotifier {
               : null,
         ),
       );
+
+      // Async history trigger so we don't delay playback
+      _musicService.recordPlay(music.id);
 
       await _audioPlayer.setAudioSource(audioSource);
       _audioPlayer.play();

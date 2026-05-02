@@ -13,6 +13,8 @@ class User {
   final String role;
   final String? profilePicture;
   final int coins;
+  final bool isArtist;
+  final String? artistId;
 
   const User({
     required this.id,
@@ -22,6 +24,8 @@ class User {
     required this.role,
     this.profilePicture,
     this.coins = 0,
+    this.isArtist = false,
+    this.artistId,
   });
 
   String get fullName => '$firstName $lastName';
@@ -35,6 +39,8 @@ class User {
       role: json['role'] ?? 'user',
       profilePicture: json['profilePicture'],
       coins: json['coins'] ?? 0,
+      isArtist: json['isArtist'] ?? false,
+      artistId: json['artistId'],
     );
   }
 }
@@ -58,7 +64,7 @@ class AuthService {
     try {
       final response = await _apiClient.dio.post(
         ApiConfig.login,
-        data: {'email': email, 'password': password},
+        data: {'email': email, 'password': password, 'deviceType': 'mobile'},
       );
 
       final body = response.data;
@@ -124,7 +130,7 @@ class AuthService {
     try {
       final response = await _apiClient.dio.post(
         ApiConfig.googleAuth,
-        data: {'idToken': idToken},
+        data: {'idToken': idToken, 'deviceType': 'mobile'},
       );
 
       final body = response.data;

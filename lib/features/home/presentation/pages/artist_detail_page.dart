@@ -5,8 +5,13 @@ import '../../../../core/network/api_client.dart';
 import '../../../../data/models/artist_model.dart';
 import '../../../../data/models/music_model.dart';
 import '../../../../shared/widgets/gift_bottom_sheet.dart';
+import '../../../../shared/widgets/comment_section_widget.dart';
 import '../../../../data/providers/audio_provider.dart';
+import '../../../../data/services/artist_service.dart';
+import '../../../../data/services/video_service.dart';
+import '../../../../data/models/video_model.dart';
 import '../../../../ui/widgets/player_screen.dart';
+import '../../../video/presentation/pages/videos_page.dart';
 import '../../../song/presentation/pages/song_detail_page.dart';
 
 class ArtistDetailPage extends StatefulWidget {
@@ -23,6 +28,7 @@ class _ArtistDetailPageState extends State<ArtistDetailPage> {
   ArtistModel? _artist;
   List<MusicModel> _songs = [];
   List<Map<String, dynamic>> _albums = [];
+  List<VideoModel> _videos = [];
   bool _loading = true;
   bool _isFollowing = false;
 
@@ -46,30 +52,35 @@ class _ArtistDetailPageState extends State<ArtistDetailPage> {
           ApiConfig.albums,
           queryParameters: {'artist': widget.artistId, 'limit': 10},
         ),
+        context.read<VideoService>().getVideos(artistId: widget.artistId),
       ]);
 
       // Artist
-      final aBody = results[0].data;
+      final aBody = (results[0] as dynamic).data;
       final aData = aBody['data'] ?? aBody;
       final artist = ArtistModel.fromJson(aData as Map<String, dynamic>);
 
       // Songs
-      final sBody = results[1].data;
+      final sBody = (results[1] as dynamic).data;
       final sItems = sBody['data'] ?? sBody['songs'] ?? [];
       final songs = (sItems as List)
           .map((j) => MusicModel.fromJson(j as Map<String, dynamic>))
           .toList();
 
       // Albums
-      final alBody = results[2].data;
+      final alBody = (results[2] as dynamic).data;
       final alItems = alBody['data'] ?? alBody['albums'] ?? [];
       final albums = List<Map<String, dynamic>>.from(alItems);
+
+      // Videos
+      final videos = results[3] as List<VideoModel>;
 
       if (mounted) {
         setState(() {
           _artist = artist;
           _songs = songs;
           _albums = albums;
+          _videos = videos;
           _isFollowing = artist.isFollowing;
           _loading = false;
         });
@@ -77,6 +88,45 @@ class _ArtistDetailPageState extends State<ArtistDetailPage> {
     } catch (e) {
       if (mounted) setState(() => _loading = false);
     }
+  }
+
+  void _showPremiumRequired() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1F2937),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Row(
+          children: [
+            Icon(Icons.workspace_premium, color: Color(0xFFFFD700)),
+            SizedBox(width: 8),
+            Text('Premium Feature', style: TextStyle(color: Colors.white)),
+          ],
+        ),
+        content: const Text(
+          'Messaging and commenting directly on an artist\'s profile requires a Lugmatic Premium subscription.',
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel', style: TextStyle(color: Colors.white60)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              // TODO: Navigate to Premium Subscription Page
+              // Navigator.pushNamed(context, '/premium');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF10B981),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            child: const Text('Upgrade Now', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
   }
 
   String _formatDuration(Duration d) {
@@ -198,6 +248,28 @@ class _ArtistDetailPageState extends State<ArtistDetailPage> {
                             ],
                           ),
                         ),
+                      if (artist.isLive) ...[
+                        const SizedBox(height: 8),
+                        GestureDetector(
+                          onTap: () => Navigator.pushNamed(context, '/live', arguments: artist.id), // placeholder route
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: AppColors.error,
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [BoxShadow(color: AppColors.error.withOpacity(0.5), blurRadius: 10)],
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.fiber_manual_record, color: Colors.white, size: 10),
+                                SizedBox(width: 6),
+                                Text('LIVE NOW - TAP TO JOIN', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 12),
                       Text(
                         artist.name,
@@ -261,7 +333,37 @@ class _ArtistDetailPageState extends State<ArtistDetailPage> {
                       _CircleActionButton(
                         icon: _isFollowing ? Icons.person_add_disabled : Icons.person_add,
                         isActive: _isFollowing,
-                        onTap: () => setState(() => _isFollowing = !_isFollowing),
+                        onTap: () async {
+                          final artistService = context.read<ArtistService>();
+                          final oldState = _isFollowing;
+                          setState(() => _isFollowing = !_isFollowing);
+                          try {
+                            if (oldState) {
+                              await artistService.unfollowArtist(widget.artistId);
+                            } else {
+                              await artistService.followArtist(widget.artistId);
+                            }
+                          } catch (e) {
+                            if (mounted) {
+                              setState(() => _isFollowing = oldState);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Failed to update following: $e')),
+                              );
+                            }
+                          }
+                        },
+                      ),
+                      const SizedBox(width: 12),
+                      _CircleActionButton(
+                        icon: Icons.chat_bubble_outline,
+                        color: Colors.white,
+                        onTap: _showPremiumRequired,
+                      ),
+                      const SizedBox(width: 12),
+                      _CircleActionButton(
+                        icon: Icons.mail_outline,
+                        color: Colors.white,
+                        onTap: _showPremiumRequired,
                       ),
                       const SizedBox(width: 12),
                       _CircleActionButton(
@@ -375,6 +477,104 @@ class _ArtistDetailPageState extends State<ArtistDetailPage> {
                   const SizedBox(height: 40),
                 ],
 
+                // Music Videos Section
+                if (_videos.isNotEmpty) ...[
+                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Music Videos', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: -0.5)),
+                      TextButton(
+                        onPressed: () {}, // No 'See All' for videos yet
+                        child: Text('See all', style: TextStyle(color: const Color(0xFF10B981).withOpacity(0.8), fontWeight: FontWeight.w700)),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    height: 180,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: _videos.length,
+                      itemBuilder: (ctx, i) {
+                        final v = _videos[i];
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => VideoPlayerScreen(video: v),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            width: 240,
+                            margin: const EdgeInsets.only(right: 16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Stack(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(16),
+                                      child: v.thumbnailUrl.isNotEmpty
+                                          ? Image.network(v.thumbnailUrl, width: 240, height: 135, fit: BoxFit.cover,
+                                              errorBuilder: (_, __, ___) => _videoPlaceholder())
+                                          : _videoPlaceholder(),
+                                    ),
+                                    const Positioned.fill(
+                                      child: Center(
+                                        child: Icon(Icons.play_circle_fill, color: Colors.white70, size: 40),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                Text(v.title,
+                                    maxLines: 1, overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700)),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                  const SizedBox(height: 40),
+                ],
+
+                // Past Lives Section (Placeholder until backend fully integrated)
+                const Text('Past Lives', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: -0.5)),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.04),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.white.withOpacity(0.08)),
+                  ),
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.videocam_off, color: Colors.white.withOpacity(0.3), size: 48),
+                        const SizedBox(height: 12),
+                        Text(
+                          'No recorded sessions yet',
+                          style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 16, fontWeight: FontWeight.w600),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'When ${artist.name} saves a live stream, it will appear here.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 13),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 40),
+
                 // About Section
                 if (artist.bio.isNotEmpty || artist.genres.isNotEmpty) ...[
                   const Text('About', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: -0.5)),
@@ -412,6 +612,13 @@ class _ArtistDetailPageState extends State<ArtistDetailPage> {
                     ),
                   ),
                 ],
+                const SizedBox(height: 40),
+
+                // Comments
+                const Text('Comments', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: -0.5)),
+                const SizedBox(height: 16),
+                CommentSectionWidget(contentType: 'artist', contentId: widget.artistId),
+
                 const SizedBox(height: 120),
               ],
             ),
@@ -424,6 +631,11 @@ class _ArtistDetailPageState extends State<ArtistDetailPage> {
   Widget _albumPlaceholder() => Container(
     width: 140, height: 140, color: const Color(0xFF1A2332),
     child: const Icon(Icons.album, color: Colors.white24, size: 48),
+  );
+
+  Widget _videoPlaceholder() => Container(
+    width: 240, height: 135, color: const Color(0xFF1A2332),
+    child: const Icon(Icons.video_library, color: Colors.white24, size: 40),
   );
 }
 

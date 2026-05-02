@@ -121,4 +121,32 @@ class MusicService {
       throw ApiException.fromDioException(e);
     }
   }
+
+  /// Fetch the current user's unified artist catalog (owned & collaborations).
+  Future<List<MusicModel>> getArtistCatalog() async {
+    try {
+      final response = await _apiClient.dio.get('/users/contributor/dashboard');
+      final body = response.data;
+      final resultData = body['data'] ?? body;
+      final items = resultData['songs'] ?? [];
+      
+      return (items as List)
+          .map((json) => MusicModel.fromJson(json as Map<String, dynamic>))
+          .toList();
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// Record a play/listen for a song (updates history and play count).
+  Future<void> recordPlay(String id) async {
+    try {
+      await _apiClient.dio.post('${ApiConfig.songListen}/$id');
+    } on DioException catch (e) {
+      // We usually don't want to interrupt playback if the analytics call fails
+      print('Failed to record listen for song $id: ${e.message}');
+    } catch (e) {
+      print('Unknown error recording listen: $e');
+    }
+  }
 }

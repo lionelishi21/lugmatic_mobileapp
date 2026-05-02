@@ -1,6 +1,6 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:livekit_client/livekit_client.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 import '../../../../data/models/live_stream_model.dart';
 
 /// Widget that connects to a LiveKit room and renders the host's video.
@@ -24,7 +24,7 @@ class LiveVideoWidget extends StatefulWidget {
 }
 
 class _LiveVideoWidgetState extends State<LiveVideoWidget>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   Room? _room;
   EventsListener<RoomEvent>? _listener;
   bool _isConnecting = true;
@@ -42,7 +42,16 @@ class _LiveVideoWidgetState extends State<LiveVideoWidget>
       vsync: this,
       duration: const Duration(milliseconds: 1500),
     )..repeat(reverse: true);
+    WidgetsBinding.instance.addObserver(this);
     _connectToRoom();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && _isConnected) {
+      debugPrint('[LiveKit] App resumed, re-syncing video tracks');
+      _updateVideoTrack();
+    }
   }
 
   Future<void> _connectToRoom() async {
@@ -153,6 +162,7 @@ class _LiveVideoWidgetState extends State<LiveVideoWidget>
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _pulseController.dispose();
     _listener?.dispose();
     _room?.disconnect();
@@ -170,44 +180,53 @@ class _LiveVideoWidgetState extends State<LiveVideoWidget>
       return _buildConnectingState();
     }
 
-    return Stack(
-      children: [
-        // Video or audio-only visualization
-        if (_videoTrack != null)
-          VideoTrackRenderer(
-            _videoTrack!,
-            fit: VideoViewFit.cover,
-            mirrorMode: widget.isHost
-                ? VideoViewMirrorMode.mirror
-                : VideoViewMirrorMode.off,
-          )
-        else
-          _buildAudioOnlyState(),
+    return VisibilityDetector(
+      key: Key('live-video-${widget.tokenData.token}'),
+      onVisibilityChanged: (info) {
+        if (info.visibleFraction > 0.1 && _isConnected) {
+          debugPrint('[LiveKit] Stream became visible, re-syncing tracks');
+          _updateVideoTrack();
+        }
+      },
+      child: Stack(
+        children: [
+          // Video or audio-only visualization
+          if (_videoTrack != null)
+            VideoTrackRenderer(
+              _videoTrack!,
+              fit: VideoViewFit.cover,
+              mirrorMode: widget.isHost
+                  ? VideoViewMirrorMode.mirror
+                  : VideoViewMirrorMode.off,
+            )
+          else
+            _buildAudioOnlyState(),
 
-        // Host controls overlay
-        if (widget.isHost && _isConnected)
-          Positioned(
-            bottom: 20,
-            left: 0,
-            right: 0,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _buildControlButton(
-                  icon: _isMicOn ? Icons.mic : Icons.mic_off,
-                  isActive: _isMicOn,
-                  onTap: _toggleMic,
-                ),
-                const SizedBox(width: 16),
-                _buildControlButton(
-                  icon: _isCameraOn ? Icons.videocam : Icons.videocam_off,
-                  isActive: _isCameraOn,
-                  onTap: _toggleCamera,
-                ),
-              ],
+          // Host controls overlay
+          if (widget.isHost && _isConnected)
+            Positioned(
+              bottom: 20,
+              left: 0,
+              right: 0,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildControlButton(
+                    icon: _isMicOn ? Icons.mic : Icons.mic_off,
+                    isActive: _isMicOn,
+                    onTap: _toggleMic,
+                  ),
+                  const SizedBox(width: 16),
+                  _buildControlButton(
+                    icon: _isCameraOn ? Icons.videocam : Icons.videocam_off,
+                    isActive: _isCameraOn,
+                    onTap: _toggleCamera,
+                  ),
+                ],
+              ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 

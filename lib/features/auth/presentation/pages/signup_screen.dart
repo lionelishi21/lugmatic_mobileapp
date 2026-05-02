@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:ui';
-import '../../../../data/services/auth_service.dart';
+import '../../../../data/providers/auth_provider.dart';
 import 'email_verification_screen.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
@@ -59,16 +59,18 @@ class _SignUpScreenState extends State<SignUpScreen>
   Future<void> _signUp() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
-    try {
-      final authService = context.read<AuthService>();
-      await authService.register(
-        firstName: _firstNameCtrl.text.trim(),
-        lastName: _lastNameCtrl.text.trim(),
-        email: _emailCtrl.text.trim(),
-        password: _passwordCtrl.text,
-      );
-      if (mounted) {
-        setState(() => _isLoading = false);
+    
+    final authProvider = context.read<AuthProvider>();
+    final success = await authProvider.register(
+      firstName: _firstNameCtrl.text.trim(),
+      lastName: _lastNameCtrl.text.trim(),
+      email: _emailCtrl.text.trim(),
+      password: _passwordCtrl.text,
+    );
+
+    if (mounted) {
+      setState(() => _isLoading = false);
+      if (success) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -76,12 +78,9 @@ class _SignUpScreenState extends State<SignUpScreen>
                     email: _emailCtrl.text.trim(),
                   )),
         );
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isLoading = false);
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(e.toString()),
+          content: Text(authProvider.errorMessage ?? 'Registration failed'),
           backgroundColor: AppColors.destructive,
         ));
       }

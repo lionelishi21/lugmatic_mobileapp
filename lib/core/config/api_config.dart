@@ -46,6 +46,7 @@ class ApiConfig {
   static const String songs = '/song/list';
   static const String billboard = '/song/billboard';
   static const String songDetails = '/song/details'; // + /:id
+  static const String songListen = '/song/listen'; // + /:id
 
   // ── Artist endpoints ────────────────────────────────────────────
   static const String artists = '/artist/list';
@@ -83,6 +84,7 @@ class ApiConfig {
   // ── Notification endpoints ──────────────────────────────────────
   static const String notifications = '/notification';
   static const String markRead = '/notification/read-all';
+  static const String fcmToken = '/user/fcm-token';
 
   // ── Artist Request endpoints ────────────────────────────────────
   static const String artistRequest = '/artist-request';
@@ -95,6 +97,7 @@ class ApiConfig {
   static const String liveStreams = '/live-stream';
   static const String liveStreamDetails = '/live-stream'; // + /:id
   static const String liveStreamToken = '/live-stream'; // + /:id/token
+  static const String liveStreamRecorded = '/live-stream/recorded';
 
   // ── Video endpoints ─────────────────────────────────────────────
   static const String videos = '/video/list';
@@ -129,4 +132,13 @@ class ApiConfig {
   static const String mobileSearch = '/mobile/search';
   static const String mobileFavorites = '/mobile/favorites';
   static const String recentlyPlayed = '/user/recently-played/list';
+
+  // ── Admin Management ───────────────────────────────────────────
+  static const String adminDashboard = '/admin/dashboard';
+  static const String adminUsers = '/admin/users';
+  static const String adminArtists = '/admin/artists';
+  static const String adminModeration = '/admin/moderation';
+
+  // ── Artist Management ──────────────────────────────────────────
+  static const String artistStats = '/artist'; // + /:id/stats
 }

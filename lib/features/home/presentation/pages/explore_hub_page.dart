@@ -9,6 +9,7 @@ import 'package:lugmatic_flutter/shared/widgets/demand_artist_dialog.dart';
 import 'package:lugmatic_flutter/features/home/presentation/pages/browse_page.dart';
 import 'package:lugmatic_flutter/features/video/presentation/pages/videos_page.dart';
 import 'package:lugmatic_flutter/features/music/presentation/pages/discover_page.dart';
+import 'package:lugmatic_flutter/features/home/presentation/pages/meet_artist_page.dart';
 
 class ExploreHubPage extends StatelessWidget {
   const ExploreHubPage({Key? key}) : super(key: key);
@@ -58,7 +59,7 @@ class ExploreHubPage extends StatelessWidget {
                   title: 'Meet Artists',
                   icon: Icons.people,
                   color: AppColors.secondary,
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const DiscoverPage())),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MeetArtistPage())),
                 ),
                 _buildHubCard(
                   context,

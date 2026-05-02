@@ -66,11 +66,10 @@ class HomeService {
   Future<List<ArtistModel>> getFeaturedArtists() async {
     try {
       final response = await _apiClient.dio.get(
-        ApiConfig.mobileArtists,
+        ApiConfig.artists,
         queryParameters: {'limit': 20, 'featured': 'true'},
       );
-      // /mobile/artists returns { success: true, data: { items: [...], nextCursor: ... } }
-      final items = _extractList(response.data, ['data', 'items']);
+      final items = _extractList(response.data, ['data']);
       return (items)
           .map((json) => ArtistModel.fromJson(json as Map<String, dynamic>))
           .toList();

@@ -12,6 +12,7 @@ class ArtistModel {
   final int totalAlbums;
   final double rating;
   final bool isFollowing;
+  final bool isLive;
 
   ArtistModel({
     required this.id,
@@ -27,6 +28,7 @@ class ArtistModel {
     this.totalAlbums = 0,
     this.rating = 0.0,
     this.isFollowing = false,
+    this.isLive = false,
   });
 
   factory ArtistModel.fromJson(Map<String, dynamic> json) {
@@ -67,6 +69,7 @@ class ArtistModel {
       totalAlbums: json['albumCount'] ?? json['totalAlbums'] ?? 0,
       rating: (json['rating'] ?? 0.0).toDouble(),
       isFollowing: json['isFollowing'] ?? false,
+      isLive: json['isLive'] ?? false,
     );
   }
 
@@ -85,6 +88,7 @@ class ArtistModel {
       'totalAlbums': totalAlbums,
       'rating': rating,
       'isFollowing': isFollowing,
+      'isLive': isLive,
     };
   }
 }

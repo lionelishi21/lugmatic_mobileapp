@@ -85,26 +85,90 @@ class _VideosPageState extends State<VideosPage> {
                       child: Text('No videos found',
                           style: TextStyle(color: Colors.white70)),
                     )
-                  : PageView.builder(
-                      scrollDirection: Axis.vertical,
+                  : GridView.builder(
+                      padding: const EdgeInsets.fromLTRB(16, 120, 16, 100),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                        childAspectRatio: 0.75,
+                      ),
                       itemCount: _videos.length,
                       itemBuilder: (context, index) {
-                        return VideoPlayerItem(video: _videos[index]);
+                        final video = _videos[index];
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => VideoPlayerScreen(video: video),
+                              ),
+                            );
+                          },
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                video.thumbnailUrl.isNotEmpty
+                                    ? Image.network(video.thumbnailUrl, fit: BoxFit.cover)
+                                    : Container(color: Colors.grey[900]),
+                                Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [
+                                        Colors.transparent,
+                                        Colors.black.withOpacity(0.8),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                const Center(
+                                  child: Icon(Icons.play_circle_fill, color: Colors.white, size: 48),
+                                ),
+                                Positioned(
+                                  bottom: 8,
+                                  left: 8,
+                                  right: 8,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        video.title,
+                                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      Text(
+                                        video.artistName,
+                                        style: const TextStyle(color: Colors.white70, fontSize: 10),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
                       },
                     ),
     );
   }
 }
 
-class VideoPlayerItem extends StatefulWidget {
+class VideoPlayerScreen extends StatefulWidget {
   final VideoModel video;
-  const VideoPlayerItem({Key? key, required this.video}) : super(key: key);
+  const VideoPlayerScreen({Key? key, required this.video}) : super(key: key);
 
   @override
-  State<VideoPlayerItem> createState() => _VideoPlayerItemState();
+  State<VideoPlayerScreen> createState() => _VideoPlayerScreenState();
 }
 
-class _VideoPlayerItemState extends State<VideoPlayerItem> {
+class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   late VideoPlayerController _videoPlayerController;
   ChewieController? _chewieController;
 
@@ -123,9 +187,10 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
     
     _chewieController = ChewieController(
       videoPlayerController: _videoPlayerController,
-      autoPlay: true,
+      autoPlay: false, // Disabled autoplay per user request
       looping: true,
       showControls: true,
+      autoInitialize: true,
       aspectRatio: _videoPlayerController.value.aspectRatio,
       placeholder: widget.video.thumbnailUrl.isNotEmpty
           ? Image.network(widget.video.thumbnailUrl, fit: BoxFit.cover)
@@ -155,49 +220,19 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        if (_chewieController != null &&
-            _chewieController!.videoPlayerController.value.isInitialized)
-          Chewie(controller: _chewieController!)
-        else
-          const Center(child: CircularProgressIndicator(color: Color(0xFF10B981))),
-        
-        // Overlay for Artist Info
-        Positioned(
-          left: 16,
-          bottom: 32,
-          right: 80,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '@${widget.video.artistName}',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                widget.video.title,
-                style: const TextStyle(color: Colors.white, fontSize: 14),
-              ),
-              if (widget.video.description.isNotEmpty) ...[
-                const SizedBox(height: 4),
-                Text(
-                  widget.video.description,
-                  style: const TextStyle(color: Colors.white70, fontSize: 12),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ],
-          ),
-        ),
-      ],
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        elevation: 0,
+        title: Text(widget.video.title),
+      ),
+      body: Center(
+        child: _chewieController != null &&
+            _chewieController!.videoPlayerController.value.isInitialized
+          ? Chewie(controller: _chewieController!)
+          : const Center(child: CircularProgressIndicator(color: Color(0xFF10B981))),
+      ),
     );
   }
 }

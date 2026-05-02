@@ -307,7 +307,9 @@ class _DiscoverPageState extends State<DiscoverPage> {
             TextButton(
               onPressed: () {
                 if (title == 'Trending Now') {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => const TrendingSongsPage()));
+                  Navigator.pushNamed(context, '/trending');
+                } else if (title == 'New Releases') {
+                  Navigator.pushNamed(context, '/new_releases');
                 }
               },
               child: Text(
@@ -416,31 +418,34 @@ class _DiscoverPageState extends State<DiscoverPage> {
   }
 
   Widget _buildArtistCard(ArtistModel artist) {
-    return Container(
-      width: 120,
-      margin: const EdgeInsets.only(right: 12),
-      child: Column(
-        children: [
-          ClipOval(
-            child: artist.imageUrl.isNotEmpty
-                ? Image.network(
-                    ApiConfig.resolveUrl(artist.imageUrl),
-                    width: 80, height: 80, fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => _placeholderAvatar(),
-                  )
-                : _placeholderAvatar(),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            artist.name,
-            style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-          ),
-          if (artist.isVerified)
-            const Icon(Icons.verified, color: Color(0xFF10B981), size: 14),
-        ],
+    return GestureDetector(
+      onTap: () => Navigator.pushNamed(context, '/artist', arguments: {'id': artist.id, 'initialData': artist}),
+      child: Container(
+        width: 120,
+        margin: const EdgeInsets.only(right: 12),
+        child: Column(
+          children: [
+            ClipOval(
+              child: artist.imageUrl.isNotEmpty
+                  ? Image.network(
+                      ApiConfig.resolveUrl(artist.imageUrl),
+                      width: 80, height: 80, fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => _placeholderAvatar(),
+                    )
+                  : _placeholderAvatar(),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              artist.name,
+              style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+            ),
+            if (artist.isVerified)
+              const Icon(Icons.verified, color: Color(0xFF10B981), size: 14),
+          ],
+        ),
       ),
     );
   }

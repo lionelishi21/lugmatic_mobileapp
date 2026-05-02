@@ -30,6 +30,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
   void initState() {
     super.initState();
     _lastVideoUrl = widget.music.videoUrl;
+    _isFavorited = widget.music.isLiked;
     _initVideo(widget.music.videoUrl);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -47,13 +48,20 @@ class _PlayerScreenState extends State<PlayerScreen> {
   void _onAudioProviderChanged() {
     if (!mounted) return;
     final audioProvider = Provider.of<AudioProvider>(context, listen: false);
-    final newVideoUrl = audioProvider.currentMusic?.videoUrl ?? '';
+    final currentMusic = audioProvider.currentMusic;
+    if (currentMusic == null) return;
+
+    final newVideoUrl = currentMusic.videoUrl;
     if (newVideoUrl != _lastVideoUrl) {
       _lastVideoUrl = newVideoUrl;
       _videoController?.dispose();
       _videoController = null;
       _initVideo(newVideoUrl);
-      setState(() {});
+    }
+    
+    // Sync favorited status
+    if (_isFavorited != currentMusic.isLiked) {
+      setState(() => _isFavorited = currentMusic.isLiked);
     }
   }
 
@@ -371,7 +379,6 @@ class _PlayerScreenState extends State<PlayerScreen> {
                           ),
                           const SizedBox(height: 30),
 
-                          // Secondary Controls: Favorite & Gift
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
@@ -398,7 +405,58 @@ class _PlayerScreenState extends State<PlayerScreen> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 30),
+                          
+                          // Lyrics Section
+                          if (currentMusic.lyrics.isNotEmpty) ...[
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(24),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.05),
+                                borderRadius: BorderRadius.circular(24),
+                                border: Border.all(color: Colors.white.withOpacity(0.1)),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.lyrics_outlined, color: Color(0xFF10B981), size: 20),
+                                      const SizedBox(width: 10),
+                                      Text(
+                                        'LYRICS',
+                                        style: TextStyle(
+                                          color: Colors.white.withOpacity(0.9),
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w900,
+                                          letterSpacing: 1.5,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 20),
+                                  Text(
+                                    currentMusic.lyrics,
+                                    style: TextStyle(
+                                      color: Colors.white.withOpacity(0.8),
+                                      fontSize: 18,
+                                      height: 1.8,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ] else ...[
+                             Center(
+                               child: Text(
+                                 'Lyrics not available for this track',
+                                 style: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 13),
+                               ),
+                             ),
+                          ],
+                          const SizedBox(height: 60),
                         ],
                       ),
                     ),

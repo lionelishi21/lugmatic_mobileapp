@@ -11,11 +11,14 @@ class MusicModel {
   final String videoUrl;
   final Duration duration;
   final String genre;
+  final String lyrics;
   final bool isLiked;
   final int playCount;
   final DateTime releaseDate;
   final bool isArtistVerified;
   final Map<String, dynamic>? billboardStats;
+  final double? share;
+  final String? role;
 
   MusicModel({
     required this.id,
@@ -28,11 +31,14 @@ class MusicModel {
     this.videoUrl = '',
     required this.duration,
     required this.genre,
+    this.lyrics = '',
     this.isLiked = false,
     this.playCount = 0,
     required this.releaseDate,
     this.isArtistVerified = false,
     this.billboardStats,
+    this.share,
+    this.role,
   });
 
   factory MusicModel.fromJson(Map<String, dynamic> json) {
@@ -90,6 +96,7 @@ class MusicModel {
             : (json['duration'] as num).toInt(),
       ),
       genre: genreName,
+      lyrics: json['lyrics'] ?? '',
       isLiked: json['isLiked'] ?? false,
       playCount: json['playCount'] ?? 0,
       releaseDate: json['releaseDate'] != null
@@ -97,6 +104,8 @@ class MusicModel {
           : DateTime.now(),
       isArtistVerified: isVerified,
       billboardStats: json['billboardStats'] as Map<String, dynamic>?,
+      share: json['share'] != null ? (json['share'] as num).toDouble() : null,
+      role: json['role'],
     );
   }
 
@@ -112,11 +121,14 @@ class MusicModel {
       'videoUrl': videoUrl,
       'duration': duration.inSeconds,
       'genre': genre,
+      'lyrics': lyrics,
       'isLiked': isLiked,
       'playCount': playCount,
       'releaseDate': releaseDate.toIso8601String(),
       'isArtistVerified': isArtistVerified,
       'billboardStats': billboardStats,
+      'share': share,
+      'role': role,
     };
   }
 }

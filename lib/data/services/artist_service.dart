@@ -44,7 +44,7 @@ class ArtistService {
   Future<void> followArtist(String artistId) async {
     try {
       await _apiClient.dio.post(
-        '${ApiConfig.mobileArtists}/$artistId/follow',
+        '${ApiConfig.mobileArtists}/$artistId/like',
       );
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);
@@ -55,7 +55,7 @@ class ArtistService {
   Future<void> unfollowArtist(String artistId) async {
     try {
       await _apiClient.dio.delete(
-        '${ApiConfig.mobileArtists}/$artistId/follow',
+        '${ApiConfig.mobileArtists}/$artistId/like',
       );
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);

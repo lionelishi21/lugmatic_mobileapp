@@ -6,6 +6,9 @@ import '../../../../data/models/music_model.dart';
 import '../../../../data/models/artist_model.dart';
 import '../../../../data/models/playlist_model.dart';
 import '../../../../data/providers/audio_provider.dart';
+import '../../../../data/providers/auth_provider.dart';
+import '../../../../data/services/music_service.dart';
+import 'package:dio/dio.dart';
 
 class LibraryPage extends StatefulWidget {
   const LibraryPage({Key? key}) : super(key: key);
@@ -23,11 +26,15 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
   List<Map<String, dynamic>> _albums = [];
   List<ArtistModel> _artists = [];
   List<MusicModel> _history = [];
+  List<MusicModel> _artistSongs = [];
+  bool _isArtist = false;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 5, vsync: this);
+    final auth = context.read<AuthProvider>();
+    _isArtist = auth.user?.isArtist ?? false;
+    _tabController = TabController(length: _isArtist ? 6 : 5, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadData());
   }
 
@@ -49,14 +56,15 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
         api.dio.get(ApiConfig.mobileFavorites, queryParameters: {'type': 'album'}), // Liked albums
         api.dio.get(ApiConfig.mobileFavorites, queryParameters: {'type': 'artist'}), // Following
         api.dio.get(ApiConfig.recentlyPlayed), // History
+        if (_isArtist) MusicService(apiClient: api).getArtistCatalog(),
       ]);
 
       if (mounted) {
-        final playlistBody = results[0].data;
-        final favoritesBody = results[1].data;
-        final albumBody = results[2].data;
-        final artistBody = results[3].data;
-        final historyBody = results[4].data;
+        final playlistBody = (results[0] as Response).data;
+        final favoritesBody = (results[1] as Response).data;
+        final albumBody = (results[2] as Response).data;
+        final artistBody = (results[3] as Response).data;
+        final historyBody = (results[4] as Response).data;
 
         setState(() {
           final playlistsRaw = playlistBody['data'] ?? [];
@@ -80,6 +88,10 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
                   : null)
               .whereType<MusicModel>()
               .toList();
+          
+          if (_isArtist && results.length > 5) {
+            _artistSongs = results[5] as List<MusicModel>;
+          }
           
           _isLoading = false;
         });
@@ -109,12 +121,13 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
                   labelStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
                   unselectedLabelStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
                   isScrollable: true,
-                  tabs: const [
-                    Tab(text: 'Playlists'),
-                    Tab(text: 'Liked Songs'),
-                    Tab(text: 'Albums'),
-                    Tab(text: 'Following'),
-                    Tab(text: 'History'),
+                  tabs: [
+                    const Tab(text: 'Playlists'),
+                    const Tab(text: 'Liked Songs'),
+                    const Tab(text: 'Albums'),
+                    const Tab(text: 'Following'),
+                    const Tab(text: 'History'),
+                    if (_isArtist) const Tab(text: 'Artist Music'),
                   ],
                 ),
               ),
@@ -135,6 +148,7 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
                   _buildAlbumsTab(),
                   _buildFollowingTab(),
                   _buildSongsTab(songs: _history), // History
+                  if (_isArtist) _buildArtistSongsTab(),
                 ],
               ),
       ),
@@ -387,7 +401,7 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
           ),
           child: ListTile(
             onTap: () {
-              // Navigator.pushNamed(context, '/artist_details', arguments: artist);
+              Navigator.pushNamed(context, '/artist', arguments: {'id': artist.id, 'initialData': artist});
             },
             leading: CircleAvatar(
               radius: 28,
@@ -430,10 +444,7 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
           ),
           child: ListTile(
             onTap: () {
-              // Assuming '/artist' takes arguments or you might have '/artist_details'
-              // The specific implementation depends on how Lugmatic app passes arguments
-              // Here is a common pattern. Adjust to the actual route name used.
-              // Navigator.pushNamed(context, '/artist_details', arguments: artist);
+              Navigator.pushNamed(context, '/artist', arguments: {'id': artist.id, 'initialData': artist});
             },
             leading: CircleAvatar(
               radius: 28,
@@ -529,6 +540,72 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
           Text(message, style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 16)),
         ],
       ),
+    );
+  }
+
+  Widget _buildArtistSongsTab() {
+    if (_artistSongs.isEmpty) {
+      return Center(child: _buildEmptyState('No music in your artist catalog yet', Icons.library_music));
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: _artistSongs.length,
+      itemBuilder: (context, index) {
+        final song = _artistSongs[index];
+        final isPrimary = song.role?.toLowerCase() == 'primary';
+        
+        return Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            color: Colors.white.withOpacity(0.04),
+          ),
+          child: ListTile(
+            onTap: () {
+              final audioProvider = context.read<AudioProvider>();
+              audioProvider.playMusic(song, queue: _artistSongs);
+            },
+            leading: Container(
+              width: 50, height: 50,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                image: song.imageUrl.isNotEmpty ? DecorationImage(
+                  image: NetworkImage(song.imageUrl),
+                  fit: BoxFit.cover,
+                ) : null,
+              ),
+              child: song.imageUrl.isEmpty ? const Icon(Icons.music_note, color: Colors.white24) : null,
+            ),
+            title: Row(
+              children: [
+                Expanded(child: Text(song.title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
+                if (song.role != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: (isPrimary ? const Color(0xFF10B981) : Colors.blueAccent).withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      song.role!.toUpperCase(),
+                      style: TextStyle(
+                        color: isPrimary ? const Color(0xFF10B981) : Colors.blueAccent,
+                        fontSize: 8,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            subtitle: Text(
+              '${song.artist}${song.share != null ? " • ${song.share!.round()}% share" : ""}',
+              style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12),
+            ),
+            trailing: const Icon(Icons.play_circle_outline, color: Color(0xFF10B981)),
+          ),
+        );
+      },
     );
   }
 }

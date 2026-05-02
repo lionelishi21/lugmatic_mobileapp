@@ -56,23 +56,23 @@ Backend Tasks
 
 Flutter Tasks
 
-    [ ] Project Setup
+    [x] Project Setup
 
-        [ ] Initialize Flutter project with a scalable folder structure (e.g., feature-first).
+        [x] Initialize Flutter project with a scalable folder structure (e.g., feature-first).
 
-        [ ] Set up state management solution (Riverpod is recommended for modern Flutter).
+        [x] Set up state management solution (Riverpod is recommended for modern Flutter).
 
-        [ ] Configure routing (GoRouter is recommended for deep linking).
+        [x] Configure routing (GoRouter is recommended for deep linking).
 
-        [ ] Implement the design system: theme data, text styles, and custom UI components.
+        [x] Implement the design system: theme data, text styles, and custom UI components.
 
-    [ ] Authentication Screens
+    [x] Authentication Screens
 
-        [ ] Build Welcome, Login, and Registration screens.
+        [x] Build Welcome, Login, and Registration screens.
 
-        [ ] Integrate with the authentication API endpoints.
+        [x] Integrate with the authentication API endpoints.
 
-        [ ] Implement token storage and refresh logic securely.
+        [x] Implement token storage and refresh logic securely.
 
     [ ] Core UI Shell
 

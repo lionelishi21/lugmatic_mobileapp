@@ -37,4 +37,12 @@ class NotificationService {
       throw ApiException.fromDioException(e);
     }
   }
+
+  Future<void> updateFcmToken(String token) async {
+    try {
+      await _apiClient.dio.post(ApiConfig.fcmToken, data: {'fcmToken': token});
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
 }

@@ -4,6 +4,7 @@ import '../../../../core/config/api_config.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../data/models/music_model.dart';
 import '../../../../shared/widgets/gift_bottom_sheet.dart';
+import '../../../../shared/widgets/comment_section_widget.dart';
 import '../../../../data/providers/audio_provider.dart';
 import '../../../../ui/widgets/player_screen.dart';
 
@@ -22,7 +23,7 @@ class _SongDetailPageState extends State<SongDetailPage> {
   List<MusicModel> _related = [];
   bool _loading = true;
   bool _isLiked = false;
-  String _tab = 'about'; // 'about' | 'lyrics'
+  String _tab = 'about'; // 'about' | 'lyrics' | 'comments'
   String? _lyrics;
 
   @override
@@ -258,12 +259,16 @@ class _SongDetailPageState extends State<SongDetailPage> {
                     _Tab(label: 'About', selected: _tab == 'about', onTap: () => setState(() => _tab = 'about')),
                     const SizedBox(width: 8),
                     _Tab(label: 'Lyrics', selected: _tab == 'lyrics', onTap: () => setState(() => _tab = 'lyrics')),
+                    const SizedBox(width: 8),
+                    _Tab(label: 'Comments', selected: _tab == 'comments', onTap: () => setState(() => _tab = 'comments')),
                   ],
                 ),
                 const SizedBox(height: 16),
 
                 // Tab content
-                _tab == 'about' ? _buildAboutTab(song) : _buildLyricsTab(),
+                if (_tab == 'about') _buildAboutTab(song)
+                else if (_tab == 'lyrics') _buildLyricsTab()
+                else CommentSectionWidget(contentType: 'song', contentId: widget.songId),
                 const SizedBox(height: 32),
 
                 // Related / More from artist

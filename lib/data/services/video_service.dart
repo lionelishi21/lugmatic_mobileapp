@@ -11,9 +11,15 @@ class VideoService {
   VideoService({required ApiClient apiClient}) : _apiClient = apiClient;
 
   /// Fetch all videos (paginated/list).
-  Future<List<VideoModel>> getVideos() async {
+  Future<List<VideoModel>> getVideos({String? artistId}) async {
     try {
-      final response = await _apiClient.dio.get(ApiConfig.videos);
+      final queryParams = <String, dynamic>{};
+      if (artistId != null) queryParams['artist'] = artistId;
+
+      final response = await _apiClient.dio.get(
+        ApiConfig.videos,
+        queryParameters: queryParams,
+      );
       final body = response.data;
       final rawData = body['data'];
       final items = rawData is List ? rawData : rawData?['videos'] ?? body['videos'] ?? [];

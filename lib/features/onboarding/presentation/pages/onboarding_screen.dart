@@ -225,6 +225,34 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                       ),
                     ),
                   ),
+                  const SizedBox(height: 24),
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    children: [
+                      Text(
+                        'By continuing, you agree to our ',
+                        style: TextStyle(color: AppColors.mutedForeground, fontSize: 12),
+                      ),
+                      GestureDetector(
+                        onTap: () => Navigator.pushNamed(context, '/terms'),
+                        child: Text(
+                          'Terms',
+                          style: TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      Text(
+                        ' and ',
+                        style: TextStyle(color: AppColors.mutedForeground, fontSize: 12),
+                      ),
+                      GestureDetector(
+                        onTap: () => Navigator.pushNamed(context, '/privacy'),
+                        child: Text(
+                          'Privacy Policy',
+                          style: TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),

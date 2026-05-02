@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import '../../core/network/api_exception.dart';
 import '../../core/network/token_storage.dart';
 import '../services/auth_service.dart';
+import '../services/fcm_service.dart';
+import '../services/auth_service.dart' show User; // If User model is there
 
 enum AuthStatus { initial, loading, authenticated, unauthenticated, error }
 
@@ -9,6 +11,7 @@ enum AuthStatus { initial, loading, authenticated, unauthenticated, error }
 class AuthProvider extends ChangeNotifier {
   final AuthService _authService;
   final TokenStorage _tokenStorage;
+  final FcmService? _fcmService;
 
   AuthStatus _status = AuthStatus.initial;
   User? _user;
@@ -17,8 +20,10 @@ class AuthProvider extends ChangeNotifier {
   AuthProvider({
     required AuthService authService,
     required TokenStorage tokenStorage,
+    FcmService? fcmService,
   })  : _authService = authService,
-        _tokenStorage = tokenStorage;
+        _tokenStorage = tokenStorage,
+        _fcmService = fcmService;
 
   AuthStatus get status => _status;
   User? get user => _user;
@@ -43,6 +48,8 @@ class AuthProvider extends ChangeNotifier {
     if (user != null) {
       _user = user;
       _status = AuthStatus.authenticated;
+      // Register FCM token once authenticated
+      _fcmService?.registerToken();
     } else {
       await _tokenStorage.clearTokens();
       _status = AuthStatus.unauthenticated;
@@ -62,6 +69,7 @@ class AuthProvider extends ChangeNotifier {
     try {
       _user = await _authService.login(email: email, password: password);
       _status = AuthStatus.authenticated;
+      _fcmService?.registerToken();
       notifyListeners();
       return true;
     } on ApiException catch (e) {
@@ -96,6 +104,7 @@ class AuthProvider extends ChangeNotifier {
         password: password,
       );
       _status = AuthStatus.authenticated;
+      _fcmService?.registerToken();
       notifyListeners();
       return true;
     } on ApiException catch (e) {
@@ -120,6 +129,7 @@ class AuthProvider extends ChangeNotifier {
     try {
       _user = await _authService.loginWithGoogle(idToken: idToken);
       _status = AuthStatus.authenticated;
+      _fcmService?.registerToken();
       notifyListeners();
       return true;
     } on ApiException catch (e) {

@@ -23,6 +23,8 @@ class LiveStreamModel {
   final bool chatEnabled;
   final bool giftsEnabled;
   final List<String> tags;
+  final bool isRecorded;
+  final String? recordingUrl;
   final DateTime? createdAt;
 
   const LiveStreamModel({
@@ -49,6 +51,8 @@ class LiveStreamModel {
     this.chatEnabled = true,
     this.giftsEnabled = true,
     this.tags = const [],
+    this.isRecorded = false,
+    this.recordingUrl,
     this.createdAt,
   });
 
@@ -97,6 +101,8 @@ class LiveStreamModel {
       chatEnabled: json['chatEnabled'] ?? true,
       giftsEnabled: json['giftsEnabled'] ?? true,
       tags: (json['tags'] as List?)?.map((t) => t.toString()).toList() ?? [],
+      isRecorded: json['isRecorded'] ?? false,
+      recordingUrl: json['recordingUrl']?.toString(),
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'])
           : null,
@@ -207,12 +213,14 @@ class LiveStreamTokenData {
   final String url;
   final String roomName;
   final String role; // host, viewer
+  final bool switchedSession;
 
   const LiveStreamTokenData({
     required this.token,
     required this.url,
     required this.roomName,
     required this.role,
+    this.switchedSession = false,
   });
 
   bool get isHost => role == 'host';
@@ -223,6 +231,7 @@ class LiveStreamTokenData {
       url: json['url'] ?? '',
       roomName: json['roomName'] ?? '',
       role: json['role'] ?? 'viewer',
+      switchedSession: json['switchedSession'] == true,
     );
   }
 }

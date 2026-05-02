@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import 'dart:ui';
 import '../../../../core/constants/app_colors.dart';
@@ -68,6 +69,52 @@ class _LoginScreenState extends State<LoginScreen>
       ));
       auth.clearError();
     }
+  }
+
+  Future<void> _signInWithGoogle() async {
+    // TODO: Fix GoogleSignIn constructor issue
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      content: Text('Google sign-in is temporarily disabled in this build.'),
+      backgroundColor: AppColors.secondary,
+    ));
+    /*
+    final authProvider = context.read<AuthProvider>();
+    try {
+      final googleSignIn = GoogleSignIn();
+      final googleUser = await googleSignIn.signIn();
+      if (googleUser == null) return; // User cancelled
+
+      final googleAuth = await googleUser.authentication;
+      final idToken = googleAuth.idToken;
+      if (idToken == null) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Google sign-in failed: no ID token'),
+          backgroundColor: AppColors.destructive,
+        ));
+        return;
+      }
+
+      final ok = await authProvider.loginWithGoogle(idToken: idToken);
+      if (!mounted) return;
+      if (ok) {
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (_) => HomePage()));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(authProvider.errorMessage ?? 'Google sign-in failed'),
+          backgroundColor: AppColors.destructive,
+        ));
+        authProvider.clearError();
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Google sign-in failed: ${e.toString()}'),
+        backgroundColor: AppColors.destructive,
+      ));
+    }
+    */
   }
 
   @override
@@ -339,8 +386,9 @@ class _LoginScreenState extends State<LoginScreen>
                                       text: AppStrings.googleSignIn,
                                       iconPath:
                                           'assets/images/google_icon.png',
-                                      onPressed: () =>
-                                          _showComingSoon('Google'),
+                                      onPressed: auth.isLoading
+                                          ? null
+                                          : _signInWithGoogle,
                                     ),
                                     const SizedBox(height: 10),
                                     SocialLoginButton(
@@ -462,6 +510,13 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
+  void _showComingSoon(String platform) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text('$platform login is coming soon!'),
+      backgroundColor: AppColors.secondary,
+    ));
+  }
+
   Widget _buildDivider() => Row(
         children: [
           Expanded(
@@ -483,9 +538,6 @@ class _LoginScreenState extends State<LoginScreen>
         ],
       );
 
-  void _showComingSoon(String provider) =>
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$provider sign-in coming soon')));
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
