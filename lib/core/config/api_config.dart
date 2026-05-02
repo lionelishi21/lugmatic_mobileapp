@@ -69,6 +69,13 @@ class ApiConfig {
   // ── Playlist endpoints ──────────────────────────────────────────
   static const String playlists = '/playlist';
 
+  // ── Message endpoints ───────────────────────────────────────────
+  static const String conversations = '/messages';
+  static const String startConversation = '/messages/start';
+  static const String messages = '/messages'; // + /:conversationId
+  static const String messageUnreadCount = '/messages/unread-count';
+  static const String markMessageRead = '/messages'; // + /:conversationId/read
+
   // ── Genre endpoints ────────────────────────────────────────────
   static const String genres = '/genre/list';
   static const String genreContent = '/genre/content'; // + /:id
@@ -105,6 +112,7 @@ class ApiConfig {
   static const String videoDetails = '/video/details'; // + /:id
   static const String songVideos = '/video/song'; // + /:id
   static const String videoView = '/video/view'; // + /:id
+  static const String createVideo = '/video/create';
 
   // ── Clash endpoints ─────────────────────────────────────────────
   static const String clash = '/clash';
@@ -141,4 +149,8 @@ class ApiConfig {
 
   // ── Artist Management ──────────────────────────────────────────
   static const String artistStats = '/artist'; // + /:id/stats
+
+  // ── Upload endpoints ─────────────────────────────────────────────
+  static const String presignArtistVideo = '/upload/presign/artist-video';
+  static const String presignProfileImage = '/upload/presign/profile-image';
 }

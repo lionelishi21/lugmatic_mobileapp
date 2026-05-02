@@ -1,0 +1,606 @@
+Running Gradle task 'assembleRelease'...                        
+lib/features/home/presentation/pages/library_page.dart:11:8: Error: Error when reading 'lib/features/music/presentation/widgets/music_list_item.dart': No such file or directory
+import '../../../music/presentation/widgets/music_list_item.dart';
+       ^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:9:31: Error: Type 'StatefulWidget' not found.
+class LiveVideoWidget extends StatefulWidget {
+                              ^^^^^^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:12:9: Error: Type 'VoidCallback' not found.
+  final VoidCallback? onDisconnected;
+        ^^^^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:15:5: Error: Type 'Key' not found.
+    Key? key,
+    ^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:22:3: Error: Type 'State' not found.
+  State<LiveVideoWidget> createState() => _LiveVideoWidgetState();
+  ^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:25:37: Error: Type 'State' not found.
+class _LiveVideoWidgetState extends State<LiveVideoWidget>
+                                    ^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:26:10: Error: Type 'SingleTickerProviderStateMixin' not found.
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:26:42: Error: Type 'WidgetsBindingObserver' not found.
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
+                                         ^^^^^^^^^^^^^^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:35:8: Error: Type 'AnimationController' not found.
+  late AnimationController _pulseController;
+       ^^^^^^^^^^^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:49:35: Error: Type 'AppLifecycleState' not found.
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+                                  ^^^^^^^^^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:173:3: Error: Type 'Widget' not found.
+  Widget build(BuildContext context) {
+  ^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:173:16: Error: Type 'BuildContext' not found.
+  Widget build(BuildContext context) {
+               ^^^^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:232:3: Error: Type 'Widget' not found.
+  Widget _buildControlButton({
+  ^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:233:14: Error: Type 'IconData' not found.
+    required IconData icon,
+             ^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:235:14: Error: Type 'VoidCallback' not found.
+    required VoidCallback onTap,
+             ^^^^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:257:3: Error: Type 'Widget' not found.
+  Widget _buildConnectingState() {
+  ^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:276:3: Error: Type 'Widget' not found.
+  Widget _buildAudioOnlyState() {
+  ^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:337:3: Error: Type 'Widget' not found.
+  Widget _buildErrorState() {
+  ^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:25:7: Error: The type 'SingleTickerProviderStateMixin' can't be mixed in.
+class _LiveVideoWidgetState extends State<LiveVideoWidget>
+      ^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:25:7: Error: The type 'WidgetsBindingObserver' can't be mixed in.
+class _LiveVideoWidgetState extends State<LiveVideoWidget>
+      ^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:19:14: Error: No named parameter with the name 'key'.
+  }) : super(key: key);
+             ^^^
+lib/features/live_stream/presentation/pages/tiktok_live_page.dart:503:24: Error: A value of type 'LiveVideoWidget' can't be returned from a function with return type 'Widget?'.
+ - 'LiveVideoWidget' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+ - 'Widget' is from 'package:flutter/src/widgets/framework.dart' ('../../../../../development/flutter/packages/flutter/lib/src/widgets/framework.dart').
+                return LiveVideoWidget(
+                       ^
+lib/features/home/presentation/pages/library_page.dart:63:41: Error: The getter 'data' isn't defined for the type 'Object'.
+ - 'Object' is from 'dart:core'.
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'data'.
+        final playlistBody = results[0].data;
+                                        ^^^^
+lib/features/home/presentation/pages/library_page.dart:64:42: Error: The getter 'data' isn't defined for the type 'Object'.
+ - 'Object' is from 'dart:core'.
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'data'.
+        final favoritesBody = results[1].data;
+                                         ^^^^
+lib/features/home/presentation/pages/library_page.dart:65:38: Error: The getter 'data' isn't defined for the type 'Object'.
+ - 'Object' is from 'dart:core'.
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'data'.
+        final albumBody = results[2].data;
+                                     ^^^^
+lib/features/home/presentation/pages/library_page.dart:66:39: Error: The getter 'data' isn't defined for the type 'Object'.
+ - 'Object' is from 'dart:core'.
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'data'.
+        final artistBody = results[3].data;
+                                      ^^^^
+lib/features/home/presentation/pages/library_page.dart:67:40: Error: The getter 'data' isn't defined for the type 'Object'.
+ - 'Object' is from 'dart:core'.
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'data'.
+        final historyBody = results[4].data;
+                                       ^^^^
+lib/features/home/presentation/pages/library_page.dart:130:25: Error: Not a constant expression.
+                    if (_isArtist) Tab(text: 'Artist Music'),
+                        ^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:12:9: Error: 'VoidCallback' isn't a type.
+  final VoidCallback? onDisconnected;
+        ^^^^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:15:5: Error: 'Key' isn't a type.
+    Key? key,
+    ^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:35:8: Error: 'AnimationController' isn't a type.
+  late AnimationController _pulseController;
+       ^^^^^^^^^^^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:39:11: Error: Superclass has no method named 'initState'.
+    super.initState();
+          ^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:40:24: Error: The method 'AnimationController' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'AnimationController'.
+    _pulseController = AnimationController(
+                       ^^^^^^^^^^^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:44:5: Error: The getter 'WidgetsBinding' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'WidgetsBinding'.
+    WidgetsBinding.instance.addObserver(this);
+    ^^^^^^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:49:35: Error: 'AppLifecycleState' isn't a type.
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+                                  ^^^^^^^^^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:50:18: Error: The getter 'AppLifecycleState' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppLifecycleState'.
+    if (state == AppLifecycleState.resumed && _isConnected) {
+                 ^^^^^^^^^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:51:7: Error: The method 'debugPrint' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'debugPrint'.
+      debugPrint('[LiveKit] App resumed, re-syncing video tracks');
+      ^^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:76:15: Error: The getter 'mounted' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'mounted'.
+          if (mounted) {
+              ^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:77:13: Error: The method 'setState' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'setState'.
+            setState(() {
+            ^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:80:13: Error: The getter 'widget' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'widget'.
+            widget.onDisconnected?.call();
+            ^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:85:9: Error: The getter 'widget' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'widget'.
+        widget.tokenData.url,
+        ^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:86:9: Error: The getter 'widget' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'widget'.
+        widget.tokenData.token,
+        ^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:90:11: Error: The getter 'widget' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'widget'.
+      if (widget.isHost) {
+          ^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:95:11: Error: The getter 'mounted' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'mounted'.
+      if (mounted) {
+          ^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:96:9: Error: The method 'setState' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'setState'.
+        setState(() {
+        ^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:103:11: Error: The getter 'mounted' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'mounted'.
+      if (mounted) {
+          ^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:104:9: Error: The method 'setState' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'setState'.
+        setState(() {
+        ^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:113:10: Error: The getter 'mounted' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'mounted'.
+    if (!mounted || _room == null) return;
+         ^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:133:26: Error: The getter 'widget' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'widget'.
+    if (track == null && widget.isHost && _room!.localParticipant != null) {
+                         ^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:143:5: Error: The method 'setState' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'setState'.
+    setState(() {
+    ^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:152:5: Error: The method 'setState' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'setState'.
+    setState(() {});
+    ^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:159:5: Error: The method 'setState' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'setState'.
+    setState(() {});
+    ^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:169:11: Error: Superclass has no method named 'dispose'.
+    super.dispose();
+          ^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:164:5: Error: The getter 'WidgetsBinding' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'WidgetsBinding'.
+    WidgetsBinding.instance.removeObserver(this);
+    ^^^^^^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:173:16: Error: 'BuildContext' isn't a type.
+  Widget build(BuildContext context) {
+               ^^^^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:218:25: Error: Not a constant expression.
+                  const SizedBox(width: 16),
+                        ^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:183:12: Error: The method 'Key' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Key'.
+      key: Key('live-video-${widget.tokenData.token}'),
+           ^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:183:30: Error: The getter 'widget' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'widget'.
+      key: Key('live-video-${widget.tokenData.token}'),
+                             ^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:190:14: Error: The method 'Stack' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Stack'.
+      child: Stack(
+             ^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:197:27: Error: The getter 'widget' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'widget'.
+              mirrorMode: widget.isHost
+                          ^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:205:15: Error: The getter 'widget' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'widget'.
+          if (widget.isHost && _isConnected)
+              ^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:206:13: Error: The method 'Positioned' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Positioned'.
+            Positioned(
+            ^^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:210:22: Error: The method 'Row' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Row'.
+              child: Row(
+                     ^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:211:36: Error: The getter 'MainAxisAlignment' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'MainAxisAlignment'.
+                mainAxisAlignment: MainAxisAlignment.center,
+                                   ^^^^^^^^^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:214:38: Error: The getter 'Icons' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'Icons'.
+                    icon: _isMicOn ? Icons.mic : Icons.mic_off,
+                                     ^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:214:50: Error: The getter 'Icons' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'Icons'.
+                    icon: _isMicOn ? Icons.mic : Icons.mic_off,
+                                                 ^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:220:41: Error: The getter 'Icons' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'Icons'.
+                    icon: _isCameraOn ? Icons.videocam : Icons.videocam_off,
+                                        ^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:220:58: Error: The getter 'Icons' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'Icons'.
+                    icon: _isCameraOn ? Icons.videocam : Icons.videocam_off,
+                                                         ^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:186:11: Error: The method 'debugPrint' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'debugPrint'.
+          debugPrint('[LiveKit] Stream became visible, re-syncing tracks');
+          ^^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:233:14: Error: 'IconData' isn't a type.
+    required IconData icon,
+             ^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:235:14: Error: 'VoidCallback' isn't a type.
+    required VoidCallback onTap,
+             ^^^^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:237:12: Error: The method 'GestureDetector' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'GestureDetector'.
+    return GestureDetector(
+           ^^^^^^^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:239:14: Error: The method 'Container' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Container'.
+      child: Container(
+             ^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:242:21: Error: The method 'BoxDecoration' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'BoxDecoration'.
+        decoration: BoxDecoration(
+                    ^^^^^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:244:17: Error: The getter 'Colors' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'Colors'.
+              ? Colors.white.withOpacity(0.2)
+                ^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:245:17: Error: The getter 'Colors' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'Colors'.
+              : Colors.red.withOpacity(0.8),
+                ^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:246:18: Error: The getter 'BoxShape' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'BoxShape'.
+          shape: BoxShape.circle,
+                 ^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:247:19: Error: The getter 'Border' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'Border'.
+          border: Border.all(
+                  ^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:248:20: Error: The getter 'Colors' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'Colors'.
+            color: Colors.white.withOpacity(0.3),
+                   ^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:252:16: Error: The method 'Icon' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Icon'.
+        child: Icon(icon, color: Colors.white, size: 24),
+               ^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:252:34: Error: The getter 'Colors' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'Colors'.
+        child: Icon(icon, color: Colors.white, size: 24),
+                                 ^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:262:30: Error: Not a constant expression.
+          mainAxisAlignment: MainAxisAlignment.center,
+                             ^^^^^^^^^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:264:46: Error: Not a constant expression.
+            CircularProgressIndicator(color: Colors.white),
+                                             ^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:268:39: Error: Not a constant expression.
+              style: TextStyle(color: Colors.white70, fontSize: 14),
+                                      ^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:268:22: Error: Not a constant expression.
+              style: TextStyle(color: Colors.white70, fontSize: 14),
+                     ^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:266:13: Error: Not a constant expression.
+            Text(
+            ^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:265:13: Error: Not a constant expression.
+            SizedBox(height: 16),
+            ^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:264:13: Error: Not a constant expression.
+            CircularProgressIndicator(color: Colors.white),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:261:16: Error: Not a constant expression.
+        child: Column(
+               ^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:260:20: Error: Not a constant expression.
+      child: const Center(
+                   ^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:258:12: Error: The method 'Container' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Container'.
+    return Container(
+           ^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:259:14: Error: The getter 'Colors' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'Colors'.
+      color: Colors.black,
+             ^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:306:23: Error: Not a constant expression.
+                      Icons.headphones,
+                      ^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:308:30: Error: Not a constant expression.
+                      color: Colors.white70,
+                             ^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:305:34: Error: Not a constant expression.
+                    child: const Icon(
+                                 ^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:314:19: Error: Not a constant expression.
+            const SizedBox(height: 20),
+                  ^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:318:24: Error: Not a constant expression.
+                color: Colors.white,
+                       ^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:320:29: Error: Not a constant expression.
+                fontWeight: FontWeight.bold,
+                            ^^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:317:22: Error: Not a constant expression.
+              style: TextStyle(
+                     ^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:315:19: Error: Not a constant expression.
+            const Text(
+                  ^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:323:19: Error: Not a constant expression.
+            const SizedBox(height: 8),
+                  ^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:277:12: Error: The method 'Container' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Container'.
+    return Container(
+           ^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:278:19: Error: The method 'BoxDecoration' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'BoxDecoration'.
+      decoration: BoxDecoration(
+                  ^^^^^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:279:19: Error: The method 'LinearGradient' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'LinearGradient'.
+        gradient: LinearGradient(
+                  ^^^^^^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:280:18: Error: The getter 'Alignment' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'Alignment'.
+          begin: Alignment.topLeft,
+                 ^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:281:16: Error: The getter 'Alignment' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'Alignment'.
+          end: Alignment.bottomRight,
+               ^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:283:13: Error: The getter 'Colors' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'Colors'.
+            Colors.green.withOpacity(0.8),
+            ^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:284:13: Error: The getter 'Colors' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'Colors'.
+            Colors.blue.withOpacity(0.8),
+            ^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:285:13: Error: The getter 'Colors' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'Colors'.
+            Colors.black.withOpacity(0.9),
+            ^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:289:14: Error: The method 'Center' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Center'.
+      child: Center(
+             ^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:290:16: Error: The method 'Column' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Column'.
+        child: Column(
+               ^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:291:30: Error: The getter 'MainAxisAlignment' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'MainAxisAlignment'.
+          mainAxisAlignment: MainAxisAlignment.center,
+                             ^^^^^^^^^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:293:13: Error: The method 'AnimatedBuilder' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'AnimatedBuilder'.
+            AnimatedBuilder(
+            ^^^^^^^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:296:24: Error: The getter 'Transform' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'Transform'.
+                return Transform.scale(
+                       ^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:298:26: Error: The method 'Container' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Container'.
+                  child: Container(
+                         ^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:301:33: Error: The method 'BoxDecoration' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'BoxDecoration'.
+                    decoration: BoxDecoration(
+                                ^^^^^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:302:30: Error: The getter 'Colors' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'Colors'.
+                      color: Colors.white.withOpacity(0.15),
+                             ^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:303:30: Error: The getter 'BoxShape' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'BoxShape'.
+                      shape: BoxShape.circle,
+                             ^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:324:13: Error: The method 'Text' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Text'.
+            Text(
+            ^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:326:22: Error: The method 'TextStyle' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'TextStyle'.
+              style: TextStyle(
+                     ^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:327:24: Error: The getter 'Colors' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'Colors'.
+                color: Colors.white.withOpacity(0.7),
+                       ^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:344:24: Error: Not a constant expression.
+            const Icon(Icons.error_outline, color: Colors.red, size: 48),
+                       ^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:344:52: Error: Not a constant expression.
+            const Icon(Icons.error_outline, color: Colors.red, size: 48),
+                                                   ^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:344:19: Error: Not a constant expression.
+            const Icon(Icons.error_outline, color: Colors.red, size: 48),
+                  ^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:345:19: Error: Not a constant expression.
+            const SizedBox(height: 16),
+                  ^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:349:24: Error: Not a constant expression.
+                color: Colors.white,
+                       ^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:351:29: Error: Not a constant expression.
+                fontWeight: FontWeight.bold,
+                            ^^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:348:28: Error: Not a constant expression.
+              style: const TextStyle(
+                           ^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:354:19: Error: Not a constant expression.
+            const SizedBox(height: 8),
+                  ^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:356:30: Error: Couldn't find constructor 'EdgeInsets.symmetric'.
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+                             ^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:338:12: Error: The method 'Container' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Container'.
+    return Container(
+           ^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:339:14: Error: The getter 'Colors' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'Colors'.
+      color: Colors.black,
+             ^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:340:14: Error: The method 'Center' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Center'.
+      child: Center(
+             ^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:341:16: Error: The method 'Column' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Column'.
+        child: Column(
+               ^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:342:30: Error: The getter 'MainAxisAlignment' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'MainAxisAlignment'.
+          mainAxisAlignment: MainAxisAlignment.center,
+                             ^^^^^^^^^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:346:13: Error: The method 'Text' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Text'.
+            Text(
+            ^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:355:13: Error: The method 'Padding' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Padding'.
+            Padding(
+            ^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:357:22: Error: The method 'Text' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Text'.
+              child: Text(
+                     ^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:359:24: Error: The method 'TextStyle' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'TextStyle'.
+                style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12),
+                       ^^^^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:359:41: Error: The getter 'Colors' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'Colors'.
+                style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12),
+                                        ^^^^^^
+lib/features/live_stream/presentation/widgets/live_video_widget.dart:360:28: Error: The getter 'TextAlign' isn't defined for the type '_LiveVideoWidgetState'.
+ - '_LiveVideoWidgetState' is from 'package:lugmatic_flutter/features/live_stream/presentation/widgets/live_video_widget.dart' ('lib/features/live_stream/presentation/widgets/live_video_widget.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'TextAlign'.
+                textAlign: TextAlign.center,
+                           ^^^^^^^^^
+Target kernel_snapshot_program failed: Exception
+
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileFlutterBuildRelease'.
+> Process 'command '/Users/Ish/development/flutter/bin/flutter'' finished with non-zero exit value 1
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 1m 18s
+Running Gradle task 'assembleRelease'...                           79.1s
+Gradle task assembleRelease failed with exit code 1

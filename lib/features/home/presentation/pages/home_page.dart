@@ -82,6 +82,7 @@ class _HomePageState extends State<HomePage> {
       );
       _loadData();
       _listenForGlobalClash();
+      context.read<MessageProvider>().fetchConversations();
     });
   }
 
@@ -338,11 +339,15 @@ class _HomePageState extends State<HomePage> {
           ? CustomAppBar(
               title: 'Lugmatic',
               unreadCount: _unreadNotifications,
+              unreadMessageCount: context.watch<MessageProvider>().totalUnreadCount,
               onNotificationTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const NotificationsPage()),
                 ).then((_) => _loadNotifications());
+              },
+              onMessageTap: () {
+                Navigator.pushNamed(context, '/messages');
               },
               onProfileTap: () {
                 Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen()));

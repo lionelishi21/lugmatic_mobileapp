@@ -37,6 +37,7 @@ class SocketService {
   final _clashGlobalStartedController = StreamController<Map<String, dynamic>>.broadcast();
   final _notificationController = StreamController<Map<String, dynamic>>.broadcast();
   final _hostSwitchedSessionController = StreamController<Map<String, dynamic>>.broadcast();
+  final _dmMessageController = StreamController<Map<String, dynamic>>.broadcast();
 
   /// Real-time chat messages.
   Stream<LiveStreamChatMessage> get onChatMessage => _chatController.stream;
@@ -85,6 +86,7 @@ class SocketService {
   /// Real-time notification event.
   Stream<Map<String, dynamic>> get onNotification => _notificationController.stream;
   Stream<Map<String, dynamic>> get onHostSwitchedSession => _hostSwitchedSessionController.stream;
+  Stream<Map<String, dynamic>> get onDmMessage => _dmMessageController.stream;
 
   SocketService._({required TokenStorage tokenStorage})
       : _tokenStorage = tokenStorage;
@@ -245,10 +247,15 @@ class SocketService {
     });
 
     _socket!.on('stream:host-switched-session', (data) {
-      if (data is Map<String, dynamic>) {
-        _hostSwitchedSessionController.add(data);
       } else {
         _hostSwitchedSessionController.add({'timestamp': DateTime.now().toIso8601String()});
+      }
+    });
+
+    _socket!.on('dm:message', (data) {
+      debugPrint('[Socket] New DM message received: $data');
+      if (data is Map<String, dynamic>) {
+        _dmMessageController.add(data);
       }
     });
 
@@ -337,6 +344,7 @@ class SocketService {
     _clashGlobalStartedController.close();
     _notificationController.close();
     _hostSwitchedSessionController.close();
+    _dmMessageController.close();
     _instance = null;
   }
 }

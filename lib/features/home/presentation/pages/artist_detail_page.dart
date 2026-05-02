@@ -14,6 +14,8 @@ import '../../../../data/models/video_model.dart';
 import '../../../../ui/widgets/player_screen.dart';
 import '../../../video/presentation/pages/videos_page.dart';
 import '../../../song/presentation/pages/song_detail_page.dart';
+import '../../../../data/providers/message_provider.dart';
+import '../../../../data/models/conversation_model.dart';
 
 class ArtistDetailPage extends StatefulWidget {
   final String artistId;
@@ -358,7 +360,17 @@ class _ArtistDetailPageState extends State<ArtistDetailPage> {
                       _CircleActionButton(
                         icon: Icons.chat_bubble_outline,
                         color: Colors.white,
-                        onTap: _showPremiumRequired,
+                        onTap: () async {
+                          final provider = context.read<MessageProvider>();
+                          try {
+                            final conv = await provider.startConversation(widget.artistId);
+                            Navigator.pushNamed(context, '/chat', arguments: conv);
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Failed to start chat: $e')),
+                            );
+                          }
+                        },
                       ),
                       const SizedBox(width: 12),
                       _CircleActionButton(

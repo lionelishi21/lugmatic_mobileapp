@@ -26,6 +26,9 @@ import 'data/services/subscription_service.dart';
 import 'data/services/mixer_service.dart';
 import 'data/services/management_service.dart';
 import 'data/services/artist_service.dart';
+import 'data/services/message_service.dart';
+import 'data/providers/message_provider.dart';
+import 'data/services/socket_service.dart';
 import 'data/providers/audio_provider.dart';
 import 'features/store/presentation/pages/store_page.dart';
 import 'features/mixer/presentation/pages/mixer_page.dart';
@@ -95,6 +98,7 @@ void main() async {
     final subscriptionService = SubscriptionService(apiClient: apiClient);
     final mixerService = MixerService(apiClient: apiClient);
     final managementService = ManagementService(apiClient: apiClient);
+    final messageService = MessageService(apiClient: apiClient);
     
     // Initialize FCM
     final fcmService = FcmService(notificationService: notificationService);
@@ -131,6 +135,13 @@ void main() async {
           Provider<SubscriptionService>.value(value: subscriptionService),
           Provider<MixerService>.value(value: mixerService),
           Provider<ManagementService>.value(value: managementService),
+          Provider<MessageService>.value(value: messageService),
+          ChangeNotifierProvider(
+            create: (context) => MessageProvider(
+              messageService: messageService,
+              socketService: SocketService.getInstance(tokenStorage: context.read<TokenStorage>()),
+            ),
+          ),
           ChangeNotifierProvider(
             create: (_) => AudioProvider(musicService: musicService),
           ),

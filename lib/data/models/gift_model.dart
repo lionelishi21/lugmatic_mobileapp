@@ -39,7 +39,7 @@ class GiftModel {
       name: json['name'] ?? '',
       description: json['description'] ?? '',
       imageUrl: json['image'] ?? json['imageUrl'] ?? '',
-      price: (json['coinCost'] ?? json['value'] ?? 0).toDouble() / 100.0, // Convert to display dollars
+      price: (json['coinCost'] ?? json['value'] ?? 0).toDouble(), // Use absolute coin cost
       currency: json['currency'] ?? 'coins',
       category: json['category'] ?? json['type'] ?? 'support',
       isPopular: json['rarity'] == 'legendary' || json['rarity'] == 'epic' || (json['isPopular'] ?? false),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../data/providers/auth_provider.dart';
 import '../../../../data/services/management_service.dart';
+import '../../video/presentation/pages/video_recording_page.dart';
 import '../../../../core/constants/app_colors.dart';
 
 class ArtistDashboardPage extends StatefulWidget {
@@ -206,9 +207,9 @@ class _ArtistDashboardPageState extends State<ArtistDashboardPage> {
             AppColors.primary.withOpacity(0.2), 
             AppColors.primary,
             () {
-              // Placeholder for upload functionality
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Upload feature coming soon to mobile!')),
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const VideoRecordingPage()),
               );
             },
           ),

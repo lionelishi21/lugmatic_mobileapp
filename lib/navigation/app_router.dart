@@ -16,6 +16,9 @@ import '../features/home/presentation/pages/artist_dashboard_page.dart';
 import '../features/home/presentation/pages/admin_dashboard_page.dart';
 import '../features/legal/presentation/pages/privacy_policy_page.dart';
 import '../features/legal/presentation/pages/terms_of_service_page.dart';
+import '../features/messages/presentation/pages/messages_page.dart';
+import '../features/messages/presentation/pages/chat_page.dart';
+import '../data/models/conversation_model.dart';
 
 class AppRouter {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
@@ -129,6 +132,16 @@ class AppRouter {
 
       case '/artist_dashboard':
         return MaterialPageRoute(builder: (_) => const ArtistDashboardPage());
+
+      case '/messages':
+        return MaterialPageRoute(builder: (_) => const MessagesPage());
+
+      case '/chat':
+        final args = settings.arguments;
+        if (args is ConversationModel) {
+          return MaterialPageRoute(builder: (_) => ChatPage(conversation: args));
+        }
+        return _notFound();
 
       default:
         return _notFound();

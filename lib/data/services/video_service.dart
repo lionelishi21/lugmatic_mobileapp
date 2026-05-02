@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
 import '../../core/config/api_config.dart';
 import '../../core/network/api_client.dart';
@@ -88,6 +89,65 @@ class VideoService {
       await _apiClient.dio.post('${ApiConfig.videoView}/$id');
     } catch (e) {
       // Silent fail for view counts
+    }
+  }
+
+  /// Get presigned URL for artist video upload.
+  Future<Map<String, dynamic>> getPresignedUrl(String fileName, String contentType) async {
+    try {
+      final response = await _apiClient.dio.post(
+        ApiConfig.presignArtistVideo,
+        data: {'filename': fileName, 'contentType': contentType},
+      );
+      return response.data['data'];
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// Upload file to S3 using presigned URL.
+  Future<void> uploadToS3(String url, File file, String contentType) async {
+    try {
+      final length = await file.length();
+      await _apiClient.dio.put(
+        url,
+        data: file.openRead(),
+        options: Options(
+          headers: {
+            Headers.contentTypeHeader: contentType,
+            Headers.contentLengthHeader: length,
+          },
+        ),
+      );
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// Create video record in database.
+  Future<VideoModel> createVideoRecord({
+    required String title,
+    required String description,
+    required String videoUrl,
+    required String thumbnailUrl,
+    required String artistId,
+  }) async {
+    try {
+      final response = await _apiClient.dio.post(
+        ApiConfig.createVideo,
+        data: {
+          'title': title,
+          'description': description,
+          'videoUrl': videoUrl,
+          'thumbnailUrl': thumbnailUrl,
+          'artistId': artistId,
+          'pushedToFeed': true,
+        },
+      );
+      final data = response.data['data'] ?? response.data;
+      return VideoModel.fromJson(data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
     }
   }
 }
