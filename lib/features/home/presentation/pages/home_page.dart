@@ -47,6 +47,7 @@ import 'package:lugmatic_flutter/core/network/token_storage.dart';
 import 'package:lugmatic_flutter/data/models/genre_model.dart';
 import 'package:lugmatic_flutter/features/music/presentation/pages/genre_music_page.dart';
 import 'package:lugmatic_flutter/features/home/presentation/widgets/billboard_list_item.dart';
+import 'package:lugmatic_flutter/features/live_stream/presentation/pages/recorded_streams_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -590,6 +591,14 @@ class _HomePageState extends State<HomePage> {
             subtitle: 'Remix',
             color: AppColors.primary,
             onTap: () => Navigator.pushNamed(context, '/mixer'),
+          ),
+          const SizedBox(width: 12),
+          _buildQuickActionItem(
+            icon: Icons.history_rounded,
+            title: 'Recorded',
+            subtitle: 'Replay',
+            color: Colors.purpleAccent,
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const RecordedStreamsPage())),
           ),
         ],
       ),

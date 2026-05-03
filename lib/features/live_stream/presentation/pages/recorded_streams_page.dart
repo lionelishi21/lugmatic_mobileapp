@@ -7,6 +7,7 @@ import 'package:lugmatic_flutter/core/theme/neumorphic_theme.dart';
 import 'package:intl/intl.dart';
 // import 'package:chewie/chewie.dart'; // Assume chewie is used for VOD
 import 'package:video_player/video_player.dart';
+import '../../../../shared/widgets/comment_section_widget.dart';
 
 class RecordedStreamsPage extends StatefulWidget {
   const RecordedStreamsPage({super.key});
@@ -230,20 +231,35 @@ class _LiveStreamReplayPageState extends State<LiveStreamReplayPage> {
         title: Text(widget.stream.title),
         backgroundColor: Colors.transparent,
       ),
-      body: Center(
-        child: _initialized
-            ? AspectRatio(
-                aspectRatio: _controller.value.aspectRatio,
-                child: Stack(
-                  alignment: Alignment.bottomCenter,
-                  children: [
-                    VideoPlayer(_controller),
-                    VideoProgressIndicator(_controller, allowScrubbing: true),
-                    _buildPlayPauseOverlay(),
-                  ],
-                ),
-              )
-            : const CircularProgressIndicator(color: Colors.white),
+      body: Column(
+        children: [
+          Expanded(
+            flex: 2,
+            child: Center(
+              child: _initialized
+                  ? AspectRatio(
+                      aspectRatio: _controller.value.aspectRatio,
+                      child: Stack(
+                        alignment: Alignment.bottomCenter,
+                        children: [
+                          VideoPlayer(_controller),
+                          VideoProgressIndicator(_controller, allowScrubbing: true),
+                          _buildPlayPauseOverlay(),
+                        ],
+                      ),
+                    )
+                  : const CircularProgressIndicator(color: Colors.white),
+            ),
+          ),
+          const Divider(color: Colors.white10, height: 1),
+          Expanded(
+            flex: 3,
+            child: CommentSectionWidget(
+              contentType: 'stream',
+              contentId: widget.stream.id,
+            ),
+          ),
+        ],
       ),
     );
   }

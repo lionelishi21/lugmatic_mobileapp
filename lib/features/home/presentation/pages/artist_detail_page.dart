@@ -376,7 +376,17 @@ class _ArtistDetailPageState extends State<ArtistDetailPage> {
                       _CircleActionButton(
                         icon: Icons.mail_outline,
                         color: Colors.white,
-                        onTap: _showPremiumRequired,
+                        onTap: () async {
+                          final provider = context.read<MessageProvider>();
+                          try {
+                            final conv = await provider.startConversation(widget.artistId);
+                            Navigator.pushNamed(context, '/chat', arguments: conv);
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Failed to start chat: $e')),
+                            );
+                          }
+                        },
                       ),
                       const SizedBox(width: 12),
                       _CircleActionButton(

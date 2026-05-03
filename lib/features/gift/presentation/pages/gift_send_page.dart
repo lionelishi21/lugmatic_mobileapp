@@ -782,9 +782,9 @@ class _GiftSendPageState extends State<GiftSendPage> {
       const SnackBar(content: Text('Initializing payment...'), duration: Duration(seconds: 1)),
     );
 
-    final success = await stripeService.purchaseCoins(amount);
+    final error = await stripeService.purchaseCoins(amount);
     
-    if (success) {
+    if (error == null) {
       await _refreshBalance();
       if (mounted) {
         Navigator.pop(context); // Close wallet dialog

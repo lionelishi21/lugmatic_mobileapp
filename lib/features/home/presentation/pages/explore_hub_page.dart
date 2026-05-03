@@ -10,6 +10,8 @@ import 'package:lugmatic_flutter/features/home/presentation/pages/browse_page.da
 import 'package:lugmatic_flutter/features/video/presentation/pages/videos_page.dart';
 import 'package:lugmatic_flutter/features/music/presentation/pages/discover_page.dart';
 import 'package:lugmatic_flutter/features/home/presentation/pages/meet_artist_page.dart';
+import 'package:lugmatic_flutter/features/live_stream/presentation/pages/recorded_streams_page.dart';
+import 'package:lugmatic_flutter/features/live_stream/presentation/pages/clash_view_page.dart';
 
 class ExploreHubPage extends StatelessWidget {
   const ExploreHubPage({Key? key}) : super(key: key);
@@ -106,6 +108,23 @@ class ExploreHubPage extends StatelessWidget {
                       context: context,
                       builder: (context) => const DemandArtistDialog(),
                     );
+                  },
+                ),
+                _buildHubCard(
+                  context,
+                  title: 'Recorded',
+                  icon: Icons.history_rounded,
+                  color: Colors.purpleAccent,
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const RecordedStreamsPage())),
+                ),
+                _buildHubCard(
+                  context,
+                  title: 'Lyrical Clashes',
+                  icon: Icons.sports_kabaddi,
+                  color: Colors.deepOrangeAccent,
+                  onTap: () {
+                     // For now, take them to Live section which has clashes
+                     Navigator.push(context, MaterialPageRoute(builder: (_) => const TikTokLivePage()));
                   },
                 ),
               ]),

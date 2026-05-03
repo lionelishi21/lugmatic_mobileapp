@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../data/providers/auth_provider.dart';
 import '../../../../data/services/management_service.dart';
-import '../../video/presentation/pages/video_recording_page.dart';
+import 'package:lugmatic_flutter/features/video/presentation/pages/video_recording_page.dart';
 import '../../../../core/constants/app_colors.dart';
 
 class ArtistDashboardPage extends StatefulWidget {
@@ -202,14 +202,14 @@ class _ArtistDashboardPageState extends State<ArtistDashboardPage> {
         const SizedBox(width: 16),
         Expanded(
           child: _buildActionButton(
-            'UPLOAD', 
-            Icons.cloud_upload_outlined, 
+            'RECORD', 
+            Icons.videocam_outlined, 
             AppColors.primary.withOpacity(0.2), 
             AppColors.primary,
             () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const VideoRecordingPage()),
+                MaterialPageRoute(builder: (_) => VideoRecordingPage()),
               );
             },
           ),
