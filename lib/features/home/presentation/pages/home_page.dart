@@ -48,6 +48,7 @@ import 'package:lugmatic_flutter/data/models/genre_model.dart';
 import 'package:lugmatic_flutter/features/music/presentation/pages/genre_music_page.dart';
 import 'package:lugmatic_flutter/features/home/presentation/widgets/billboard_list_item.dart';
 import 'package:lugmatic_flutter/features/live_stream/presentation/pages/recorded_streams_page.dart';
+import 'package:lugmatic_flutter/data/providers/message_provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);

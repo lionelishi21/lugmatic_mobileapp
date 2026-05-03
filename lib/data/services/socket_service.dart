@@ -247,6 +247,8 @@ class SocketService {
     });
 
     _socket!.on('stream:host-switched-session', (data) {
+      if (data is Map<String, dynamic>) {
+        _hostSwitchedSessionController.add(data);
       } else {
         _hostSwitchedSessionController.add({'timestamp': DateTime.now().toIso8601String()});
       }
