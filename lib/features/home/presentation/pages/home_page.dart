@@ -102,10 +102,18 @@ class _HomePageState extends State<HomePage> {
         ScaffoldMessenger.of(context).showMaterialBanner(
           MaterialBanner(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            backgroundColor: const Color(0xFF1A1A2E),
+            backgroundColor: AppColors.card,
+            dividerColor: AppColors.primary.withOpacity(0.2),
             content: Row(
               children: [
-                const Icon(Icons.sports_kabaddi, color: Color(0xFFE94560), size: 28),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.sports_kabaddi, color: AppColors.primary, size: 22),
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -113,9 +121,9 @@ class _HomePageState extends State<HomePage> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const Text('⚔️ Clash Started!',
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
                       Text('$challengerName vs $opponentName • $realmLabel',
-                          style: const TextStyle(color: Colors.white60, fontSize: 12),
+                          style: TextStyle(color: Colors.white.withOpacity(0.55), fontSize: 12),
                           overflow: TextOverflow.ellipsis),
                     ],
                   ),
@@ -127,13 +135,14 @@ class _HomePageState extends State<HomePage> {
                 onPressed: () {
                   ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
                 },
-                child: const Text('Dismiss', style: TextStyle(color: Colors.white54)),
+                child: Text('Dismiss', style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 12)),
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFE94560),
-                  foregroundColor: Colors.white,
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.black,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
+                  textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                 ),
                 onPressed: () {
                   ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
