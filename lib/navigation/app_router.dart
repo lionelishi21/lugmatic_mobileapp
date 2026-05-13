@@ -19,6 +19,10 @@ import '../features/legal/presentation/pages/terms_of_service_page.dart';
 import '../features/messages/presentation/pages/messages_page.dart';
 import '../features/messages/presentation/pages/chat_page.dart';
 import '../data/models/conversation_model.dart';
+import '../features/live_stream/presentation/pages/clashes_hub_page.dart';
+import '../features/music/presentation/pages/billboard_page.dart';
+import '../features/music/presentation/pages/genre_list_page.dart';
+import '../features/home/presentation/pages/my_requests_page.dart';
 
 class AppRouter {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
@@ -98,6 +102,18 @@ class AppRouter {
 
       case '/live':
         return MaterialPageRoute(builder: (_) => const TikTokLivePage());
+
+      case '/clashes':
+        return MaterialPageRoute(builder: (_) => const ClashesHubPage());
+
+      case '/billboard':
+        return MaterialPageRoute(builder: (_) => const BillboardPage());
+
+      case '/genres':
+        return MaterialPageRoute(builder: (_) => const GenreListPage());
+
+      case '/my_requests':
+        return MaterialPageRoute(builder: (_) => const MyRequestsPage());
 
       case '/clash':
         final args = settings.arguments;

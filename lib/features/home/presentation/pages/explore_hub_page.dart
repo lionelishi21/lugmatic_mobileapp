@@ -112,6 +112,20 @@ class ExploreHubPage extends StatelessWidget {
                 ),
                 _buildHubCard(
                   context,
+                  title: 'Billboard Hot 100',
+                  icon: Icons.trending_up,
+                  color: Colors.amber,
+                  onTap: () => Navigator.pushNamed(context, '/billboard'),
+                ),
+                _buildHubCard(
+                  context,
+                  title: 'Browse Genres',
+                  icon: Icons.grid_view_rounded,
+                  color: Colors.tealAccent,
+                  onTap: () => Navigator.pushNamed(context, '/genres'),
+                ),
+                _buildHubCard(
+                  context,
                   title: 'Recorded',
                   icon: Icons.history_rounded,
                   color: Colors.purpleAccent,
@@ -122,10 +136,7 @@ class ExploreHubPage extends StatelessWidget {
                   title: 'Lyrical Clashes',
                   icon: Icons.sports_kabaddi,
                   color: Colors.deepOrangeAccent,
-                  onTap: () {
-                     // For now, take them to Live section which has clashes
-                     Navigator.push(context, MaterialPageRoute(builder: (_) => const TikTokLivePage()));
-                  },
+                  onTap: () => Navigator.pushNamed(context, '/clashes'),
                 ),
               ]),
             ),

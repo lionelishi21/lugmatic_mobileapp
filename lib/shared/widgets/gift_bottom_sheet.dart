@@ -5,6 +5,8 @@ import '../../core/config/api_config.dart';
 import '../../core/network/api_client.dart';
 import '../../data/models/gift_model.dart';
 import '../../data/providers/auth_provider.dart';
+import '../../data/services/stripe_service.dart';
+import '../../data/services/gift_service.dart';
 
 class GiftBottomSheet extends StatefulWidget {
   final String artistId;
@@ -96,13 +98,9 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> with SingleTickerProv
       );
       return;
     }
+    
     if (_coinBalance < gift.price.toInt()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Insufficient coins. Visit the Store to buy more!'),
-          backgroundColor: Color(0xFFEF4444),
-        ),
-      );
+      _showTopUpDialog(requiredAmount: gift.price.toInt());
       return;
     }
 
@@ -142,6 +140,18 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> with SingleTickerProv
         );
       }
     }
+  }
+
+  void _showTopUpDialog({int? requiredAmount}) {
+    showDialog(
+      context: context,
+      builder: (context) => _TopUpDialog(
+        requiredAmount: requiredAmount,
+        onSuccess: (newBalance) {
+          if (mounted) setState(() => _coinBalance = newBalance);
+        },
+      ),
+    );
   }
 
   @override
@@ -494,6 +504,143 @@ class _GiftCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _TopUpDialog extends StatefulWidget {
+  final int? requiredAmount;
+  final Function(int) onSuccess;
+
+  const _TopUpDialog({this.requiredAmount, required this.onSuccess});
+
+  @override
+  State<_TopUpDialog> createState() => _TopUpDialogState();
+}
+
+class _TopUpDialogState extends State<_TopUpDialog> {
+  bool _loading = false;
+  int? _loadingAmount;
+
+  final List<Map<String, dynamic>> _packages = [
+    {'amount': 500, 'price': '$5', 'label': 'Starter'},
+    {'amount': 1000, 'price': '$10', 'label': 'Popular'},
+    {'amount': 2000, 'price': '$20', 'label': 'Best Value'},
+    {'amount': 5000, 'price': '$50', 'label': 'Supporter'},
+  ];
+
+  Future<void> _handlePurchase(int amount) async {
+    setState(() {
+      _loading = true;
+      _loadingAmount = amount;
+    });
+
+    try {
+      final stripeService = context.read<StripeService>();
+      final giftService = context.read<GiftService>();
+      
+      final error = await stripeService.purchaseCoins(amount);
+      
+      if (!mounted) return;
+
+      if (error == null) {
+        // Success: Fetch new balance
+        final balData = await giftService.getCoinBalance();
+        final newCoins = balData['data']?['coins'] ?? balData['coins'] ?? 0;
+        widget.onSuccess(newCoins is int ? newCoins : (newCoins as num).toInt());
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Coins added successfully!'), backgroundColor: Color(0xFF10B981)),
+          );
+          Navigator.pop(context);
+        }
+      } else if (error.isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(error), backgroundColor: const Color(0xFFEF4444)),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Purchase failed'), backgroundColor: Color(0xFFEF4444)),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: const Color(0xFF1A2332),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.monetization_on, color: Color(0xFF10B981), size: 48),
+            const SizedBox(height: 16),
+            const Text(
+              'Get More Coins',
+              style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            if (widget.requiredAmount != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                'You need ${widget.requiredAmount} coins for this gift.',
+                style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 13),
+                textAlign: TextAlign.center,
+              ),
+            ],
+            const SizedBox(height: 24),
+            ..._packages.map((pkg) {
+              final isThisLoading = _loading && _loadingAmount == pkg['amount'];
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: InkWell(
+                  onTap: _loading ? null : () => _handlePurchase(pkg['amount']),
+                  borderRadius: BorderRadius.circular(16),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.white.withOpacity(0.1)),
+                    ),
+                    child: Row(
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(pkg['label'], style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                            Text('${pkg['amount']} Coins', style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12)),
+                          ],
+                        ),
+                        const Spacer(),
+                        if (isThisLoading)
+                          const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF10B981)))
+                        else
+                          Text(
+                            pkg['price'] as String,
+                            style: const TextStyle(color: Color(0xFF10B981), fontWeight: FontWeight.w900),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+            const SizedBox(height: 8),
+            TextButton(
+              onPressed: _loading ? null : () => Navigator.pop(context),
+              child: Text('Cancel', style: TextStyle(color: Colors.white.withOpacity(0.4))),
+            ),
+          ],
+        ),
       ),
     );
   }

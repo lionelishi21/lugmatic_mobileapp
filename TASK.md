@@ -18,12 +18,12 @@
 <!-- STREAM -->
 - [ ] Stream
 - [ ] Live Stream
-- [ ] Past Streams
+- [x] Past Streams
 - [ ] Stream Settings
-- [ ] Join Live Stream
+- [x] Join Live Stream
 - [ ] Leave Live Stream
-- [ ] Send Gift
-- [ ] Send Message
+- [x] Send Gift
+- [x] Send Message
 - [ ] Send Tip
 - [ ] Send Tip
 

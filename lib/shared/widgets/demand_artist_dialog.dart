@@ -138,6 +138,23 @@ class _DemandArtistDialogState extends State<DemandArtistDialog> {
                           ),
                         ),
                 ),
+                const SizedBox(height: 16),
+                Center(
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.pop(context); // Close dialog
+                      Navigator.pushNamed(context, '/my_requests');
+                    },
+                    child: Text(
+                      'View My Requests',
+                      style: TextStyle(
+                        color: NeumorphicTheme.primaryAccent.withOpacity(0.8),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

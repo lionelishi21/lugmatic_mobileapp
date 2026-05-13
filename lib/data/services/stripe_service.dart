@@ -31,11 +31,16 @@ class StripeService {
     }
 
     try {
+      debugPrint('StripeService: Creating payment intent for $amount coins...');
+      
       // 1. Create Payment Intent on backend
       final intentData = await _giftService.createPaymentIntent(amount);
       final clientSecret = intentData['clientSecret'] as String?;
       final intentId     = intentData['id']           as String?;
-      if (clientSecret == null) return 'Server error: could not create payment. Try again.';
+      
+      if (clientSecret == null || intentId == null) {
+        return 'Server error: could not initialize payment. Please try again.';
+      }
 
       // 2. Initialise Payment Sheet
       await Stripe.instance.initPaymentSheet(
@@ -43,27 +48,35 @@ class StripeService {
           paymentIntentClientSecret: clientSecret,
           style: ThemeMode.dark,
           merchantDisplayName: 'Lugmatic',
+          appearance: const PaymentSheetAppearance(
+            colors: PaymentSheetAppearanceColors(
+              primary: Color(0xFF10B981),
+            ),
+          ),
         ),
       );
 
       // 3. Present Payment Sheet (throws StripeException on cancel/fail)
       await Stripe.instance.presentPaymentSheet();
 
-      // 4. Verify with backend to credit coins
-      if (intentId != null) {
-        await _giftService.verifyPurchase(intentId);
-      }
+      // 4. Verify with backend to credit coins immediately
+      debugPrint('StripeService: Verifying payment intent $intentId...');
+      await _giftService.verifyPurchase(intentId);
 
       return null; // success
     } on StripeException catch (e) {
       final code = e.error.code;
       // User pressed Cancel — not an error worth showing
-      if (code == FailureCode.Canceled) return '';
-      debugPrint('Stripe error: ${e.error.localizedMessage}');
+      if (code == FailureCode.Canceled) {
+        debugPrint('StripeService: Payment cancelled by user');
+        return '';
+      }
+      debugPrint('Stripe error: ${e.error.localizedMessage} (code: $code)');
       return e.error.localizedMessage ?? 'Payment failed. Please try again.';
     } catch (e) {
       debugPrint('purchaseCoins error: $e');
-      return 'Something went wrong. Please try again.';
+      if (e.toString().contains('401')) return 'Session expired. Please log in again.';
+      return 'Something went wrong with the payment. Please try again.';
     }
   }
 }

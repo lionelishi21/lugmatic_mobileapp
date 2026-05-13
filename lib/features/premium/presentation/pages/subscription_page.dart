@@ -59,10 +59,15 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       // 1. Create intent
       final intentData = await subscriptionService.createSubscriptionIntent(plan.id);
       
-      // 2. Process payment via StripeService
-      // Assuming StripeService has a method to handle the sheet from intent data
-      // For now, using a placeholder logic that matches StripeService.purchaseCoins style
-      await stripeService.purchaseCoins((plan.price * 100).toInt());
+      // TODO: Implement proper subscription flow via dedicated backend routes
+      // For now, we provide a notice that subscriptions are handled via our web portal.
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please visit our website to manage subscriptions.'),
+          backgroundColor: Color(0xFF10B981),
+        ),
+      );
+      // await stripeService.purchaseCoins((plan.price * 100).toInt());
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
