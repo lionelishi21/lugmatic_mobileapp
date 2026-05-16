@@ -16,6 +16,7 @@ import 'package:lugmatic_flutter/features/live_stream/presentation/widgets/battl
 import 'package:lugmatic_flutter/features/live_stream/presentation/widgets/clash_video_widget.dart';
 import 'package:lugmatic_flutter/core/network/api_exception.dart';
 import 'package:lugmatic_flutter/features/live_stream/presentation/widgets/clash_artist_picker.dart';
+import 'package:share_plus/share_plus.dart';
 
 class TikTokLivePage extends StatefulWidget {
   final String? initialStreamId;
@@ -869,7 +870,13 @@ class _TikTokLivePageState extends State<TikTokLivePage>
           // Share button
           GestureDetector(
             onTap: () {
-              // Share functionality
+              if (_liveStreams.isEmpty) return;
+              final stream = _liveStreams[_currentStreamIndex];
+              final url = 'https://studio.lugmaticmusic.com/share/stream/${stream.id}';
+              Share.share(
+                '🎵 Watch "${stream.title}" LIVE on Lugmatic!\n$url',
+                subject: stream.title,
+              );
             },
             child: Container(
               padding: const EdgeInsets.all(12),

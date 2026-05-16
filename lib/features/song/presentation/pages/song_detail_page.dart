@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../../../core/config/api_config.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../data/models/music_model.dart';
@@ -248,6 +249,19 @@ class _SongDetailPageState extends State<SongDetailPage> {
                       ),
                       icon: Icons.card_giftcard_rounded,
                       color: const Color(0xFFFFD700),
+                    ),
+                    const SizedBox(width: 10),
+                    // Share button
+                    _IconActionButton(
+                      onTap: () {
+                        final url = 'https://studio.lugmaticmusic.com/share/song/${song.id}';
+                        Share.share(
+                          'Listen to "${song.title}" on Lugmatic 🎵\n$url',
+                          subject: song.title,
+                        );
+                      },
+                      icon: Icons.share_rounded,
+                      color: const Color(0xFF10B981),
                     ),
                   ],
                 ),
