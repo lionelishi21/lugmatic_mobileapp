@@ -72,15 +72,12 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   Future<void> _signInWithGoogle() async {
-    // TODO: Fix GoogleSignIn constructor issue
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      content: Text('Google sign-in is temporarily disabled in this build.'),
-      backgroundColor: AppColors.secondary,
-    ));
-    /*
     final authProvider = context.read<AuthProvider>();
     try {
-      final googleSignIn = GoogleSignIn();
+      // serverClientId is required on Android to receive an idToken
+      final googleSignIn = GoogleSignIn(
+        serverClientId: '952677583974-d5ao7s59okc1r97sjv08np687srrqduc.apps.googleusercontent.com',
+      );
       final googleUser = await googleSignIn.signIn();
       if (googleUser == null) return; // User cancelled
 
@@ -89,7 +86,7 @@ class _LoginScreenState extends State<LoginScreen>
       if (idToken == null) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Google sign-in failed: no ID token'),
+          content: Text('Google sign-in failed: no ID token received'),
           backgroundColor: AppColors.destructive,
         ));
         return;
@@ -114,7 +111,6 @@ class _LoginScreenState extends State<LoginScreen>
         backgroundColor: AppColors.destructive,
       ));
     }
-    */
   }
 
   @override
