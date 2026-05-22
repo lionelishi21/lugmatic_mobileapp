@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:video_player/video_player.dart';
+import 'package:chewie/chewie.dart';
 import '../../../../core/config/api_config.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../data/models/music_model.dart';
@@ -24,14 +26,62 @@ class _SongDetailPageState extends State<SongDetailPage> {
   List<MusicModel> _related = [];
   bool _loading = true;
   bool _isLiked = false;
-  String _tab = 'about'; // 'about' | 'lyrics' | 'comments'
+  String _tab = 'about'; // 'about' | 'lyrics' | 'video' | 'comments'
   String? _lyrics;
+
+  // Video player
+  VideoPlayerController? _videoController;
+  ChewieController? _chewieController;
+  bool _videoInitializing = false;
 
   @override
   void initState() {
     super.initState();
     _song = widget.initialData;
     _loadData();
+  }
+
+  @override
+  void dispose() {
+    _videoController?.dispose();
+    _chewieController?.dispose();
+    super.dispose();
+  }
+
+  Future<void> _initVideoPlayer() async {
+    if (_song == null || _song!.videoUrl.isEmpty) return;
+    if (_videoController != null) return; // already initialized
+
+    setState(() => _videoInitializing = true);
+
+    try {
+      final controller = VideoPlayerController.networkUrl(Uri.parse(_song!.videoUrl));
+      _videoController = controller;
+      await controller.initialize();
+
+      // Mute the video — audio comes from the audio player
+      await controller.setVolume(0);
+
+      // Seek to current audio playback position
+      final audioPosition = Provider.of<AudioProvider>(context, listen: false).position;
+      await controller.seekTo(audioPosition);
+
+      final chewieController = ChewieController(
+        videoPlayerController: controller,
+        autoPlay: true,
+        looping: true,
+        showControls: false,
+      );
+
+      if (mounted) {
+        setState(() {
+          _chewieController = chewieController;
+          _videoInitializing = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _videoInitializing = false);
+    }
   }
 
   Future<void> _loadData() async {
@@ -102,6 +152,8 @@ class _SongDetailPageState extends State<SongDetailPage> {
     final coverUrl = song.imageUrl.isNotEmpty
         ? song.imageUrl
         : 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=400&fit=crop';
+
+    final hasVideo = song.videoUrl.isNotEmpty;
 
     return CustomScrollView(
       slivers: [
@@ -270,11 +322,43 @@ class _SongDetailPageState extends State<SongDetailPage> {
                 // Tabs
                 Row(
                   children: [
-                    _Tab(label: 'About', selected: _tab == 'about', onTap: () => setState(() => _tab = 'about')),
+                    _Tab(
+                      label: 'About',
+                      selected: _tab == 'about',
+                      onTap: () => setState(() {
+                        if (_tab != 'video') _videoController?.pause();
+                        _tab = 'about';
+                      }),
+                    ),
                     const SizedBox(width: 8),
-                    _Tab(label: 'Lyrics', selected: _tab == 'lyrics', onTap: () => setState(() => _tab = 'lyrics')),
+                    _Tab(
+                      label: 'Lyrics',
+                      selected: _tab == 'lyrics',
+                      onTap: () => setState(() {
+                        if (_tab != 'video') _videoController?.pause();
+                        _tab = 'lyrics';
+                      }),
+                    ),
+                    if (hasVideo) ...[
+                      const SizedBox(width: 8),
+                      _Tab(
+                        label: 'Video',
+                        selected: _tab == 'video',
+                        onTap: () {
+                          setState(() => _tab = 'video');
+                          _initVideoPlayer();
+                        },
+                      ),
+                    ],
                     const SizedBox(width: 8),
-                    _Tab(label: 'Comments', selected: _tab == 'comments', onTap: () => setState(() => _tab = 'comments')),
+                    _Tab(
+                      label: 'Comments',
+                      selected: _tab == 'comments',
+                      onTap: () => setState(() {
+                        _videoController?.pause();
+                        _tab = 'comments';
+                      }),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -282,6 +366,7 @@ class _SongDetailPageState extends State<SongDetailPage> {
                 // Tab content
                 if (_tab == 'about') _buildAboutTab(song)
                 else if (_tab == 'lyrics') _buildLyricsTab()
+                else if (_tab == 'video') _buildVideoTab()
                 else CommentSectionWidget(contentType: 'song', contentId: widget.songId),
                 const SizedBox(height: 32),
 
@@ -351,6 +436,35 @@ class _SongDetailPageState extends State<SongDetailPage> {
   }
 
   Widget _buildLyricsTab() {
+    if (_lyrics == null || _lyrics!.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.white.withOpacity(0.08)),
+        ),
+        child: Column(
+          children: [
+            Icon(Icons.mic_none, color: Colors.white.withOpacity(0.2), size: 48),
+            const SizedBox(height: 12),
+            Text('No lyrics available', style: TextStyle(color: Colors.white.withOpacity(0.4))),
+          ],
+        ),
+      );
+    }
+
+    final bool isAiLyrics = _lyrics!.startsWith('[AI Suggested');
+    final String displayLyrics;
+    if (isAiLyrics) {
+      final firstDoubleNewline = _lyrics!.indexOf('\n\n');
+      displayLyrics = firstDoubleNewline != -1
+          ? _lyrics!.substring(firstDoubleNewline + 2)
+          : _lyrics!;
+    } else {
+      displayLyrics = _lyrics!;
+    }
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -358,22 +472,106 @@ class _SongDetailPageState extends State<SongDetailPage> {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.white.withOpacity(0.08)),
       ),
-      child: _lyrics != null && _lyrics!.isNotEmpty
-          ? Text(
-              _lyrics!,
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.8),
-                fontSize: 15,
-                height: 1.8,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (isAiLyrics) ...[
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF10B981).withOpacity(0.15),
+                borderRadius: BorderRadius.circular(8),
               ),
-            )
-          : Column(
-              children: [
-                Icon(Icons.mic_none, color: Colors.white.withOpacity(0.2), size: 48),
-                const SizedBox(height: 12),
-                Text('No lyrics available', style: TextStyle(color: Colors.white.withOpacity(0.4))),
-              ],
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.auto_awesome, color: Color(0xFF10B981), size: 16),
+                  SizedBox(width: 6),
+                  Text(
+                    'AI Assisted — may not match the exact recording',
+                    style: TextStyle(
+                      color: Color(0xFF10B981),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
             ),
+            const SizedBox(height: 16),
+          ],
+          SelectableText(
+            displayLyrics,
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.8),
+              fontSize: 15,
+              height: 1.8,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVideoTab() {
+    if (_videoInitializing) {
+      return const SizedBox(
+        height: 220,
+        child: Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF10B981)),
+          ),
+        ),
+      );
+    }
+
+    if (_chewieController == null || _videoController == null) {
+      return const SizedBox(
+        height: 220,
+        child: Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF10B981)),
+          ),
+        ),
+      );
+    }
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: Stack(
+        children: [
+          AspectRatio(
+            aspectRatio: 16 / 9,
+            child: Chewie(controller: _chewieController!),
+          ),
+          Positioned(
+            top: 8,
+            left: 8,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.6),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('🔇', style: TextStyle(fontSize: 12)),
+                  SizedBox(width: 4),
+                  Text(
+                    'Audio from player',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
