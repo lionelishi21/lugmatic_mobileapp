@@ -524,10 +524,10 @@ class _TopUpDialogState extends State<_TopUpDialog> {
   int? _loadingAmount;
 
   final List<Map<String, dynamic>> _packages = [
-    {'amount': 500, 'price': '$5', 'label': 'Starter'},
-    {'amount': 1000, 'price': '$10', 'label': 'Popular'},
-    {'amount': 2000, 'price': '$20', 'label': 'Best Value'},
-    {'amount': 5000, 'price': '$50', 'label': 'Supporter'},
+    {'amount': 500, 'price': '\$5', 'label': 'Starter'},
+    {'amount': 1000, 'price': '\$10', 'label': 'Popular'},
+    {'amount': 2000, 'price': '\$20', 'label': 'Best Value'},
+    {'amount': 5000, 'price': '\$50', 'label': 'Supporter'},
   ];
 
   Future<void> _handlePurchase(int amount) async {

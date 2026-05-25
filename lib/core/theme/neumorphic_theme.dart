@@ -213,11 +213,11 @@ class _NeumorphicButtonState extends State<NeumorphicButton> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTapDown: (_) => setState(() => _pressed = true),
-      onTapUp: (_) {
+      onTapCancel: () => setState(() => _pressed = false),
+      onTap: () {
         setState(() => _pressed = false);
         widget.onPressed?.call();
       },
-      onTapCancel: () => setState(() => _pressed = false),
       child: AnimatedOpacity(
         opacity: _pressed ? 0.85 : 1.0,
         duration: const Duration(milliseconds: 100),

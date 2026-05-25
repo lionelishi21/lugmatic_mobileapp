@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import 'package:framer_motion/framer_motion.dart'; // Assuming Framer Motion or similar is available or use standard animations
+// import 'package:framer_motion/framer_motion.dart'; // Assuming Framer Motion or similar is available or use standard animations
 import '../../../../core/theme/neumorphic_theme.dart';
 import '../../../../data/models/live_clash_model.dart';
 import '../../../../data/services/live_stream_service.dart';
@@ -145,7 +145,7 @@ class _ClashesHubPageState extends State<ClashesHubPage> with SingleTickerProvid
             children: [
               Text(
                 '#${index + 1}',
-                style: const TextStyle(color: Color(0xFF10B981), fontWeight: FontWeight.black, fontSize: 18),
+                style: const TextStyle(color: Color(0xFF10B981), fontWeight: FontWeight.w900, fontSize: 18),
               ),
               const SizedBox(width: 16),
               CircleAvatar(
@@ -183,7 +183,7 @@ class _ClashCard extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         if (isLive) {
-          Navigator.pushNamed(context, '/live', arguments: clash.streamId);
+          Navigator.pushNamed(context, '/live', arguments: clash.id);
         } else {
           Navigator.pushNamed(context, '/clash', arguments: {'id': clash.id, 'initialData': clash});
         }
@@ -213,7 +213,7 @@ class _ClashCard extends StatelessWidget {
                         child: const Text('LIVE', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
                       )
                     else
-                      const Text('VS', style: TextStyle(color: Colors.white24, fontWeight: FontWeight.black, fontSize: 20)),
+                      const Text('VS', style: TextStyle(color: Colors.white24, fontWeight: FontWeight.w900, fontSize: 20)),
                   ],
                 ),
                 _buildArtistInfo(clash.opponent.name, clash.opponent.image, clash.opponentScore.toInt()),

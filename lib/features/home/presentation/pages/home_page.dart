@@ -35,6 +35,7 @@ import 'package:lugmatic_flutter/data/models/playlist_model.dart';
 import 'package:lugmatic_flutter/features/live_stream/presentation/pages/tiktok_live_page.dart';
 import 'package:lugmatic_flutter/features/video/presentation/pages/videos_page.dart';
 import 'package:lugmatic_flutter/features/home/presentation/pages/artist_detail_page.dart';
+import 'package:lugmatic_flutter/features/home/presentation/pages/meet_artist_page.dart';
 import 'package:lugmatic_flutter/features/song/presentation/pages/song_detail_page.dart';
 import 'package:lugmatic_flutter/data/models/live_clash_model.dart';
 import 'package:lugmatic_flutter/ui/widgets/mini_player.dart';
@@ -279,28 +280,57 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(height: 36),
 
             // Live Now section
-            _buildSectionHeader('Live Now', 'View All'),
+            _buildSectionHeader(
+              'Live Now',
+              'View All',
+              onTap: () {
+                setState(() {
+                  _currentIndex = 2;
+                });
+              },
+            ),
             const SizedBox(height: 18),
             _buildLiveSection(),
             const SizedBox(height: 36),
 
             // Recent Clashes section
             if (_recentClashes.isNotEmpty) ...[
-              _buildSectionHeader('Recent Clashes', 'Review'),
+              _buildSectionHeader(
+                'Recent Clashes',
+                'Review',
+                onTap: () {
+                  Navigator.pushNamed(context, '/clashes');
+                },
+              ),
               const SizedBox(height: 18),
               _buildClashHistorySection(),
               const SizedBox(height: 36),
             ],
 
             // Billboard Charts
-            _buildSectionHeader('Billboard Top 10', 'See All'),
+            _buildSectionHeader(
+              'Billboard Top 10',
+              'See All',
+              onTap: () {
+                Navigator.pushNamed(context, '/billboard');
+              },
+            ),
             const SizedBox(height: 18),
             _buildTrendingSongs(),
             const SizedBox(height: 36),
 
             // Featured Artists
             if (_featuredArtists.isNotEmpty) ...[  
-              _buildSectionHeader('Featured Artists', 'View All'),
+              _buildSectionHeader(
+                'Featured Artists',
+                'View All',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const MeetArtistPage()),
+                  );
+                },
+              ),
               const SizedBox(height: 18),
               _buildFeaturedArtists(),
               const SizedBox(height: 36),
@@ -322,7 +352,16 @@ class _HomePageState extends State<HomePage> {
 
             // Popular Podcasts
             if (_featuredPodcasts.isNotEmpty) ...[  
-              _buildSectionHeader('Podcasts', 'Browse'),
+              _buildSectionHeader(
+                'Podcasts',
+                'Browse',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const PodcastHubPage()),
+                  );
+                },
+              ),
               const SizedBox(height: 18),
               _buildPopularPodcasts(),
               const SizedBox(height: 36),
@@ -719,7 +758,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildSectionHeader(String title, String action) {
+  Widget _buildSectionHeader(String title, String action, {VoidCallback? onTap}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -736,7 +775,7 @@ class _HomePageState extends State<HomePage> {
           Material(
             color: Colors.transparent,
             child: InkWell(
-            onTap: () => print('$action tapped'),
+              onTap: onTap ?? () => print('$action tapped'),
               borderRadius: BorderRadius.circular(20),
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -752,10 +791,10 @@ class _HomePageState extends State<HomePage> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-              action,
-              style: const TextStyle(
-                color: AppColors.primary,
-                fontSize: 14,
+                      action,
+                      style: const TextStyle(
+                        color: AppColors.primary,
+                        fontSize: 14,
                         fontWeight: FontWeight.w700,
                       ),
                     ),

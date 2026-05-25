@@ -113,7 +113,7 @@ class _RecordedStreamsPageState extends State<RecordedStreamsPage> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
                     image: DecorationImage(
-                      image: NetworkImage(stream.coverImage.isNotEmpty ? stream.coverImage : (stream.host?.image ?? '')),
+                      image: NetworkImage(ApiConfig.resolveUrl(stream.coverImage.isNotEmpty ? stream.coverImage : (stream.host?.image ?? ''))),
                       fit: BoxFit.cover,
                     ),
                     boxShadow: [
@@ -214,7 +214,7 @@ class _LiveStreamReplayPageState extends State<LiveStreamReplayPage> {
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.networkUrl(Uri.parse(widget.stream.recordingUrl!))
+    _controller = VideoPlayerController.networkUrl(Uri.parse(ApiConfig.resolveUrl(widget.stream.recordingUrl!)))
       ..initialize().then((_) {
         setState(() {
           _initialized = true;

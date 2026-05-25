@@ -78,7 +78,7 @@ class _SoftGlassButtonState extends State<SoftGlassButton>
     HapticFeedback.selectionClick();
   }
 
-  void _handleTapUp(TapUpDetails details) {
+  void _handleTap() {
     if (!widget.enabled) return;
     _resetState();
     widget.onTap();
@@ -154,8 +154,8 @@ class _SoftGlassButtonState extends State<SoftGlassButton>
               scale: _scaleAnimation.value,
               child: GestureDetector(
                 onTapDown: _handleTapDown,
-                onTapUp: _handleTapUp,
                 onTapCancel: _handleTapCancel,
+                onTap: _handleTap,
                 child: Container(
                   height: widget.size,
                   width: widget.size,
