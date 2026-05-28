@@ -29,6 +29,10 @@ import 'data/services/artist_service.dart';
 import 'data/services/message_service.dart';
 import 'data/providers/message_provider.dart';
 import 'data/providers/section_provider.dart';
+import 'data/providers/dashboard_provider.dart';
+import 'data/providers/track_provider.dart';
+import 'data/services/artist/dashboard_service.dart';
+import 'data/services/artist/track_service.dart';
 import 'data/services/socket_service.dart';
 import 'data/providers/audio_provider.dart';
 import 'features/store/presentation/pages/store_page.dart';
@@ -147,6 +151,16 @@ void main() async {
             create: (_) => AudioProvider(musicService: musicService),
           ),
           ChangeNotifierProvider(create: (_) => SectionProvider()),
+          ChangeNotifierProvider(
+            create: (context) => DashboardProvider(
+              service: DashboardService(apiClient: context.read<ApiClient>()),
+            ),
+          ),
+          ChangeNotifierProvider(
+            create: (context) => TrackProvider(
+              service: TrackService(apiClient: context.read<ApiClient>()),
+            ),
+          ),
         ],
         child: const LugmaticApp(),
       ),

@@ -47,6 +47,7 @@ import 'package:lugmatic_flutter/data/services/socket_service.dart';
 import 'package:lugmatic_flutter/core/network/token_storage.dart';
 import 'package:lugmatic_flutter/data/models/genre_model.dart';
 import 'package:lugmatic_flutter/features/music/presentation/pages/genre_music_page.dart';
+import 'package:lugmatic_flutter/shared/widgets/role_switcher_button.dart';
 import 'package:lugmatic_flutter/features/home/presentation/widgets/billboard_list_item.dart';
 import 'package:lugmatic_flutter/features/live_stream/presentation/pages/recorded_streams_page.dart';
 import 'package:lugmatic_flutter/data/providers/message_provider.dart';
@@ -417,6 +418,8 @@ class _HomePageState extends State<HomePage> {
           const LibraryPage(),
         ],
       ),
+      floatingActionButton: const RoleSwitcherButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       bottomNavigationBar: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
