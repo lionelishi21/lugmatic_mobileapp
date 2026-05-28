@@ -94,10 +94,10 @@ class _ArtistBottomNav extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF0A0A12),
         border: Border(
-            top: BorderSide(color: Colors.white.withOpacity(0.06), width: 1)),
+            top: BorderSide(color: Colors.white.withValues(alpha: 0.06), width: 1)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.4),
+            color: Colors.black.withValues(alpha: 0.4),
             blurRadius: 20,
             offset: const Offset(0, -4),
           ),
@@ -188,7 +188,7 @@ class _NavItem extends StatelessWidget {
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
                 color: active
-                    ? AppColors.primary.withOpacity(0.12)
+                    ? AppColors.primary.withValues(alpha: 0.12)
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(10),
               ),
@@ -259,7 +259,7 @@ class _LiveButton extends StatelessWidget {
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.primary.withOpacity(0.3),
+                        color: AppColors.primary.withValues(alpha: 0.3),
                         blurRadius: glow,
                         spreadRadius: glow / 4,
                       ),

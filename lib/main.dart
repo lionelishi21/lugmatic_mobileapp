@@ -34,7 +34,9 @@ import 'data/providers/track_provider.dart';
 import 'data/services/artist/dashboard_service.dart';
 import 'data/services/artist/track_service.dart';
 import 'data/services/socket_service.dart';
+import 'data/services/live_stream_service.dart';
 import 'data/providers/audio_provider.dart';
+import 'data/providers/live_streaming_provider.dart';
 import 'features/store/presentation/pages/store_page.dart';
 import 'features/mixer/presentation/pages/mixer_page.dart';
 import 'ui/widgets/mini_player.dart';
@@ -159,6 +161,12 @@ void main() async {
           ChangeNotifierProvider(
             create: (context) => TrackProvider(
               service: TrackService(apiClient: context.read<ApiClient>()),
+            ),
+          ),
+          ChangeNotifierProvider(
+            create: (context) => LiveStreamingProvider(
+              liveService: LiveStreamService(apiClient: context.read<ApiClient>()),
+              socketService: SocketService.getInstance(tokenStorage: context.read<TokenStorage>()),
             ),
           ),
         ],
