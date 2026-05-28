@@ -41,6 +41,7 @@ class ApiConfig {
   static const String verifyEmail = '/auth/verify-email';
   static const String forgotPassword = '/auth/forgot-password';
   static const String resetPassword = '/auth/reset-password';
+  static const String addRole = '/auth/add-role';
 
   // ── Song endpoints ──────────────────────────────────────────────
   static const String songs = '/song/list';

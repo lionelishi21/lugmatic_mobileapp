@@ -23,6 +23,7 @@ import '../features/live_stream/presentation/pages/clashes_hub_page.dart';
 import '../features/music/presentation/pages/billboard_page.dart';
 import '../features/music/presentation/pages/genre_list_page.dart';
 import '../features/home/presentation/pages/my_requests_page.dart';
+import '../features/artist/navigation/artist_shell.dart';
 
 class AppRouter {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
@@ -142,6 +143,9 @@ class AppRouter {
           return MaterialPageRoute(builder: (_) => LiveHostScreen(streamId: args['id'] as String));
         }
         return _notFound();
+
+      case '/artist_home':
+        return MaterialPageRoute(builder: (_) => const ArtistShell());
 
       case '/admin_dashboard':
         return MaterialPageRoute(builder: (_) => const AdminDashboardPage());

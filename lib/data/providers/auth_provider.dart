@@ -30,6 +30,8 @@ class AuthProvider extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   bool get isAuthenticated => _status == AuthStatus.authenticated;
   bool get isLoading => _status == AuthStatus.loading;
+  bool get hasArtistRole => _user?.hasArtistRole ?? false;
+  bool get hasContributorRole => _user?.hasContributorRole ?? false;
 
   /// Check if user has a stored session on app start.
   Future<void> checkAuthStatus() async {
@@ -152,6 +154,25 @@ class AuthProvider extends ChangeNotifier {
     _status = AuthStatus.unauthenticated;
     _errorMessage = null;
     notifyListeners();
+  }
+
+  /// Add a role (artist | contributor) and refresh the stored JWT.
+  Future<bool> addRole(String role) async {
+    _errorMessage = null;
+    notifyListeners();
+    try {
+      _user = await _authService.addRole(role);
+      notifyListeners();
+      return true;
+    } on ApiException catch (e) {
+      _errorMessage = e.message;
+      notifyListeners();
+      return false;
+    } catch (_) {
+      _errorMessage = 'Failed to add role';
+      notifyListeners();
+      return false;
+    }
   }
 
   /// Clear any displayed error.

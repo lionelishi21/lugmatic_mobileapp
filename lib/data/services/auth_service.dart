@@ -11,9 +11,11 @@ class User {
   final String firstName;
   final String lastName;
   final String role;
+  final List<String> roles;
   final String? profilePicture;
   final int coins;
   final bool isArtist;
+  final bool isContributor;
   final String? artistId;
 
   const User({
@@ -22,24 +24,38 @@ class User {
     required this.firstName,
     required this.lastName,
     required this.role,
+    this.roles = const ['user'],
     this.profilePicture,
     this.coins = 0,
     this.isArtist = false,
+    this.isContributor = false,
     this.artistId,
   });
 
   String get fullName => '$firstName $lastName';
 
+  bool get hasArtistRole =>
+      roles.contains('artist') || isArtist || role == 'artist';
+  bool get hasContributorRole =>
+      roles.contains('contributor') || isContributor;
+
   factory User.fromJson(Map<String, dynamic> json) {
+    final rawRoles = json['roles'];
+    final rolesList = rawRoles is List
+        ? List<String>.from(rawRoles)
+        : [json['role'] as String? ?? 'user'];
+
     return User(
       id: json['_id'] ?? json['id'] ?? '',
       email: json['email'] ?? '',
       firstName: json['firstName'] ?? '',
       lastName: json['lastName'] ?? '',
       role: json['role'] ?? 'user',
+      roles: rolesList,
       profilePicture: json['profilePicture'],
       coins: json['coins'] ?? 0,
       isArtist: json['isArtist'] ?? false,
+      isContributor: json['isContributor'] ?? false,
       artistId: json['artistId'],
     );
   }
@@ -172,6 +188,33 @@ class AuthService {
       return User.fromJson(data);
     } on DioException {
       return null;
+    }
+  }
+
+  /// Add a role (artist or contributor) to the current user.
+  /// Re-issues JWT with updated roles and returns the refreshed User.
+  Future<User> addRole(String role) async {
+    try {
+      final response = await _apiClient.dio.post(
+        ApiConfig.addRole,
+        data: {'role': role},
+      );
+      final body = response.data;
+      final data = body['data'] ?? body;
+
+      final accessToken = data['accessToken'] ?? data['token'];
+      final refreshToken = data['refreshToken'];
+      if (accessToken != null && refreshToken != null) {
+        await _tokenStorage.saveTokens(
+          accessToken: accessToken,
+          refreshToken: refreshToken,
+        );
+      }
+
+      final userData = data['user'] ?? data;
+      return User.fromJson(userData);
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
     }
   }
 

@@ -28,6 +28,7 @@ import 'data/services/management_service.dart';
 import 'data/services/artist_service.dart';
 import 'data/services/message_service.dart';
 import 'data/providers/message_provider.dart';
+import 'data/providers/section_provider.dart';
 import 'data/services/socket_service.dart';
 import 'data/providers/audio_provider.dart';
 import 'features/store/presentation/pages/store_page.dart';
@@ -145,6 +146,7 @@ void main() async {
           ChangeNotifierProvider(
             create: (_) => AudioProvider(musicService: musicService),
           ),
+          ChangeNotifierProvider(create: (_) => SectionProvider()),
         ],
         child: const LugmaticApp(),
       ),
