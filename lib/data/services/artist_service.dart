@@ -61,4 +61,14 @@ class ArtistService {
       throw ApiException.fromDioException(e);
     }
   }
+
+  /// Update artist profile (including payouts/identity).
+  Future<Map<String, dynamic>> updateProfile(String artistId, Map<String, dynamic> data) async {
+    try {
+      final response = await _apiClient.dio.put('/artist/update/$artistId', data: data);
+      return (response.data['data'] ?? response.data) as Map<String, dynamic>;
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
 }

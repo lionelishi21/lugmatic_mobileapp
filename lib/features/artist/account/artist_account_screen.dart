@@ -3,6 +3,10 @@ import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/theme/neumorphic_theme.dart';
 import '../../../data/providers/auth_provider.dart';
+import 'profile_editor_screen.dart';
+import 'payout_settings_screen.dart';
+import 'support_screen.dart';
+import '../../home/presentation/pages/notifications_page.dart';
 
 class ArtistAccountScreen extends StatelessWidget {
   const ArtistAccountScreen({super.key});
@@ -92,22 +96,34 @@ class ArtistAccountScreen extends StatelessWidget {
                 _buildMenuItem(
                   icon: Icons.person_outline,
                   label: 'Edit Profile',
-                  onTap: () => _showComingSoon(context, 'Edit Profile'),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const ProfileEditorScreen()),
+                  ),
                 ),
                 _buildMenuItem(
                   icon: Icons.payments_outlined,
                   label: 'Payout & Verification',
-                  onTap: () => _showComingSoon(context, 'Payout & Verification'),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const PayoutSettingsScreen()),
+                  ),
                 ),
                 _buildMenuItem(
                   icon: Icons.notifications_outlined,
                   label: 'Notifications',
-                  onTap: () => _showComingSoon(context, 'Notifications'),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const NotificationsPage()),
+                  ),
                 ),
                 _buildMenuItem(
                   icon: Icons.help_outline,
                   label: 'Help & Support',
-                  onTap: () => _showComingSoon(context, 'Help & Support'),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const SupportScreen()),
+                  ),
                 ),
 
                 const SizedBox(height: 32),
@@ -165,11 +181,7 @@ class ArtistAccountScreen extends StatelessWidget {
     );
   }
 
-  void _showComingSoon(BuildContext context, String feature) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$feature — coming soon')),
-    );
-  }
+
 
   Widget _buildMenuItem({
     required IconData icon,

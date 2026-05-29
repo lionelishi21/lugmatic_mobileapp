@@ -24,6 +24,8 @@ import '../features/music/presentation/pages/billboard_page.dart';
 import '../features/music/presentation/pages/genre_list_page.dart';
 import '../features/home/presentation/pages/my_requests_page.dart';
 import '../features/artist/navigation/artist_shell.dart';
+import '../features/artist/tracks/upload_track_screen.dart';
+import '../features/artist/finance/earnings_screen.dart';
 
 class AppRouter {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
@@ -152,6 +154,12 @@ class AppRouter {
 
       case '/artist_dashboard':
         return MaterialPageRoute(builder: (_) => const ArtistDashboardPage());
+
+      case '/artist/upload':
+        return MaterialPageRoute(builder: (_) => const UploadTrackScreen());
+
+      case '/artist/earnings':
+        return MaterialPageRoute(builder: (_) => const EarningsScreen());
 
       case '/messages':
         return MaterialPageRoute(builder: (_) => const MessagesPage());

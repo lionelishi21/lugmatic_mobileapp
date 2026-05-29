@@ -37,6 +37,10 @@ import 'data/services/socket_service.dart';
 import 'data/services/live_stream_service.dart';
 import 'data/providers/audio_provider.dart';
 import 'data/providers/live_streaming_provider.dart';
+import 'data/services/contributor/contributor_service.dart';
+import 'data/providers/contributor_provider.dart';
+import 'data/services/artist/upload_service.dart';
+import 'data/services/support_service.dart';
 import 'features/store/presentation/pages/store_page.dart';
 import 'features/mixer/presentation/pages/mixer_page.dart';
 import 'ui/widgets/mini_player.dart';
@@ -106,6 +110,9 @@ void main() async {
     final mixerService = MixerService(apiClient: apiClient);
     final managementService = ManagementService(apiClient: apiClient);
     final messageService = MessageService(apiClient: apiClient);
+    final uploadService = UploadService(apiClient: apiClient);
+    final contributorService = ContributorService(apiClient: apiClient);
+    final supportService = SupportService(apiClient: apiClient);
     
     // Initialize FCM
     final fcmService = FcmService(notificationService: notificationService);
@@ -167,6 +174,14 @@ void main() async {
             create: (context) => LiveStreamingProvider(
               liveService: LiveStreamService(apiClient: context.read<ApiClient>()),
               socketService: SocketService.getInstance(tokenStorage: context.read<TokenStorage>()),
+            ),
+          ),
+          Provider<UploadService>.value(value: uploadService),
+          Provider<ContributorService>.value(value: contributorService),
+          Provider<SupportService>.value(value: supportService),
+          ChangeNotifierProvider(
+            create: (context) => ContributorProvider(
+              service: contributorService,
             ),
           ),
         ],

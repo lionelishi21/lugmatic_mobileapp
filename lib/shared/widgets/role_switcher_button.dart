@@ -4,6 +4,7 @@ import '../../core/constants/app_colors.dart';
 import '../../data/providers/auth_provider.dart';
 import '../../data/providers/section_provider.dart';
 import '../../features/artist/navigation/artist_shell.dart';
+import '../../features/contributor/navigation/contributor_shell.dart';
 
 /// Floating chip shown when the user has multiple roles.
 /// Tapping it pushes ArtistShell as a full-screen route.
@@ -47,7 +48,13 @@ class RoleSwitcherButton extends StatelessWidget {
               icon: Icons.piano_rounded,
               color: AppColors.secondary,
               onTap: () {
-                // Contributor shell — to be wired up when implemented
+                context.read<SectionProvider>().switchTo(AppSection.contributor);
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    fullscreenDialog: false,
+                    builder: (_) => const ContributorShell(),
+                  ),
+                );
               },
             ),
         ],
