@@ -2,9 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'dart:async';
 import 'video_publish_page.dart';
+import 'clash_video_submit_page.dart';
 
 class VideoRecordingPage extends StatefulWidget {
-  const VideoRecordingPage({Key? key}) : super(key: key);
+  /// If set, recording is locked to 6 seconds and the video is submitted to this clash.
+  final String? clashId;
+
+  const VideoRecordingPage({Key? key, this.clashId}) : super(key: key);
+
+  bool get isClashMode => clashId != null;
 
   @override
   State<VideoRecordingPage> createState() => _VideoRecordingPageState();
@@ -16,6 +22,8 @@ class _VideoRecordingPageState extends State<VideoRecordingPage> {
   bool _isRecording = false;
   int _recordSeconds = 0;
   Timer? _timer;
+
+  int get _maxSeconds => widget.isClashMode ? 6 : 60;
 
   @override
   void initState() {
@@ -63,7 +71,7 @@ class _VideoRecordingPageState extends State<VideoRecordingPage> {
         setState(() {
           _recordSeconds++;
         });
-        if (_recordSeconds >= 60) { // Max 60 seconds
+        if (_recordSeconds >= _maxSeconds) {
           _stopRecording();
         }
       });
@@ -83,12 +91,21 @@ class _VideoRecordingPageState extends State<VideoRecordingPage> {
       });
 
       if (mounted) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => VideoPublishPage(videoFile: file),
-          ),
-        );
+        if (widget.isClashMode) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => ClashVideoSubmitPage(videoFile: file, clashId: widget.clashId!),
+            ),
+          );
+        } else {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => VideoPublishPage(videoFile: file),
+            ),
+          );
+        }
       }
     } catch (e) {
       debugPrint('Stop record error: $e');
@@ -117,9 +134,11 @@ class _VideoRecordingPageState extends State<VideoRecordingPage> {
     if (_controller == null || !_controller!.value.isInitialized) {
       return const Scaffold(
         backgroundColor: Colors.black,
-        body: Center(child: CircularProgressIndicator(color: Color(0xFF10B981))),
+        body: Center(child: CircularProgressIndicator(color: Color(0xFF86E560))),
       );
     }
+
+    final pct = _isRecording ? _recordSeconds / _maxSeconds : 0.0;
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -129,6 +148,27 @@ class _VideoRecordingPageState extends State<VideoRecordingPage> {
           Center(
             child: CameraPreview(_controller!),
           ),
+
+          // Clash mode badge
+          if (widget.isClashMode)
+            SafeArea(
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: Container(
+                  margin: const EdgeInsets.only(top: 60),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF86E560).withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: const Color(0xFF86E560).withOpacity(0.5)),
+                  ),
+                  child: const Text(
+                    '⚡ Clash Mode — 6s max',
+                    style: TextStyle(color: Color(0xFF86E560), fontWeight: FontWeight.bold, fontSize: 13),
+                  ),
+                ),
+              ),
+            ),
 
           // Top Controls
           SafeArea(
@@ -161,6 +201,18 @@ class _VideoRecordingPageState extends State<VideoRecordingPage> {
               ),
             ),
           ),
+
+          // Progress bar (clash mode)
+          if (widget.isClashMode && _isRecording)
+            Positioned(
+              top: 0, left: 0, right: 0,
+              child: LinearProgressIndicator(
+                value: pct,
+                backgroundColor: Colors.white24,
+                color: const Color(0xFF86E560),
+                minHeight: 3,
+              ),
+            ),
 
           // Bottom Controls
           Positioned(

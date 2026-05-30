@@ -26,6 +26,10 @@ import '../features/home/presentation/pages/my_requests_page.dart';
 import '../features/artist/navigation/artist_shell.dart';
 import '../features/artist/tracks/upload_track_screen.dart';
 import '../features/artist/finance/earnings_screen.dart';
+import '../features/artist/clashes/artist_challenge_page.dart';
+import '../features/regular_clash/regular_clash_detail_page.dart';
+import '../features/regular_clash/regular_clash_feed_page.dart';
+import '../features/video/presentation/pages/video_recording_page.dart';
 
 class AppRouter {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
@@ -160,6 +164,36 @@ class AppRouter {
 
       case '/artist/earnings':
         return MaterialPageRoute(builder: (_) => const EarningsScreen());
+
+      case '/artist/regular-clash/challenge':
+        return MaterialPageRoute(builder: (_) => const ArtistChallengePage());
+
+      case '/regular-clash':
+        return MaterialPageRoute(builder: (_) => const RegularClashFeedPage());
+
+      case '/regular-clash-detail':
+        final args = settings.arguments;
+        if (args is Map) {
+          return MaterialPageRoute(
+            builder: (_) => RegularClashDetailPage(
+              clashId: args['id'] as String,
+              initialData: args['initialData'],
+            ),
+          );
+        }
+        if (args is String) {
+          return MaterialPageRoute(builder: (_) => RegularClashDetailPage(clashId: args));
+        }
+        return _notFound();
+
+      case '/artist/record-clash-video':
+        final args = settings.arguments;
+        if (args is Map && args.containsKey('clashId')) {
+          return MaterialPageRoute(
+            builder: (_) => VideoRecordingPage(clashId: args['clashId'] as String),
+          );
+        }
+        return _notFound();
 
       case '/messages':
         return MaterialPageRoute(builder: (_) => const MessagesPage());

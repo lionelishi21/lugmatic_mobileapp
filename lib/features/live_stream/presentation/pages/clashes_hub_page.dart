@@ -6,6 +6,7 @@ import '../../../../core/theme/neumorphic_theme.dart';
 import '../../../../data/models/live_clash_model.dart';
 import '../../../../data/services/live_stream_service.dart';
 import '../../../../core/config/api_config.dart';
+import '../../../regular_clash/regular_clash_feed_page.dart' show RegularClashTabContent;
 
 class ClashesHubPage extends StatefulWidget {
   const ClashesHubPage({Key? key}) : super(key: key);
@@ -27,7 +28,7 @@ class _ClashesHubPageState extends State<ClashesHubPage> with SingleTickerProvid
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
     _liveStreamService = LiveStreamService(apiClient: context.read());
     _loadData();
   }
@@ -85,6 +86,7 @@ class _ClashesHubPageState extends State<ClashesHubPage> with SingleTickerProvid
             Tab(text: 'LIVE NOW'),
             Tab(text: 'PAST CLASHES'),
             Tab(text: 'RANKINGS'),
+            Tab(text: 'REGULAR'),
           ],
         ),
       ),
@@ -96,6 +98,7 @@ class _ClashesHubPageState extends State<ClashesHubPage> with SingleTickerProvid
                 _buildClashList(_liveClashes, 'No active clashes right now'),
                 _buildClashList(_pastClashes, 'No past clashes yet'),
                 _buildRankingsList(),
+                const RegularClashTabContent(),
               ],
             ),
     );

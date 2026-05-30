@@ -115,6 +115,16 @@ class ApiConfig {
   static const String videoView = '/video/view'; // + /:id
   static const String createVideo = '/video/create';
 
+  // ── Regular Clash endpoints ─────────────────────────────────────
+  static const String regularClashPools = '/regular-clash/pools';
+  static const String regularClashPool = '/regular-clash/pool'; // + /:poolId
+  static const String regularClashAdminPools = '/regular-clash/pool/admin';
+  static const String regularClashFeed = '/regular-clash/feed';
+  static const String regularClashBase = '/regular-clash'; // + /:clashId
+  static const String regularClashChallenge = '/regular-clash/challenge';
+  static const String regularClashMyClashes = '/regular-clash/my-clashes';
+  static const String regularClashIncoming = '/regular-clash/incoming';
+
   // ── Clash endpoints ─────────────────────────────────────────────
   static const String clash = '/clash';
   static const String clashInvite = '/clash/invite';
