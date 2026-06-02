@@ -123,7 +123,7 @@ class _ClashVideoSubmitPageState extends State<ClashVideoSubmitPage> {
                       const SizedBox(width: 10),
                       const Expanded(
                         child: Text(
-                          'This 6-second clip will be submitted as your clash video. Your opponent\'s clip will play right after yours.',
+                          'This 60-second clip will be submitted as your clash video. Your opponent\'s clip will play right after yours.',
                           style: TextStyle(color: Colors.white70, fontSize: 13),
                         ),
                       ),

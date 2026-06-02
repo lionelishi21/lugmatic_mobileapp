@@ -124,7 +124,6 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> with SingleTickerProv
               backgroundColor: const Color(0xFF10B981),
             ),
           );
-          Navigator.pop(context);
         }
       } else {
         throw Exception(body['message'] ?? 'Failed to send gift');

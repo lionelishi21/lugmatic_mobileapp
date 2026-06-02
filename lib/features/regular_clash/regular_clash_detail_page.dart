@@ -195,6 +195,15 @@ class _RegularClashDetailPageState extends State<RegularClashDetailPage> {
 
   Widget _buildVideoSection(RegularClashModel clash) {
     if (!clash.bothVideosSubmitted) {
+      final bool missingChallenger = clash.challengerVideo?.submittedAt == null;
+      final bool missingOpponent = clash.opponentVideo?.submittedAt == null;
+      String waitMessage = 'Videos not yet submitted';
+      if (missingChallenger && !missingOpponent) {
+        waitMessage = "Waiting for ${clash.challenger.name}'s video";
+      } else if (!missingChallenger && missingOpponent) {
+        waitMessage = "Waiting for ${clash.opponent.name}'s video";
+      }
+
       return Container(
         height: 180,
         decoration: BoxDecoration(
@@ -202,8 +211,8 @@ class _RegularClashDetailPageState extends State<RegularClashDetailPage> {
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: AppColors.border),
         ),
-        child: const Center(
-          child: Text('Videos not yet submitted', style: TextStyle(color: Colors.white54)),
+        child: Center(
+          child: Text(waitMessage, style: const TextStyle(color: Colors.white54)),
         ),
       );
     }

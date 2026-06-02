@@ -23,7 +23,7 @@ class _VideoRecordingPageState extends State<VideoRecordingPage> {
   int _recordSeconds = 0;
   Timer? _timer;
 
-  int get _maxSeconds => widget.isClashMode ? 6 : 60;
+  int get _maxSeconds => 60;
 
   @override
   void initState() {
@@ -163,7 +163,7 @@ class _VideoRecordingPageState extends State<VideoRecordingPage> {
                     border: Border.all(color: const Color(0xFF86E560).withOpacity(0.5)),
                   ),
                   child: const Text(
-                    '⚡ Clash Mode — 6s max',
+                    '⚡ Clash Mode — 60s max',
                     style: TextStyle(color: Color(0xFF86E560), fontWeight: FontWeight.bold, fontSize: 13),
                   ),
                 ),
