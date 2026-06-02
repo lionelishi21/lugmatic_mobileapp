@@ -6,6 +6,7 @@ import '../../core/config/api_config.dart';
 import '../../core/constants/app_colors.dart';
 import '../../data/models/regular_clash_model.dart';
 import '../../data/services/regular_clash_service.dart';
+import '../../shared/widgets/gift_bottom_sheet.dart';
 
 enum _Phase { idle, challenger, transition, opponent, done }
 
@@ -479,6 +480,22 @@ class _ArtistInfo extends StatelessWidget {
           textAlign: TextAlign.center,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: 6),
+        InkWell(
+          onTap: () => GiftBottomSheet.show(context, artistId: artist.id, artistName: artist.name),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(color: Colors.amber.withOpacity(0.15), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.amber.withOpacity(0.3))),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.card_giftcard, size: 12, color: Colors.amber),
+                SizedBox(width: 4),
+                Text('Gift', style: TextStyle(fontSize: 10, color: Colors.amber, fontWeight: FontWeight.bold)),
+              ],
+            ),
+          ),
         ),
       ],
     );

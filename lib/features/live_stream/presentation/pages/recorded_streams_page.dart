@@ -4,6 +4,7 @@ import 'package:lugmatic_flutter/core/network/api_client.dart';
 import 'package:lugmatic_flutter/data/models/live_stream_model.dart';
 import 'package:lugmatic_flutter/data/services/live_stream_service.dart';
 import 'package:lugmatic_flutter/core/theme/neumorphic_theme.dart';
+import 'package:lugmatic_flutter/core/config/api_config.dart';
 import 'package:intl/intl.dart';
 // import 'package:chewie/chewie.dart'; // Assume chewie is used for VOD
 import 'package:video_player/video_player.dart';

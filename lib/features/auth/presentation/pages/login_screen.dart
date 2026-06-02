@@ -72,45 +72,11 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   Future<void> _signInWithGoogle() async {
-    final authProvider = context.read<AuthProvider>();
-    try {
-      // serverClientId is required on Android to receive an idToken
-      final googleSignIn = GoogleSignIn(
-        serverClientId: '518032014474-6l8u4odd9n3ssqhqnm016mp5r1qq96ji.apps.googleusercontent.com',
-      );
-      final googleUser = await googleSignIn.signIn();
-      if (googleUser == null) return; // User cancelled
-
-      final googleAuth = await googleUser.authentication;
-      final idToken = googleAuth.idToken;
-      if (idToken == null) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Google sign-in failed: no ID token received'),
-          backgroundColor: AppColors.destructive,
-        ));
-        return;
-      }
-
-      final ok = await authProvider.loginWithGoogle(idToken: idToken);
-      if (!mounted) return;
-      if (ok) {
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (_) => HomePage()));
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(authProvider.errorMessage ?? 'Google sign-in failed'),
-          backgroundColor: AppColors.destructive,
-        ));
-        authProvider.clearError();
-      }
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Google sign-in failed: ${e.toString()}'),
-        backgroundColor: AppColors.destructive,
-      ));
-    }
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      content: Text('Google sign-in is temporarily disabled'),
+      backgroundColor: AppColors.secondary,
+    ));
   }
 
   @override
