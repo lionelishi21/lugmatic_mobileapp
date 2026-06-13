@@ -1,4 +1,5 @@
 import 'dart:developer' as developer;
+import 'package:dio/dio.dart';
 import '../../models/artist/track_model.dart';
 import '../../../core/network/api_client.dart';
 
@@ -8,11 +9,17 @@ class TrackService {
 
   Future<List<Track>> getArtistTracks(String artistId) async {
     try {
-      final response = await _apiClient.dio.get('/users/contributor/dashboard');
+      final response = await _apiClient.dio.get('/user/contributor/dashboard');
       final data = response.data;
       final resultData = data['data'];
       final list = resultData != null ? (resultData['songs'] as List? ?? []) : [];
       return list.map((i) => Track.fromJson(i as Map<String, dynamic>)).toList();
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        return [];
+      }
+      developer.log('Error fetching tracks: $e');
+      rethrow;
     } catch (e) {
       developer.log('Error fetching tracks: $e');
       rethrow;

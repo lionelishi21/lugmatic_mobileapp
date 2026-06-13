@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/config/api_config.dart';
@@ -131,9 +132,20 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> with SingleTickerProv
     } catch (e) {
       if (mounted) {
         setState(() => _sendingId = null);
+        String errMsg = 'Failed to send gift';
+        if (e is DioException && e.response?.data != null) {
+          final data = e.response!.data;
+          if (data is Map && data['message'] != null) {
+            errMsg = data['message'];
+          } else {
+            errMsg = e.message ?? errMsg;
+          }
+        } else {
+          errMsg = e.toString().replaceAll('Exception:', '').trim();
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(e.toString().replaceAll('Exception:', '').trim()),
+            content: Text(errMsg),
             backgroundColor: const Color(0xFFEF4444),
           ),
         );

@@ -165,8 +165,21 @@ class _LiveVideoWidgetState extends State<LiveVideoWidget>
     WidgetsBinding.instance.removeObserver(this);
     _pulseController.dispose();
     _listener?.dispose();
-    _room?.disconnect();
-    _room?.dispose();
+    // disconnect() is async and dispose() can't be — run it fire-and-forget but
+    // sequence disconnect before room dispose, and swallow errors so a
+    // late LiveKit callback can't crash the app after this widget is gone.
+    final room = _room;
+    _room = null;
+    if (room != null) {
+      Future(() async {
+        try {
+          await room.disconnect();
+        } catch (_) {}
+        try {
+          await room.dispose();
+        } catch (_) {}
+      });
+    }
     super.dispose();
   }
 

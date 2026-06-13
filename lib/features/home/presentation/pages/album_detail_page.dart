@@ -281,51 +281,59 @@ class _AlbumDetailPageState extends State<AlbumDetailPage> {
                 if (_songs.isNotEmpty) ...[
                   const Text('Tracks', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w800)),
                   const SizedBox(height: 12),
-                  ..._songs.asMap().entries.map((e) => GestureDetector(
-                    onTap: () {
-                      context.read<AudioProvider>().playMusic(e.value, queue: _songs);
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        backgroundColor: Colors.transparent,
-                        builder: (context) => PlayerScreen(music: e.value),
+                  ..._songs.asMap().entries.map((e) => Consumer<AudioProvider>(
+                    builder: (context, audioProvider, child) {
+                      final isPlaying = audioProvider.currentMusic?.id == e.value.id;
+                      return GestureDetector(
+                        onTap: () {
+                          context.read<AudioProvider>().playMusic(e.value, queue: _songs);
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            builder: (context) => PlayerScreen(music: e.value),
+                          );
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.only(bottom: 4),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: isPlaying ? const Color(0xFF10B981).withOpacity(0.15) : Colors.white.withOpacity(0.03),
+                            borderRadius: BorderRadius.circular(12),
+                            border: isPlaying ? Border.all(color: const Color(0xFF10B981).withOpacity(0.5)) : null,
+                          ),
+                          child: Row(
+                            children: [
+                              SizedBox(
+                                width: 26,
+                                child: isPlaying
+                                    ? const Icon(Icons.bar_chart, color: Color(0xFF10B981), size: 16)
+                                    : Text('${e.key + 1}',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 13)),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(e.value.title, maxLines: 1, overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(color: isPlaying ? const Color(0xFF10B981) : Colors.white, fontSize: 14, fontWeight: FontWeight.w600)),
+                                    if (e.value.artist.isNotEmpty)
+                                      Text(e.value.artist, maxLines: 1, overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(color: Colors.white.withOpacity(0.45), fontSize: 12)),
+                                  ],
+                                ),
+                              ),
+                              Text(_fmtDur(e.value.duration),
+                                  style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 12)),
+                              const SizedBox(width: 8),
+                              Icon(isPlaying ? Icons.pause_circle_outline : Icons.play_circle_outline, color: const Color(0xFF10B981), size: 22),
+                            ],
+                          ),
+                        ),
                       );
                     },
-                    child: Container(
-                      margin: const EdgeInsets.only(bottom: 4),
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.03),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        children: [
-                          SizedBox(
-                            width: 26,
-                            child: Text('${e.key + 1}',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 13)),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(e.value.title, maxLines: 1, overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600)),
-                                if (e.value.artist.isNotEmpty)
-                                  Text(e.value.artist, maxLines: 1, overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(color: Colors.white.withOpacity(0.45), fontSize: 12)),
-                              ],
-                            ),
-                          ),
-                          Text(_fmtDur(e.value.duration),
-                              style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 12)),
-                          const SizedBox(width: 8),
-                          const Icon(Icons.play_circle_outline, color: Color(0xFF10B981), size: 22),
-                        ],
-                      ),
-                    ),
                   )),
                   const SizedBox(height: 32),
                 ],

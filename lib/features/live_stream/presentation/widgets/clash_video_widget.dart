@@ -82,8 +82,6 @@ class _ClashVideoWidgetState extends State<ClashVideoWidget> {
     ];
 
     for (final participant in allParticipants) {
-      // identify participant by metadata or identity
-      // For now, let's assume identity matches the artist ID passed in
       final identity = participant is LocalParticipant 
           ? participant.identity 
           : (participant is RemoteParticipant ? participant.identity : '');
@@ -104,27 +102,24 @@ class _ClashVideoWidgetState extends State<ClashVideoWidget> {
         challenger = track;
       } else if (identity == widget.opponentId) {
         opponent = track;
-      } else {
-        // Fallback: if identities don't match exactly (e.g. prefixed), 
-        // we might need more logic. For LUX, we'll try to find any 2 tracks if null.
       }
     }
 
-    // Fallback logic if identities don't match (Viewer mode)
-    if (challenger == null && opponent == null) {
+    // Fallback logic if identities don't match exactly (Viewer mode)
+    if (challenger == null || opponent == null) {
       int count = 0;
       for (final participant in allParticipants) {
-      final pubs = participant is LocalParticipant 
-          ? participant.videoTrackPublications 
-          : (participant is RemoteParticipant ? participant.videoTrackPublications : []);
-          
-      for (final pub in pubs) {
-        if (pub.track != null && pub.track is VideoTrack) {
-          if (count == 0) challenger = pub.track as VideoTrack;
-          else if (count == 1) opponent = pub.track as VideoTrack;
-          count++;
+        final pubs = participant is LocalParticipant 
+            ? participant.videoTrackPublications 
+            : (participant is RemoteParticipant ? participant.videoTrackPublications : []);
+            
+        for (final pub in pubs) {
+          if (pub.track != null && pub.track is VideoTrack) {
+            if (count == 0 && challenger == null) challenger = pub.track as VideoTrack;
+            else if (count == 1 && opponent == null) opponent = pub.track as VideoTrack;
+            count++;
+          }
         }
-      }
       }
     }
 

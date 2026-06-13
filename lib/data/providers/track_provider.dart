@@ -61,4 +61,12 @@ class TrackProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  void clear() {
+    _tracks = [];
+    _selectedTrackAnalytics = null;
+    _error = null;
+    _isLoading = false;
+    notifyListeners();
+  }
 }

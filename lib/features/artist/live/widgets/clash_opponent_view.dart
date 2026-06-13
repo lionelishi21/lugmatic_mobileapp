@@ -6,6 +6,8 @@ class ClashOpponentView extends StatefulWidget {
   final String clashRoomToken;
   final String opponentUserId;
   final String opponentName;
+  final LocalVideoTrack? localVideoTrack;
+  final LocalAudioTrack? localAudioTrack;
 
   const ClashOpponentView({
     super.key,
@@ -13,6 +15,8 @@ class ClashOpponentView extends StatefulWidget {
     required this.clashRoomToken,
     required this.opponentUserId,
     required this.opponentName,
+    this.localVideoTrack,
+    this.localAudioTrack,
   });
 
   @override
@@ -40,8 +44,14 @@ class _ClashOpponentViewState extends State<ClashOpponentView> {
         ..on<ParticipantConnectedEvent>((_) => _findOpponentTrack());
 
       await _room!.connect(widget.clashRoomUrl, widget.clashRoomToken);
-      await _room!.localParticipant?.setCameraEnabled(true);
-      await _room!.localParticipant?.setMicrophoneEnabled(true);
+      
+      // Publish the existing tracks instead of re-capturing camera
+      if (widget.localVideoTrack != null) {
+        await _room!.localParticipant?.publishVideoTrack(widget.localVideoTrack!);
+      }
+      if (widget.localAudioTrack != null) {
+        await _room!.localParticipant?.publishAudioTrack(widget.localAudioTrack!);
+      }
 
       if (mounted) setState(() => _connecting = false);
       _findOpponentTrack();
@@ -65,6 +75,20 @@ class _ClashOpponentViewState extends State<ClashOpponentView> {
         if (p.identity == widget.opponentUserId && found != null) break;
       }
     }
+    
+    // Fallback: Just grab the first remote video track if identity matching fails
+    if (found == null) {
+      for (final p in _room!.remoteParticipants.values) {
+        for (final pub in p.videoTrackPublications) {
+          if (pub.track != null) {
+            found = pub.track as VideoTrack?;
+            break;
+          }
+        }
+        if (found != null) break;
+      }
+    }
+
     if (mounted) setState(() => _opponentTrack = found);
   }
 

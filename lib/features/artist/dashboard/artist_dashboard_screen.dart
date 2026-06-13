@@ -9,6 +9,8 @@ import '../../../data/providers/section_provider.dart';
 import '../../../data/providers/dashboard_provider.dart';
 import '../../../data/models/artist/dashboard_models.dart';
 import 'track_analytics_screen.dart';
+import '../account/artist_account_screen.dart';
+import 'artist_promote_screen.dart';
 
 class ArtistDashboardScreen extends StatefulWidget {
   const ArtistDashboardScreen({super.key});
@@ -55,7 +57,7 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
                     child: Row(
                       children: [
                         GestureDetector(
-                          onTap: () => sectionProvider.setArtistTab(5),
+                          onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ArtistAccountScreen())),
                           child: Container(
                             width: 46, height: 46,
                             decoration: BoxDecoration(
@@ -87,7 +89,12 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
                                 ],
                               ),
                               GestureDetector(
-                                onTap: () { sectionProvider.switchTo(AppSection.fan); Navigator.of(context).pop(); },
+                                onTap: () {
+                                  context.read<TrackProvider>().clear();
+                                  context.read<DashboardProvider>().clear();
+                                  sectionProvider.switchTo(AppSection.fan);
+                                  Navigator.of(context).pop();
+                                },
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                   decoration: BoxDecoration(
@@ -239,7 +246,7 @@ class _QuickActions extends StatelessWidget {
     final actions = [
       _QuickAction('Clash', FontAwesomeIcons.fire, const Color(0xFFFF6B6B), () => sectionProvider.setArtistTab(3)),
       _QuickAction('Tracks', FontAwesomeIcons.music, AppColors.primary, () => sectionProvider.setArtistTab(1)),
-      _QuickAction('Upload', FontAwesomeIcons.cloudArrowUp, const Color(0xFF7B6FFF), () => Navigator.of(context).pushNamed('/artist/upload')),
+      _QuickAction('Promote', FontAwesomeIcons.bullhorn, const Color(0xFF7B6FFF), () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ArtistPromoteScreen()))),
       _QuickAction('Earnings', FontAwesomeIcons.coins, const Color(0xFFFFB347), () => Navigator.of(context).pushNamed('/artist/earnings')),
     ];
     return Row(children: List.generate(actions.length, (i) {

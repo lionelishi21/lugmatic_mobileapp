@@ -30,7 +30,6 @@ class _ArtistShellState extends State<ArtistShell>
     ArtistLiveScreen(),
     ArtistClashesScreen(),
     ArtistMessagesScreen(),
-    ArtistAccountScreen(),
   ];
 
   @override
@@ -138,12 +137,6 @@ class _ArtistBottomNav extends StatelessWidget {
               onTap: onTap,
               useRegularIcon: true,
               activeIcon: Icons.message),
-          _NavItem(
-              icon: FontAwesomeIcons.user,
-              label: 'Account',
-              index: 5,
-              current: currentIndex,
-              onTap: onTap),
         ],
       ),
     );

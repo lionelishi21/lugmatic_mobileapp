@@ -82,8 +82,8 @@ class ApiConfig {
   static const String genreContent = '/genre/content'; // + /:id
 
   // ── Podcast endpoints ───────────────────────────────────────────
-  static const String podcasts = '/podcast/list';
-  static const String podcastDetails = '/podcast/details'; // + /:id
+  static const String podcasts = '/podcast'; // GET = list, POST = create; + /:id for details
+  static const String podcastTrending = '/podcast/trending';
 
   // ── Comment endpoints ───────────────────────────────────────────
   static const String comments = '/comment';

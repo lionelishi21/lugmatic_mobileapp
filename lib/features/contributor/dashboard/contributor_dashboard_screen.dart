@@ -5,6 +5,8 @@ import '../../../core/constants/app_colors.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/section_provider.dart';
 import '../../../data/providers/contributor_provider.dart';
+import '../../../data/providers/track_provider.dart';
+import '../../../data/providers/dashboard_provider.dart';
 
 class ContributorDashboardScreen extends StatefulWidget {
   const ContributorDashboardScreen({super.key});
@@ -98,6 +100,8 @@ class _ContributorDashboardScreenState extends State<ContributorDashboardScreen>
                                 ),
                                 GestureDetector(
                                   onTap: () {
+                                    context.read<TrackProvider>().clear();
+                                    context.read<DashboardProvider>().clear();
                                     sectionProvider.switchTo(AppSection.fan);
                                     Navigator.of(context).pop();
                                   },

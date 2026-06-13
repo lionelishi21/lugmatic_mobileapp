@@ -69,6 +69,7 @@ class RegularClashService {
     required String poolId,
     required String opponentArtistId,
     String realm = 'fire',
+    String? rhythmId,
     String? message,
   }) async {
     try {
@@ -78,6 +79,7 @@ class RegularClashService {
           'poolId': poolId,
           'opponentArtistId': opponentArtistId,
           'realm': realm,
+          if (rhythmId != null) 'rhythmId': rhythmId,
           if (message != null) 'message': message,
         },
       );

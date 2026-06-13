@@ -25,4 +25,11 @@ class DashboardService {
     final json = data['data'] ?? data;
     return ArtistEarnings.fromJson(json as Map<String, dynamic>);
   }
+
+  Future<void> requestPayout(double amount) async {
+    await _apiClient.dio.post(
+      '/finance/payouts',
+      data: {'amount': amount},
+    );
+  }
 }

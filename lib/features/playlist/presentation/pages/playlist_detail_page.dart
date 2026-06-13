@@ -550,124 +550,132 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
   }
 
   Widget _buildSongItem(MusicModel song, int trackNumber) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: Colors.white.withOpacity(0.02),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () => _playSong(song),
-          borderRadius: BorderRadius.circular(12),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-            child: Row(
-              children: [
-                SizedBox(
-                  width: 30,
-                  child: Text(
-                    '$trackNumber',
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.5),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Container(
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    image: DecorationImage(
-                      image: NetworkImage(ApiConfig.resolveUrl(song.imageUrl)),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        song.title,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              song.artist,
+    return Consumer<AudioProvider>(
+      builder: (context, audioProvider, child) {
+        final isPlaying = audioProvider.currentMusic?.id == song.id;
+        return Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            color: isPlaying ? const Color(0xFF10B981).withOpacity(0.15) : Colors.white.withOpacity(0.02),
+            border: isPlaying ? Border.all(color: const Color(0xFF10B981).withOpacity(0.5)) : null,
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () => _playSong(song),
+              borderRadius: BorderRadius.circular(12),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 30,
+                      child: isPlaying
+                          ? const Icon(Icons.bar_chart, color: Color(0xFF10B981), size: 16)
+                          : Text(
+                              '$trackNumber',
                               style: TextStyle(
-                                color: Colors.white.withOpacity(0.7),
+                                color: Colors.white.withOpacity(0.5),
                                 fontSize: 14,
+                                fontWeight: FontWeight.w500,
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
                             ),
+                    ),
+                    const SizedBox(width: 12),
+                    Container(
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        image: DecorationImage(
+                          image: NetworkImage(ApiConfig.resolveUrl(song.imageUrl)),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            song.title,
+                            style: TextStyle(
+                              color: isPlaying ? const Color(0xFF10B981) : Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          if (song.isArtistVerified)
-                            const Padding(
-                              padding: EdgeInsets.only(left: 4),
-                              child: Icon(
-                                Icons.verified,
-                                color: Color(0xFF10B981),
-                                size: 14,
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  song.artist,
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.7),
+                                    fontSize: 14,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
-                            ),
+                              if (song.isArtistVerified)
+                                const Padding(
+                                  padding: EdgeInsets.only(left: 4),
+                                  child: Icon(
+                                    Icons.verified,
+                                    color: Color(0xFF10B981),
+                                    size: 14,
+                                  ),
+                                ),
+                            ],
+                          ),
                         ],
                       ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  _formatDuration(song.duration),
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.5),
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                PopupMenuButton<String>(
-                  icon: Icon(
-                    Icons.more_vert,
-                    color: Colors.white.withOpacity(0.5),
-                    size: 20,
-                  ),
-                  onSelected: (value) => _handleSongAction(value, song),
-                  itemBuilder: (context) => [
-                    const PopupMenuItem(
-                      value: 'add_to_playlist',
-                      child: Text('Add to Playlist'),
                     ),
-                    const PopupMenuItem(
-                      value: 'remove_from_playlist',
-                      child: Text('Remove from Playlist'),
+                    const SizedBox(width: 12),
+                    Text(
+                      _formatDuration(song.duration),
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.5),
+                        fontSize: 14,
+                      ),
                     ),
-                    const PopupMenuItem(
-                      value: 'share',
-                      child: Text('Share'),
+                    const SizedBox(width: 8),
+                    PopupMenuButton<String>(
+                      icon: Icon(
+                        Icons.more_vert,
+                        color: Colors.white.withOpacity(0.5),
+                        size: 20,
+                      ),
+                      onSelected: (value) => _handleSongAction(value, song),
+                      itemBuilder: (context) => [
+                        const PopupMenuItem(
+                          value: 'add_to_playlist',
+                          child: Text('Add to Playlist'),
+                        ),
+                        const PopupMenuItem(
+                          value: 'remove_from_playlist',
+                          child: Text('Remove from Playlist'),
+                        ),
+                        const PopupMenuItem(
+                          value: 'share',
+                          child: Text('Share'),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 

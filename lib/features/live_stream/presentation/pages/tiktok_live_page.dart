@@ -58,6 +58,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
   StreamSubscription? _clashActionSub;
   StreamSubscription? _clashInvitationSub;
   StreamSubscription? _hostSwitchedSessionSub;
+  StreamSubscription? _realmChangedSub;
 
   @override
   void initState() {
@@ -162,7 +163,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
     });
 
     // Realm change from any participant
-    _socketService.onRealmChanged.listen((data) {
+    _realmChangedSub = _socketService.onRealmChanged.listen((data) {
       if (mounted && _activeClash != null) {
         setState(() => _activeClash = _activeClash!.copyWith(realm: data['realm'] as String?));
       }
@@ -345,7 +346,9 @@ class _TikTokLivePageState extends State<TikTokLivePage>
     _clashEndedSub?.cancel();
     _clashScoreSub?.cancel();
     _clashActionSub?.cancel();
+    _clashInvitationSub?.cancel();
     _hostSwitchedSessionSub?.cancel();
+    _realmChangedSub?.cancel();
     if (_liveStreams.isNotEmpty) {
       _socketService.leaveStream(_liveStreams[_currentStreamIndex].id);
     }
@@ -656,16 +659,17 @@ class _TikTokLivePageState extends State<TikTokLivePage>
               // Back button
               GestureDetector(
                 onTap: () => Navigator.pop(context),
+                behavior: HitTestBehavior.opaque,
                 child: Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: Colors.black.withOpacity(0.5),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
-                    Icons.arrow_back_ios,
+                    Icons.arrow_back_ios_new,
                     color: Colors.white,
-                    size: 20,
+                    size: 22,
                   ),
                 ),
               ),
@@ -752,12 +756,13 @@ class _TikTokLivePageState extends State<TikTokLivePage>
 
     return Positioned(
       right: 16,
-      bottom: 200,
+      bottom: 110,
       child: Column(
         children: [
           // Profile picture
           GestureDetector(
             onTap: _toggleFollow,
+            behavior: HitTestBehavior.opaque,
             child: Container(
               width: 60,
               height: 60,
@@ -808,6 +813,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
           // Like button
           GestureDetector(
             onTap: _toggleLike,
+            behavior: HitTestBehavior.opaque,
             child: Column(
               children: [
                 Container(
@@ -839,6 +845,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
           // Comment button
           GestureDetector(
             onTap: _showCommentInput,
+            behavior: HitTestBehavior.opaque,
             child: Column(
               children: [
                 Container(
@@ -878,6 +885,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
                 subject: stream.title,
               );
             },
+            behavior: HitTestBehavior.opaque,
             child: Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -915,6 +923,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
                 );
               }
             },
+            behavior: HitTestBehavior.opaque,
             child: Column(
               children: [
                 Container(
@@ -950,6 +959,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
           // Artist Feedback button
           GestureDetector(
             onTap: _showArtistComments,
+            behavior: HitTestBehavior.opaque,
             child: Column(
               children: [
                 Container(
@@ -982,39 +992,41 @@ class _TikTokLivePageState extends State<TikTokLivePage>
           ),
           const SizedBox(height: 20),
 
-          // Clash Invite button (visible to hosts/artists)
-          GestureDetector(
-            onTap: _inviteToClash,
-            child: Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.5),
-                    shape: BoxShape.circle,
-                    border: Border.all(
+          // Clash Invite button — host-only; viewers cannot challenge on the host's behalf
+          if (_tokenCache[currentStream.id]?.isHost == true)
+            GestureDetector(
+              onTap: _inviteToClash,
+              behavior: HitTestBehavior.opaque,
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.5),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Colors.red,
+                        width: 2,
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.flash_on,
                       color: Colors.red,
-                      width: 2,
+                      size: 28,
                     ),
                   ),
-                  child: const Icon(
-                    Icons.flash_on,
-                    color: Colors.red,
-                    size: 28,
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Clash',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                const Text(
-                  'Clash',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -1027,7 +1039,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
     return Positioned(
       bottom: 0,
       left: 0,
-      right: 0,
+      right: 88, // Prevent touch intercept overlap with right-side buttons
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(

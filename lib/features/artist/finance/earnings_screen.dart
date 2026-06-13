@@ -227,38 +227,76 @@ class _EarningsScreenState extends State<EarningsScreen> {
   }
 
   void _showPayoutDialog() {
+    bool isRequesting = false;
     showModalBottomSheet(
       context: context,
       backgroundColor: AppColors.card,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(30))),
-      builder: (context) => Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('Request Payout', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 16),
-            const Text(
-              'Your earnings will be transferred to your linked bank account. Minimum payout is \$50.00.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.mutedForeground),
-            ),
-            const SizedBox(height: 32),
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.black,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      builder: (bottomSheetContext) => StatefulBuilder(
+        builder: (context, setState) {
+          return Padding(
+            padding: const EdgeInsets.all(32.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('Request Payout', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 16),
+                const Text(
+                  'Your earnings will be transferred to your linked payout method. Minimum payout is \$50.00.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: AppColors.mutedForeground),
                 ),
-                child: const Text('CONFIRM PAYOUT', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-              ),
+                const SizedBox(height: 16),
+                TextButton.icon(
+                  onPressed: () {
+                    Navigator.pop(bottomSheetContext);
+                    Navigator.pushNamed(context, '/payout-settings');
+                  },
+                  icon: const Icon(Icons.settings, color: AppColors.primary, size: 18),
+                  label: const Text('Manage Payout Method', style: TextStyle(color: AppColors.primary)),
+                ),
+                const SizedBox(height: 32),
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: ElevatedButton(
+                    onPressed: isRequesting ? null : () async {
+                      setState(() => isRequesting = true);
+                      final provider = context.read<DashboardProvider>();
+                      final success = await provider.requestPayout(provider.artistEarnings?.totalEarnings ?? 0.0);
+                      
+                      if (bottomSheetContext.mounted) {
+                        Navigator.pop(bottomSheetContext);
+                      }
+                      
+                      if (this.context.mounted) {
+                        if (success) {
+                          ScaffoldMessenger.of(this.context).showSnackBar(
+                            const SnackBar(content: Text('Payout request submitted successfully!'), backgroundColor: AppColors.primary),
+                          );
+                          // Refresh balance
+                          provider.fetchDashboardData(provider.artistDetails?.id ?? '');
+                        } else {
+                          ScaffoldMessenger.of(this.context).showSnackBar(
+                            SnackBar(content: Text(provider.error ?? 'Failed to request payout'), backgroundColor: Colors.redAccent),
+                          );
+                        }
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    ),
+                    child: isRequesting
+                        ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
+                        : const Text('CONFIRM PAYOUT', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        }
       ),
     );
   }

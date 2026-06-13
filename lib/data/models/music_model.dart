@@ -90,11 +90,7 @@ class MusicModel {
       imageUrl: imageUrl,
       audioUrl: audioUrl,
       videoUrl: ApiConfig.resolveUrl(json['videoUrl'] ?? json['videoFileUrl'] ?? ''),
-      duration: Duration(
-        seconds: (json['duration'] ?? 0) is int
-            ? json['duration']
-            : (json['duration'] as num).toInt(),
-      ),
+      duration: Duration(seconds: _parseDurationSeconds(json['duration'])),
       genre: genreName,
       lyrics: json['lyrics'] ?? '',
       isLiked: json['isLiked'] ?? false,
@@ -107,6 +103,16 @@ class MusicModel {
       share: json['share'] != null ? (json['share'] as num).toDouble() : null,
       role: json['role'],
     );
+  }
+
+  static int _parseDurationSeconds(dynamic value) {
+    if (value == null) return 0;
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    if (value is String) {
+      return int.tryParse(value) ?? double.tryParse(value)?.toInt() ?? 0;
+    }
+    return 0;
   }
 
   Map<String, dynamic> toJson() {

@@ -6,6 +6,7 @@ import 'package:lugmatic_flutter/data/services/gift_service.dart';
 import 'package:lugmatic_flutter/data/services/home_service.dart';
 import 'package:lugmatic_flutter/data/services/stripe_service.dart';
 import 'package:lugmatic_flutter/core/theme/neumorphic_theme.dart';
+import 'package:lugmatic_flutter/core/network/api_exception.dart';
 import 'package:dio/dio.dart';
 import 'dart:async';
 
@@ -394,7 +395,7 @@ class _GiftSendPageState extends State<GiftSendPage> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        '\$${_selectedGift!.price.toStringAsFixed(2)}',
+                        '\$${_selectedGift!.priceInDollars.toStringAsFixed(2)}',
                         style: const TextStyle(
                           color: Color(0xFFFFD700),
                           fontSize: 16,
@@ -530,7 +531,7 @@ class _GiftSendPageState extends State<GiftSendPage> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '\$${gift.price.toStringAsFixed(2)}',
+                  '\$${gift.priceInDollars.toStringAsFixed(2)}',
                   style: const TextStyle(
                     color: Color(0xFFFFD700),
                     fontSize: 14,
@@ -648,7 +649,7 @@ class _GiftSendPageState extends State<GiftSendPage> {
 
   Widget _buildSendButton() {
     final canSend = _selectedArtist != null && _selectedGift != null;
-    final hasEnoughCoins = _selectedGift != null && _userCoins >= (_selectedGift!.price * 100);
+    final hasEnoughCoins = _selectedGift != null && _userCoins >= _selectedGift!.price;
     
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -660,7 +661,7 @@ class _GiftSendPageState extends State<GiftSendPage> {
           !canSend 
               ? 'Select Artist & Gift'
               : (hasEnoughCoins 
-                  ? 'Send Gift (\$${_selectedGift!.price.toStringAsFixed(2)})'
+                  ? 'Send Gift (\$${_selectedGift!.priceInDollars.toStringAsFixed(2)})'
                   : 'Insufficient Balance - Top Up'),
         ),
         style: ElevatedButton.styleFrom(
@@ -828,7 +829,7 @@ class _GiftSendPageState extends State<GiftSendPage> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Cost: \$${_selectedGift!.price.toStringAsFixed(2)}',
+              'Cost: \$${_selectedGift!.priceInDollars.toStringAsFixed(2)}',
               style: const TextStyle(
                 color: Color(0xFFFFD700),
                 fontWeight: FontWeight.bold,
@@ -900,9 +901,10 @@ class _GiftSendPageState extends State<GiftSendPage> {
       }
     } catch (e) {
       if (mounted) {
+        final message = e is ApiException ? e.message : 'Failed to send gift. Please try again.';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to send gift: $e'),
+            content: Text(message),
             backgroundColor: Colors.red,
           ),
         );

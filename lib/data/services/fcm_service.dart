@@ -105,9 +105,13 @@ class FcmService {
           navigator.pushNamed('/home');
         }
         break;
+      case 'clash_invite':
       case 'clash_invitation':
+      case 'clash_challenge':
         if (targetId != null) {
           navigator.pushNamed('/clash', arguments: targetId);
+        } else {
+          navigator.pushNamed('/clashes');
         }
         break;
       case 'gift_received':

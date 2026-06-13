@@ -5,6 +5,8 @@ import '../../../core/config/api_config.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/models/clash_pool_model.dart';
 import '../../../data/services/regular_clash_service.dart';
+import '../../../data/models/rhythm_model.dart';
+import '../../../data/services/rhythm_service.dart';
 import '../../../core/network/api_client.dart';
 import 'package:dio/dio.dart';
 
@@ -17,9 +19,11 @@ class ArtistChallengePage extends StatefulWidget {
 
 class _ArtistChallengePageState extends State<ArtistChallengePage> {
   late RegularClashService _service;
+  late RhythmService _rhythmService;
   late ApiClient _apiClient;
 
   ClashPoolModel? _activePool;
+  List<RhythmModel> _rhythms = [];
   bool _isLoadingPool = true;
   bool _isSending = false;
   String? _poolError;
@@ -30,6 +34,7 @@ class _ArtistChallengePageState extends State<ArtistChallengePage> {
 
   List<Map<String, dynamic>> _searchResults = [];
   Map<String, dynamic>? _selectedArtist;
+  RhythmModel? _selectedRhythm;
   bool _isSearching = false;
   String _selectedRealm = 'fire';
 
@@ -39,6 +44,7 @@ class _ArtistChallengePageState extends State<ArtistChallengePage> {
   void initState() {
     super.initState();
     _service = RegularClashService(apiClient: context.read());
+    _rhythmService = context.read<RhythmService>();
     _apiClient = context.read();
     _loadPool();
   }
@@ -46,11 +52,19 @@ class _ArtistChallengePageState extends State<ArtistChallengePage> {
   Future<void> _loadPool() async {
     setState(() { _isLoadingPool = true; _poolError = null; });
     try {
-      final pools = await _service.getActivePools();
+      final results = await Future.wait([
+        _service.getActivePools(),
+        _rhythmService.getRhythms(),
+      ]);
+      final pools = results[0] as List<ClashPoolModel>;
+      final rhythms = results[1] as List<RhythmModel>;
+      
       if (mounted) {
         final openPool = pools.where((p) => p.isOpen).toList();
         setState(() {
           _activePool = openPool.isNotEmpty ? openPool.first : null;
+          _rhythms = rhythms;
+          if (rhythms.isNotEmpty) _selectedRhythm = rhythms.first;
           _isLoadingPool = false;
         });
       }
@@ -93,6 +107,7 @@ class _ArtistChallengePageState extends State<ArtistChallengePage> {
         poolId: pool.id,
         opponentArtistId: opponent['_id']?.toString() ?? opponent['id']?.toString() ?? '',
         realm: _selectedRealm,
+        rhythmId: _selectedRhythm?.id,
         message: _messageController.text.trim().isEmpty ? null : _messageController.text.trim(),
       );
       if (mounted) {
@@ -285,6 +300,39 @@ class _ArtistChallengePageState extends State<ArtistChallengePage> {
             }).toList(),
           ),
           const SizedBox(height: 24),
+
+          // Rhythm picker
+          if (_rhythms.isNotEmpty) ...[
+            const Text('Rhythm', style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: _rhythms.map((rhythm) {
+                final isSelected = _selectedRhythm?.id == rhythm.id;
+                return GestureDetector(
+                  onTap: () => setState(() => _selectedRhythm = rhythm),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                    decoration: BoxDecoration(
+                      color: isSelected ? AppColors.primary.withOpacity(0.2) : AppColors.card,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: isSelected ? AppColors.primary : AppColors.border),
+                    ),
+                    child: Text(
+                      rhythm.name.toUpperCase(),
+                      style: TextStyle(
+                        color: isSelected ? AppColors.primary : Colors.white54,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 24),
+          ],
 
           // Message
           const Text('Message (optional)', style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold)),

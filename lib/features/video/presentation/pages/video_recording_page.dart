@@ -5,7 +5,7 @@ import 'video_publish_page.dart';
 import 'clash_video_submit_page.dart';
 
 class VideoRecordingPage extends StatefulWidget {
-  /// If set, recording is locked to 6 seconds and the video is submitted to this clash.
+  /// If set, recording is locked to 60 seconds and the video is submitted to this clash.
   final String? clashId;
 
   const VideoRecordingPage({Key? key, this.clashId}) : super(key: key);

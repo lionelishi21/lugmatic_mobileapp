@@ -392,7 +392,7 @@ class _ActiveCard extends StatelessWidget {
                 child: ElevatedButton.icon(
                   onPressed: onUploadVideo,
                   icon: const Icon(Icons.videocam, size: 18),
-                  label: const Text('Record 6-sec clip', style: TextStyle(fontWeight: FontWeight.bold)),
+                  label: const Text('Record 60-sec clip', style: TextStyle(fontWeight: FontWeight.bold)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.black,

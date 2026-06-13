@@ -59,6 +59,7 @@ class RegularClashModel {
   final int likesCount;
   final RegularClashArtist? winner;
   final String? message;
+  final String? rhythmId;
   final DateTime createdAt;
 
   const RegularClashModel({
@@ -77,6 +78,7 @@ class RegularClashModel {
     this.likesCount = 0,
     this.winner,
     this.message,
+    this.rhythmId,
     required this.createdAt,
   });
 
@@ -106,6 +108,7 @@ class RegularClashModel {
       likesCount: (json['likesCount'] ?? 0) as int,
       winner: json['winner'] is Map ? RegularClashArtist.fromJson(json['winner']) : null,
       message: json['message']?.toString(),
+      rhythmId: json['rhythm']?.toString() ?? json['rhythmId']?.toString(),
       createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
     );
   }

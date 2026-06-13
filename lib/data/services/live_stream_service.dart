@@ -70,13 +70,14 @@ class LiveStreamService {
   }
 
   /// Invite an artist to a clash.
-  Future<LiveClashModel> inviteToClash(String opponentId, int duration) async {
+  Future<LiveClashModel> inviteToClash(String opponentId, int duration, {String? rhythmId}) async {
     try {
       final response = await _apiClient.dio.post(
         ApiConfig.clashInvite,
         data: {
           'opponentArtistId': opponentId,
           'duration': duration,
+          if (rhythmId != null) 'rhythmId': rhythmId,
         },
       );
 

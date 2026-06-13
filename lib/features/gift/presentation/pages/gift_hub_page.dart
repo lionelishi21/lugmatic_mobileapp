@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lugmatic_flutter/features/gift/presentation/pages/gift_send_page.dart';
+import 'package:provider/provider.dart';
+import 'package:lugmatic_flutter/data/providers/auth_provider.dart';
 import 'package:lugmatic_flutter/features/store/presentation/pages/store_page.dart';
-
 class GiftHubPage extends StatefulWidget {
   const GiftHubPage({Key? key}) : super(key: key);
 
@@ -104,26 +105,24 @@ class _GiftHubPageState extends State<GiftHubPage>
               style: TextStyle(color: Colors.white70),
             ),
             const SizedBox(height: 8),
-            const Text(
-              '\$25.50',
-              style: TextStyle(
-                color: Color(0xFFFFD700),
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+            Consumer<AuthProvider>(
+              builder: (context, auth, _) {
+                final coins = auth.user?.coins ?? 0;
+                return Text(
+                  '$coins Coins',
+                  style: const TextStyle(
+                    color: Color(0xFFFFD700),
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.pop(context);
-                _tabController.animateTo(1);
-              },
-              icon: const Icon(Icons.add),
-              label: const Text('Add Funds'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFFD700),
-                foregroundColor: Colors.black,
-              ),
+            const Text(
+              'Purchase additional coins on the Lugmatic Music website.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white54, fontSize: 12),
             ),
           ],
         ),

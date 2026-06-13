@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../../shared/widgets/brand_gradient_fallback.dart';
 import '../../../../core/config/api_config.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/network/api_client.dart';
@@ -13,9 +14,7 @@ import '../../../../data/services/video_service.dart';
 import '../../../../data/models/video_model.dart';
 import '../../../../ui/widgets/player_screen.dart';
 import '../../../video/presentation/pages/videos_page.dart';
-import '../../../song/presentation/pages/song_detail_page.dart';
 import '../../../../data/providers/message_provider.dart';
-import '../../../../data/models/conversation_model.dart';
 
 class ArtistDetailPage extends StatefulWidget {
   final String artistId;
@@ -93,50 +92,7 @@ class _ArtistDetailPageState extends State<ArtistDetailPage> {
     }
   }
 
-  void _showPremiumRequired() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1F2937),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Row(
-          children: [
-            Icon(Icons.workspace_premium, color: Color(0xFFFFD700)),
-            SizedBox(width: 8),
-            Text('Premium Feature', style: TextStyle(color: Colors.white)),
-          ],
-        ),
-        content: const Text(
-          'Messaging and commenting directly on an artist\'s profile requires a Lugmatic Premium subscription.',
-          style: TextStyle(color: Colors.white70),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: Colors.white60)),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // TODO: Navigate to Premium Subscription Page
-              // Navigator.pushNamed(context, '/premium');
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF10B981),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            ),
-            child: const Text('Upgrade Now', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
-    );
-  }
 
-  String _formatDuration(Duration d) {
-    final m = d.inMinutes;
-    final s = d.inSeconds.remainder(60).toString().padLeft(2, '0');
-    return '$m:$s';
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -156,9 +112,7 @@ class _ArtistDetailPageState extends State<ArtistDetailPage> {
   }
 
   Widget _buildContent(BuildContext context, ArtistModel artist) {
-    final imageUrl = artist.imageUrl.isNotEmpty
-        ? artist.imageUrl
-        : 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=400&fit=crop';
+    final hasImage = artist.imageUrl.isNotEmpty;
 
     return CustomScrollView(
       slivers: [
@@ -208,8 +162,13 @@ class _ArtistDetailPageState extends State<ArtistDetailPage> {
             background: Stack(
               fit: StackFit.expand,
               children: [
-                Image.network(imageUrl, fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(color: const Color(0xFF1A2332))),
+                hasImage
+                    ? Image.network(
+                        artist.imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => const BrandGradientFallback(iconSize: 64, borderRadius: BorderRadius.zero),
+                      )
+                    : const BrandGradientFallback(iconSize: 64, borderRadius: BorderRadius.zero),
                 // Dynamic Overlays
                 Container(
                   decoration: BoxDecoration(
@@ -286,7 +245,7 @@ class _ArtistDetailPageState extends State<ArtistDetailPage> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        '${artist.followers ?? 0} Followers',
+                        '${artist.followers} Followers',
                         style: TextStyle(
                           color: Colors.white.withOpacity(0.8),
                           fontSize: 14,
@@ -347,7 +306,7 @@ class _ArtistDetailPageState extends State<ArtistDetailPage> {
                               await artistService.followArtist(widget.artistId);
                             }
                           } catch (e) {
-                            if (mounted) {
+                            if (context.mounted) {
                               setState(() => _isFollowing = oldState);
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(content: Text('Failed to update following: $e')),
@@ -364,8 +323,10 @@ class _ArtistDetailPageState extends State<ArtistDetailPage> {
                           final provider = context.read<MessageProvider>();
                           try {
                             final conv = await provider.startConversation(widget.artistId);
+                            if (!context.mounted) return;
                             Navigator.pushNamed(context, '/chat', arguments: conv);
                           } catch (e) {
+                            if (!context.mounted) return;
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text('Failed to start chat: $e')),
                             );
@@ -380,8 +341,10 @@ class _ArtistDetailPageState extends State<ArtistDetailPage> {
                           final provider = context.read<MessageProvider>();
                           try {
                             final conv = await provider.startConversation(widget.artistId);
+                            if (!context.mounted) return;
                             Navigator.pushNamed(context, '/chat', arguments: conv);
                           } catch (e) {
+                            if (!context.mounted) return;
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text('Failed to start chat: $e')),
                             );
@@ -480,8 +443,8 @@ class _ArtistDetailPageState extends State<ArtistDetailPage> {
                                     borderRadius: BorderRadius.circular(16),
                                     child: coverArt.isNotEmpty
                                         ? Image.network(coverArt, width: 160, height: 160, fit: BoxFit.cover,
-                                            errorBuilder: (_, __, ___) => _albumPlaceholder())
-                                        : _albumPlaceholder(),
+                                            errorBuilder: (_, __, ___) => const BrandGradientFallback(iconSize: 48, borderRadius: BorderRadius.zero))
+                                        : const BrandGradientFallback(iconSize: 48, borderRadius: BorderRadius.zero),
                                   ),
                                 ),
                                 const SizedBox(height: 12),
@@ -651,10 +614,7 @@ class _ArtistDetailPageState extends State<ArtistDetailPage> {
     );
   }
 
-  Widget _albumPlaceholder() => Container(
-    width: 140, height: 140, color: const Color(0xFF1A2332),
-    child: const Icon(Icons.album, color: Colors.white24, size: 48),
-  );
+
 
   Widget _videoPlaceholder() => Container(
     width: 240, height: 135, color: const Color(0xFF1A2332),
@@ -760,8 +720,8 @@ class _TrackRow extends StatelessWidget {
               borderRadius: BorderRadius.circular(6),
               child: coverUrl.isNotEmpty
                   ? Image.network(coverUrl, width: 42, height: 42, fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(width: 42, height: 42, color: Colors.white.withOpacity(0.1)))
-                  : Container(width: 42, height: 42, color: Colors.white.withOpacity(0.1)),
+                      errorBuilder: (_, __, ___) => const BrandGradientFallback(width: 42, height: 42, iconSize: 18, borderRadius: BorderRadius.zero))
+                  : const BrandGradientFallback(width: 42, height: 42, iconSize: 18, borderRadius: BorderRadius.zero),
             ),
             const SizedBox(width: 12),
             Expanded(

@@ -264,7 +264,8 @@ class _ArtistLiveScreenState extends State<ArtistLiveScreen> with WidgetsBinding
       ]);
 
   Widget _buildLiveView(LiveStreamingProvider provider) {
-    final track = provider.room?.localParticipant?.videoTrackPublications.firstOrNull?.track;
+    final track = provider.room?.localParticipant?.videoTrackPublications.firstOrNull?.track as LocalVideoTrack?;
+    final audioTrack = provider.room?.localParticipant?.audioTrackPublications.firstOrNull?.track as LocalAudioTrack?;
     final clash = provider.activeClash;
     final inClash = provider.hasClashRoom && clash != null;
 
@@ -285,6 +286,8 @@ class _ArtistLiveScreenState extends State<ArtistLiveScreen> with WidgetsBinding
                       clashRoomToken: provider.clashRoomToken!,
                       opponentUserId: provider.clashOpponentUserId ?? '',
                       opponentName: (clash['opponent'] is Map ? clash['opponent']['name'] : null) ?? 'Opponent',
+                      localVideoTrack: track,
+                      localAudioTrack: audioTrack,
                     )),
                   ])
                 : _cameraView(track, null),

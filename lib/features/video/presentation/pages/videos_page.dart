@@ -25,6 +25,12 @@ class _VideosPageState extends State<VideosPage> {
     _loadVideos();
   }
 
+  String _formatCount(int count) {
+    if (count >= 1000000) return '${(count / 1000000).toStringAsFixed(1)}M';
+    if (count >= 1000) return '${(count / 1000).toStringAsFixed(1)}K';
+    return count.toString();
+  }
+
   Future<void> _loadVideos() async {
     setState(() {
       _isLoading = true;
@@ -147,6 +153,33 @@ class _VideosPageState extends State<VideosPage> {
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                       ),
+                                      if (video.description.isNotEmpty) ...[
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          video.description,
+                                          style: const TextStyle(color: Colors.white60, fontSize: 9),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
+                                      const SizedBox(height: 4),
+                                      Row(
+                                        children: [
+                                          const Icon(Icons.play_arrow, color: Colors.white70, size: 12),
+                                          const SizedBox(width: 2),
+                                          Text(
+                                            _formatCount(video.views),
+                                            style: const TextStyle(color: Colors.white70, fontSize: 10),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          const Icon(Icons.favorite, color: Colors.white70, size: 12),
+                                          const SizedBox(width: 2),
+                                          Text(
+                                            _formatCount(video.likesCount),
+                                            style: const TextStyle(color: Colors.white70, fontSize: 10),
+                                          ),
+                                        ],
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -227,11 +260,48 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
         elevation: 0,
         title: Text(widget.video.title),
       ),
-      body: Center(
-        child: _chewieController != null &&
-            _chewieController!.videoPlayerController.value.isInitialized
-          ? Chewie(controller: _chewieController!)
-          : const Center(child: CircularProgressIndicator(color: Color(0xFF10B981))),
+      body: Column(
+        children: [
+          Expanded(
+            child: Center(
+              child: _chewieController != null &&
+                      _chewieController!.videoPlayerController.value.isInitialized
+                  ? Chewie(controller: _chewieController!)
+                  : const Center(child: CircularProgressIndicator(color: Color(0xFF10B981))),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      widget.video.artistName,
+                      style: const TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.w600),
+                    ),
+                    const Spacer(),
+                    const Icon(Icons.play_arrow, color: Colors.white54, size: 16),
+                    const SizedBox(width: 4),
+                    Text('${widget.video.views}', style: const TextStyle(color: Colors.white54, fontSize: 13)),
+                    const SizedBox(width: 16),
+                    const Icon(Icons.favorite, color: Colors.white54, size: 16),
+                    const SizedBox(width: 4),
+                    Text('${widget.video.likesCount}', style: const TextStyle(color: Colors.white54, fontSize: 13)),
+                  ],
+                ),
+                if (widget.video.description.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    widget.video.description,
+                    style: const TextStyle(color: Colors.white60, fontSize: 13),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

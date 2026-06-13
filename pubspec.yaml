@@ -78,10 +78,16 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  integration_test:
+    sdk: flutter
 
   flutter_lints: ^6.0.0
   flutter_native_splash: ^2.4.0 # Generates native splash screens
   flutter_launcher_icons: ^0.14.4 # Updates the app's launcher icon
+
+  # Testing utilities
+  mockito: ^5.4.4        # Mock objects for unit & widget tests
+  build_runner: ^2.4.9   # Code-gen for @GenerateMocks annotations
 
 # The following section is specific to Flutter packages.
 flutter:

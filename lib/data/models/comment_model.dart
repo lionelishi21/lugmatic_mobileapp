@@ -24,14 +24,16 @@ class CommentModel {
   });
 
   factory CommentModel.fromJson(Map<String, dynamic> json) {
-    final user = json['user'];
+    final user = json['author'] ?? json['user'];
     String name = 'Unknown';
     String avatar = '';
     String uId = '';
 
     if (user is Map) {
-      name = user['name'] ?? 'Unknown';
-      avatar = user['image'] ?? user['avatar'] ?? '';
+      name = user['firstName'] != null && user['lastName'] != null 
+          ? '${user['firstName']} ${user['lastName']}'.trim()
+          : user['name'] ?? 'Unknown';
+      avatar = user['profilePicture'] ?? user['image'] ?? user['avatar'] ?? '';
       uId = user['_id'] ?? user['id'] ?? '';
     } else {
       uId = user?.toString() ?? '';

@@ -12,6 +12,7 @@ class LiveClashModel {
   final DateTime? startTime;
   final DateTime? endTime;
   final String realm;
+  final String? rhythmId;
   final String? clashRoomName;
   final String? livekitUrl;
   final String? challengerUserId;
@@ -29,6 +30,7 @@ class LiveClashModel {
     this.startTime,
     this.endTime,
     this.realm = 'fire',
+    this.rhythmId,
     this.clashRoomName,
     this.livekitUrl,
     this.challengerUserId,
@@ -54,6 +56,7 @@ class LiveClashModel {
       startTime: json['startTime'] != null ? DateTime.tryParse(json['startTime']) : null,
       endTime: json['endTime'] != null ? DateTime.tryParse(json['endTime']) : null,
       realm: json['realm'] ?? 'fire',
+      rhythmId: json['rhythm']?.toString() ?? json['rhythmId']?.toString(),
       clashRoomName: json['clashRoomName']?.toString(),
       livekitUrl: json['livekitUrl']?.toString(),
       challengerUserId: json['challengerUserId']?.toString(),

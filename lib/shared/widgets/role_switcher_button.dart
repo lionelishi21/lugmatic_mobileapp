@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../data/providers/auth_provider.dart';
 import '../../data/providers/section_provider.dart';
+import '../../data/providers/track_provider.dart';
+import '../../data/providers/dashboard_provider.dart';
 import '../../features/artist/navigation/artist_shell.dart';
 import '../../features/contributor/navigation/contributor_shell.dart';
 
@@ -32,6 +34,8 @@ class RoleSwitcherButton extends StatelessWidget {
               icon: Icons.mic_rounded,
               color: AppColors.primary,
               onTap: () {
+                context.read<TrackProvider>().clear();
+                context.read<DashboardProvider>().clear();
                 context.read<SectionProvider>().switchTo(AppSection.artist);
                 Navigator.of(context).push(
                   MaterialPageRoute(
@@ -48,6 +52,8 @@ class RoleSwitcherButton extends StatelessWidget {
               icon: Icons.piano_rounded,
               color: AppColors.secondary,
               onTap: () {
+                context.read<TrackProvider>().clear();
+                context.read<DashboardProvider>().clear();
                 context.read<SectionProvider>().switchTo(AppSection.contributor);
                 Navigator.of(context).push(
                   MaterialPageRoute(

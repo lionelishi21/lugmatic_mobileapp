@@ -15,6 +15,9 @@ class GiftModel {
   final DateTime? expiresAt;
   final String? rarity;
 
+  /// `price` holds the coin cost (100 coins = $1.00). Use this for dollar display.
+  double get priceInDollars => price / 100;
+
   GiftModel({
     required this.id,
     required this.name,

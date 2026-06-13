@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lugmatic_flutter/data/models/artist_model.dart';
+import 'package:lugmatic_flutter/shared/widgets/brand_gradient_fallback.dart';
 
 class ArtistCard extends StatelessWidget {
   final ArtistModel artist;
@@ -118,10 +119,11 @@ class ArtistCard extends StatelessWidget {
     return _placeholder(w, h);
   }
 
-  Widget _placeholder(double w, double h) => Container(
-    width: w, height: h,
-    color: const Color(0xFF1A2332),
-    child: Icon(Icons.person, color: Colors.white.withOpacity(0.3), size: w * 0.4),
+  Widget _placeholder(double w, double h) => BrandGradientFallback(
+    width: w,
+    height: h,
+    iconSize: w * 0.4,
+    borderRadius: BorderRadius.zero,
   );
 
   String _formatNumber(int n) {

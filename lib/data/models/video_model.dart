@@ -8,6 +8,7 @@ class VideoModel {
   final String artistName;
   final String? songId;
   final int views;
+  final int likesCount;
   final DateTime createdAt;
 
   VideoModel({
@@ -20,6 +21,7 @@ class VideoModel {
     required this.artistName,
     this.songId,
     this.views = 0,
+    this.likesCount = 0,
     required this.createdAt,
   });
 
@@ -44,6 +46,7 @@ class VideoModel {
       artistName: artistName,
       songId: json['song']?.toString(),
       views: json['views'] ?? 0,
+      likesCount: json['likesCount'] ?? json['likes'] ?? 0,
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'].toString()) ?? DateTime.now()
           : DateTime.now(),
@@ -61,6 +64,7 @@ class VideoModel {
       'artistName': artistName,
       'songId': songId,
       'views': views,
+      'likesCount': likesCount,
       'createdAt': createdAt.toIso8601String(),
     };
   }

@@ -10,6 +10,7 @@ import '../../../../data/providers/auth_provider.dart';
 import '../../features/home/presentation/pages/artist_detail_page.dart';
 import '../../features/live_stream/presentation/pages/go_live_setup_page.dart';
 import '../../features/live_stream/presentation/pages/live_host_screen.dart';
+import '../../features/onboarding/presentation/pages/onboarding_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -155,7 +156,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(height: 32),
             Center(
               child: TextButton(
-                onPressed: () => context.read<AuthProvider>().logout(),
+                onPressed: () async {
+                  final navigator = Navigator.of(context);
+                  await context.read<AuthProvider>().logout();
+                  if (!context.mounted) return;
+                  navigator.pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (_) => const OnboardingScreen()),
+                    (route) => false,
+                  );
+                },
                 child: const Text('LOGOUT', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
               ),
             ),

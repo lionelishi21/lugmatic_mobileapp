@@ -26,17 +26,19 @@ class Track {
   });
 
   factory Track.fromJson(Map<String, dynamic> json) => Track(
-        id: json['_id'] ?? '',
-        name: json['title'] ?? json['name'] ?? 'Unknown Track',
-        coverArt: json['coverArt'] ?? json['coverImage'],
-        coverArtUrl: json['coverArtUrl'],
-        status: json['status'] ?? 'pending',
-        playCount: json['plays'] ?? json['playCount'] ?? 0,
-        uploadSource: json['uploadSource'],
-        createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
-        share: json['share'] != null ? (json['share'] as num).toDouble() : null,
-        role: json['role'],
-        videoUrl: json['videoUrl'] as String?,
+        id: json['_id']?.toString() ?? '',
+        name: json['title']?.toString() ?? json['name']?.toString() ?? 'Unknown Track',
+        coverArt: json['coverArt']?.toString() ?? json['coverImage']?.toString(),
+        coverArtUrl: json['coverArtUrl']?.toString(),
+        status: json['status']?.toString() ?? 'pending',
+        playCount: int.tryParse(json['plays']?.toString() ?? json['playCount']?.toString() ?? '0') ?? 0,
+        uploadSource: json['uploadSource']?.toString(),
+        createdAt: json['createdAt'] != null 
+            ? DateTime.tryParse(json['createdAt'].toString()) ?? DateTime.now() 
+            : DateTime.now(),
+        share: json['share'] != null ? double.tryParse(json['share'].toString()) : null,
+        role: json['role']?.toString(),
+        videoUrl: json['videoUrl']?.toString(),
       );
 }
 

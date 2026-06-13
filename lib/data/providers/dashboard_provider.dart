@@ -39,4 +39,34 @@ class DashboardProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  void clear() {
+    _artistDetails = null;
+    _artistStats = null;
+    _artistEarnings = null;
+    _error = null;
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<bool> requestPayout(double amount) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+    try {
+      await _service.requestPayout(amount);
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      // Try to parse dio error message
+      if (e is num || e.toString().contains('DioException')) {
+        // Simple extraction fallback
+        _error = 'Failed to request payout. Minimum is \$50.00 or check your balance.';
+      }
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }

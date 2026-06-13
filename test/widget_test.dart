@@ -1,30 +1,21 @@
-// This is a basic Flutter widget test.
+// Smoke test placeholder.
 //
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
+// LugmaticApp requires a real Firebase environment (native platform channels
+// for Firebase Core, Messaging, and Secure Storage) which cannot be initialised
+// in the headless `flutter test` runner. Attempting to pump the full widget
+// tree leaves pending timers that the AutomatedTestWidgetsFlutterBinding
+// treats as a hard failure.
+//
+// Full auth + UI coverage is provided by:
+//   • test/unit/auth_validator_test.dart   — 21 cases
+//   • test/unit/auth_provider_test.dart    — 14 cases
+//   • test/widget/login_screen_test.dart   — 12 cases
+//   • test/widget/signup_screen_test.dart  — 12 cases
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:lugmatic_flutter/main.dart';
-
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const LugmaticApp());
-
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  test('(placeholder — see test/unit/ and test/widget/ for coverage)', () {
+    // Nothing to do here.
   });
 }

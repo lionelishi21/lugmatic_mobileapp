@@ -111,9 +111,9 @@ class _PlayerScreenState extends State<PlayerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AudioProvider>(
-      builder: (context, audioProvider, child) {
-        final currentMusic = audioProvider.currentMusic ?? widget.music;
+    return Selector<AudioProvider, MusicModel>(
+      selector: (context, provider) => provider.currentMusic ?? widget.music,
+      builder: (context, currentMusic, child) {
 
         return Container(
           decoration: const BoxDecoration(
@@ -236,32 +236,36 @@ class _PlayerScreenState extends State<PlayerScreen> {
                           ),
                           const SizedBox(height: 40),
 
-                          // Error Message
-                          if (audioProvider.errorMessage != null)
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 20),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: Colors.red.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(color: Colors.red.withOpacity(0.3)),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(Icons.error_outline, color: Colors.red, size: 20),
-                                    const SizedBox(width: 8),
-                                    Flexible(
-                                      child: Text(
-                                        audioProvider.errorMessage!,
-                                        style: const TextStyle(color: Colors.red, fontSize: 13),
+                          Consumer<AudioProvider>(
+                            builder: (context, audioProvider, _) {
+                              return Column(
+                                children: [
+                                  // Error Message
+                                  if (audioProvider.errorMessage != null)
+                                    Padding(
+                                      padding: const EdgeInsets.only(bottom: 20),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                        decoration: BoxDecoration(
+                                          color: Colors.red.withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(8),
+                                          border: Border.all(color: Colors.red.withOpacity(0.3)),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const Icon(Icons.error_outline, color: Colors.red, size: 20),
+                                            const SizedBox(width: 8),
+                                            Flexible(
+                                              child: Text(
+                                                audioProvider.errorMessage!,
+                                                style: const TextStyle(color: Colors.red, fontSize: 13),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                  ],
-                                ),
-                              ),
-                            ),
 
                           // Progress Bar
                           Column(
@@ -377,6 +381,10 @@ class _PlayerScreenState extends State<PlayerScreen> {
                               ),
                             ],
                           ),
+                                ],
+                              );
+                            },
+                          ),
                           const SizedBox(height: 30),
 
                           Row(
@@ -388,6 +396,14 @@ class _PlayerScreenState extends State<PlayerScreen> {
                                   _isFavorited ? Icons.favorite : Icons.favorite_border,
                                   color: _isFavorited ? Colors.red : Colors.white60,
                                 ),
+                              ),
+                              IconButton(
+                                onPressed: () {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Added to Playlist')),
+                                  );
+                                },
+                                icon: const Icon(Icons.playlist_add, color: Colors.white60),
                               ),
                               IconButton(
                                 onPressed: () {
@@ -456,6 +472,124 @@ class _PlayerScreenState extends State<PlayerScreen> {
                                ),
                              ),
                           ],
+                          const SizedBox(height: 40),
+
+                          // Up Next Section
+                          Consumer<AudioProvider>(
+                            builder: (context, audioProvider, _) {
+                              if (audioProvider.queue.isEmpty) return const SizedBox();
+                              return Column(
+                                children: [
+                                  Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'Up Next',
+                                style: TextStyle(
+                                  color: Colors.white.withOpacity(0.9),
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            ...audioProvider.queue.skip(audioProvider.currentIndex + 1).take(3).toList().asMap().entries.map((entry) {
+                              final int index = entry.key;
+                              final song = entry.value;
+                              final isNext = index == 0;
+                              
+                              return Container(
+                                margin: const EdgeInsets.only(bottom: 12),
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: isNext ? const Color(0xFF10B981).withOpacity(0.1) : Colors.white.withOpacity(0.05),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: isNext ? Border.all(color: const Color(0xFF10B981).withOpacity(0.5), width: 1.5) : null,
+                                  boxShadow: isNext ? [
+                                    BoxShadow(
+                                      color: const Color(0xFF10B981).withOpacity(0.2),
+                                      blurRadius: 8,
+                                      spreadRadius: 1,
+                                    )
+                                  ] : null,
+                                ),
+                                child: Row(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Image.network(
+                                        song.imageUrl,
+                                        width: 48,
+                                        height: 48,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (_, __, ___) => Container(
+                                          width: 48,
+                                          height: 48,
+                                          color: Colors.white10,
+                                          child: const Icon(Icons.music_note, color: Colors.white38),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: Text(
+                                                  song.title,
+                                                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                              if (isNext)
+                                                Container(
+                                                  margin: const EdgeInsets.only(left: 8),
+                                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                                  decoration: BoxDecoration(
+                                                    color: const Color(0xFF10B981),
+                                                    borderRadius: BorderRadius.circular(4),
+                                                  ),
+                                                  child: const Text(
+                                                    'NEXT',
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 10,
+                                                      fontWeight: FontWeight.w900,
+                                                      letterSpacing: 0.5,
+                                                    ),
+                                                  ),
+                                                ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            song.artist,
+                                            style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 13),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                            if (audioProvider.queue.length - audioProvider.currentIndex - 1 > 3)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8.0),
+                                child: Text(
+                                  '+ ${audioProvider.queue.length - audioProvider.currentIndex - 4} more',
+                                  style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 13),
+                                ),
+                              ),
+                                ],
+                              );
+                            },
+                          ),
                           const SizedBox(height: 60),
                         ],
                       ),

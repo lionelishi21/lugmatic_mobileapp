@@ -18,14 +18,14 @@ class ContributorService {
 
   /// Update payout settings for the contributor.
   Future<Map<String, dynamic>> updatePayoutInfo({
-    required String method,
+    String? method,
     String? paypalEmail,
     Map<String, dynamic>? bankAccount,
     String? stripeAccountId,
   }) async {
     try {
       final response = await _apiClient.dio.put(
-        '/users/contributor/payout-info',
+        '/user/contributor/payout-info',
         data: {
           'method': method,
           if (paypalEmail != null) 'paypalEmail': paypalEmail,

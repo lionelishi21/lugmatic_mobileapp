@@ -27,6 +27,7 @@ import '../features/artist/navigation/artist_shell.dart';
 import '../features/artist/tracks/upload_track_screen.dart';
 import '../features/artist/finance/earnings_screen.dart';
 import '../features/artist/clashes/artist_challenge_page.dart';
+import '../features/artist/account/payout_settings_screen.dart';
 import '../features/regular_clash/regular_clash_detail_page.dart';
 import '../features/regular_clash/regular_clash_feed_page.dart';
 import '../features/video/presentation/pages/video_recording_page.dart';
@@ -164,6 +165,9 @@ class AppRouter {
 
       case '/artist/earnings':
         return MaterialPageRoute(builder: (_) => const EarningsScreen());
+
+      case '/payout-settings':
+        return MaterialPageRoute(builder: (_) => const PayoutSettingsScreen());
 
       case '/artist/regular-clash/challenge':
         return MaterialPageRoute(builder: (_) => const ArtistChallengePage());

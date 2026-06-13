@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:lugmatic_flutter/data/models/gift_model.dart';
+import 'package:lugmatic_flutter/data/services/gift_service.dart';
 
 class GiftDiscoverPage extends StatefulWidget {
   const GiftDiscoverPage({Key? key}) : super(key: key);
@@ -16,133 +18,43 @@ class _GiftDiscoverPageState extends State<GiftDiscoverPage> {
     'All', 'Flowers', 'Premium', 'Emotions', 'Music', 'Special', 'Limited'
   ];
 
-  final List<GiftModel> _allGifts = [
-    GiftModel(
-      id: '1',
-      name: 'Virtual Rose',
-      description: 'Send a beautiful virtual rose to show your appreciation',
-      imageUrl: 'https://via.placeholder.com/300x300/FF69B4/FFFFFF?text=Rose',
-      price: 2.99,
-      category: 'Flowers',
-      isPopular: true,
-      artistId: '',
-      artistName: '',
-      createdAt: DateTime.now(),
-    ),
-    GiftModel(
-      id: '2',
-      name: 'Golden Crown',
-      description: 'Crown your favorite artist with this golden gift',
-      imageUrl: 'https://via.placeholder.com/300x300/FFD700/FFFFFF?text=Crown',
-      price: 9.99,
-      category: 'Premium',
-      isPopular: true,
-      isLimited: true,
-      artistId: '',
-      artistName: '',
-      createdAt: DateTime.now(),
-    ),
-    GiftModel(
-      id: '3',
-      name: 'Heart Emoji',
-      description: 'Simple and sweet way to show love',
-      imageUrl: 'https://via.placeholder.com/300x300/FF6B6B/FFFFFF?text=Heart',
-      price: 1.99,
-      category: 'Emotions',
-      artistId: '',
-      artistName: '',
-      createdAt: DateTime.now(),
-    ),
-    GiftModel(
-      id: '4',
-      name: 'Diamond Ring',
-      description: 'Sparkling diamond to show your devotion',
-      imageUrl: 'https://via.placeholder.com/300x300/B0E0E6/FFFFFF?text=Diamond',
-      price: 19.99,
-      category: 'Premium',
-      isLimited: true,
-      artistId: '',
-      artistName: '',
-      createdAt: DateTime.now(),
-    ),
-    GiftModel(
-      id: '5',
-      name: 'Musical Note',
-      description: 'Perfect gift for music lovers',
-      imageUrl: 'https://via.placeholder.com/300x300/9370DB/FFFFFF?text=Music',
-      price: 3.99,
-      category: 'Music',
-      artistId: '',
-      artistName: '',
-      createdAt: DateTime.now(),
-    ),
-    GiftModel(
-      id: '6',
-      name: 'Star',
-      description: 'Make them feel like a star',
-      imageUrl: 'https://via.placeholder.com/300x300/FFA500/FFFFFF?text=Star',
-      price: 4.99,
-      category: 'Premium',
-      artistId: '',
-      artistName: '',
-      createdAt: DateTime.now(),
-    ),
-    GiftModel(
-      id: '7',
-      name: 'Rainbow',
-      description: 'Colorful rainbow to brighten their day',
-      imageUrl: 'https://via.placeholder.com/300x300/FF69B4/FFFFFF?text=Rainbow',
-      price: 5.99,
-      category: 'Special',
-      artistId: '',
-      artistName: '',
-      createdAt: DateTime.now(),
-    ),
-    GiftModel(
-      id: '8',
-      name: 'Trophy',
-      description: 'Celebrate their achievements',
-      imageUrl: 'https://via.placeholder.com/300x300/FFD700/FFFFFF?text=Trophy',
-      price: 12.99,
-      category: 'Premium',
-      isLimited: true,
-      artistId: '',
-      artistName: '',
-      createdAt: DateTime.now(),
-    ),
-    GiftModel(
-      id: '9',
-      name: 'Smile',
-      description: 'Spread joy with a bright smile',
-      imageUrl: 'https://via.placeholder.com/300x300/FFD700/FFFFFF?text=Smile',
-      price: 0.99,
-      category: 'Emotions',
-      artistId: '',
-      artistName: '',
-      createdAt: DateTime.now(),
-    ),
-  ];
+  List<GiftModel> _allGifts = [];
+  bool _isLoading = true;
+  String? _error;
+  num _coinBalance = 0;
 
-  final List<Map<String, dynamic>> _topGifters = [
-    {
-      'name': 'MusicLover123',
-      'totalSpent': 250.0,
-      'giftsSent': 45,
-      'avatar': 'https://via.placeholder.com/300x300/10B981/FFFFFF?text=ML',
-    },
-    {
-      'name': 'SuperFan2024',
-      'totalSpent': 180.0,
-      'giftsSent': 32,
-      'avatar': 'https://via.placeholder.com/300x300/8B5CF6/FFFFFF?text=SF',
-    },
-    {
-      'name': 'ArtistSupporter',
-      'totalSpent': 150.0,
-      'giftsSent': 28,
-      'avatar': 'https://via.placeholder.com/300x300/F59E0B/FFFFFF?text=AS',
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+    try {
+      final giftService = context.read<GiftService>();
+      final results = await Future.wait([
+        giftService.getGifts(),
+        giftService.getCoinBalance(),
+      ]);
+      if (!mounted) return;
+      setState(() {
+        _allGifts = results[0] as List<GiftModel>;
+        final balanceData = results[1] as Map<String, dynamic>;
+        _coinBalance = balanceData['balance'] ?? balanceData['coins'] ?? 0;
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _isLoading = false;
+      });
+    }
+  }
 
   List<GiftModel> get _filteredGifts {
     if (_selectedCategory == 'All') {
@@ -161,34 +73,66 @@ class _GiftDiscoverPageState extends State<GiftDiscoverPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF111827),
-      body: CustomScrollView(
-        slivers: [
-          _buildAppBar(),
-          SliverToBoxAdapter(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 20),
-                _buildSearchBar(),
-                const SizedBox(height: 24),
-                _buildCategoriesFilter(),
-                const SizedBox(height: 24),
-                _buildSectionHeader('Popular Gifts'),
-                const SizedBox(height: 16),
-                _buildPopularGifts(),
-                const SizedBox(height: 32),
-                _buildSectionHeader('All Gifts'),
-                const SizedBox(height: 16),
-                _buildGiftsGrid(),
-                const SizedBox(height: 32),
-                _buildSectionHeader('Top Gifters'),
-                const SizedBox(height: 16),
-                _buildTopGifters(),
-                const SizedBox(height: 100),
-              ],
+      body: RefreshIndicator(
+        onRefresh: _loadData,
+        child: CustomScrollView(
+          slivers: [
+            _buildAppBar(),
+            SliverToBoxAdapter(
+              child: _isLoading
+                  ? const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 80),
+                      child: Center(
+                          child: CircularProgressIndicator(
+                              color: Color(0xFF8B5CF6))),
+                    )
+                  : _error != null
+                      ? Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 80, horizontal: 24),
+                          child: Column(
+                            children: [
+                              Text(
+                                _error!,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    color: Colors.white.withOpacity(0.7)),
+                              ),
+                              const SizedBox(height: 16),
+                              ElevatedButton(
+                                onPressed: _loadData,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF8B5CF6),
+                                  foregroundColor: Colors.white,
+                                ),
+                                child: const Text('Retry'),
+                              ),
+                            ],
+                          ),
+                        )
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 20),
+                            _buildSearchBar(),
+                            const SizedBox(height: 24),
+                            _buildCategoriesFilter(),
+                            const SizedBox(height: 24),
+                            if (_allGifts.any((g) => g.isPopular)) ...[
+                              _buildSectionHeader('Popular Gifts'),
+                              const SizedBox(height: 16),
+                              _buildPopularGifts(),
+                              const SizedBox(height: 32),
+                            ],
+                            _buildSectionHeader('All Gifts'),
+                            const SizedBox(height: 16),
+                            _buildGiftsGrid(),
+                            const SizedBox(height: 100),
+                          ],
+                        ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -472,82 +416,7 @@ class _GiftDiscoverPageState extends State<GiftDiscoverPage> {
     );
   }
 
-  Widget _buildTopGifters() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        children: _topGifters.map((gifter) => _buildGifterCard(gifter)).toList(),
-      ),
-    );
-  }
 
-  Widget _buildGifterCard(Map<String, dynamic> gifter) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
-      ),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 25,
-            backgroundImage: NetworkImage(gifter['avatar']),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  gifter['name'],
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${gifter['giftsSent']} gifts sent',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.7),
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '\$${gifter['totalSpent'].toStringAsFixed(0)} total spent',
-                  style: const TextStyle(
-                    color: Color(0xFFFFD700),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFFD700).withOpacity(0.2),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: const Text(
-              'VIP',
-              style: TextStyle(
-                color: Color(0xFFFFD700),
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   void _showGiftDetails(GiftModel gift) {
     showDialog(
@@ -638,27 +507,23 @@ class _GiftDiscoverPageState extends State<GiftDiscoverPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text(
-              'Current Balance',
+              'Current Coin Balance',
               style: TextStyle(color: Colors.white70),
             ),
             const SizedBox(height: 8),
-            const Text(
-              '\$25.50',
-              style: TextStyle(
+            Text(
+              '$_coinBalance Coins',
+              style: const TextStyle(
                 color: Color(0xFFFFD700),
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: () => print('Add funds'),
-              icon: const Icon(Icons.add),
-              label: const Text('Add Funds'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFFD700),
-                foregroundColor: Colors.black,
-              ),
+            const Text(
+              'To purchase more coins, please visit our website.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white54, fontSize: 12),
             ),
           ],
         ),

@@ -52,9 +52,11 @@ class UploadService {
 
   Future<List<dynamic>> getGenres() async {
     try {
-      final response = await _apiClient.dio.get('/genres');
-      final data = response.data;
-      return (data['data'] ?? data) as List<dynamic>;
+      final response = await _apiClient.dio.get('/genre/list');
+      final body = response.data;
+      final rawData = body['data'];
+      final items = rawData is List ? rawData : rawData?['genres'] ?? body['genres'] ?? [];
+      return items as List<dynamic>;
     } catch (e) {
       rethrow;
     }

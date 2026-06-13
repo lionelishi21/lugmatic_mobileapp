@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:lugmatic_flutter/data/models/podcast_model.dart';
 import 'package:lugmatic_flutter/data/models/music_model.dart';
 import 'package:lugmatic_flutter/data/providers/audio_provider.dart';
+import 'package:lugmatic_flutter/data/services/podcast_service.dart';
+import 'package:lugmatic_flutter/core/network/api_exception.dart';
 import 'package:lugmatic_flutter/ui/widgets/player_screen.dart';
 import 'package:provider/provider.dart';
 import '../../../../shared/widgets/comment_section_widget.dart';
@@ -14,141 +16,121 @@ class PodcastStreamPage extends StatefulWidget {
 }
 
 class _PodcastStreamPageState extends State<PodcastStreamPage> {
-  final List<PodcastModel> _livePodcasts = [
-    PodcastModel(
-      id: '1',
-      title: 'Tech Talk Live',
-      description: 'Live discussion about the latest in technology',
-      host: 'Sarah Johnson',
-      imageUrl: 'https://via.placeholder.com/300x300/10B981/FFFFFF?text=Tech+Live',
-      audioUrl: 'https://example.com/tech-live.mp3',
-      duration: const Duration(minutes: 90),
-      category: 'Technology',
-      publishDate: DateTime.now(),
-      episodeNumber: 42,
-      totalEpisodes: 100,
-      seriesId: 'tech_talk',
-      seriesTitle: 'Tech Talk Live',
-      tags: ['technology', 'live', 'discussion'],
-    ),
-    PodcastModel(
-      id: '2',
-      title: 'Mindfulness Monday',
-      description: 'Live meditation and wellness session',
-      host: 'Dr. Emily Chen',
-      imageUrl: 'https://via.placeholder.com/300x300/8B5CF6/FFFFFF?text=Mind+Live',
-      audioUrl: 'https://example.com/mindfulness-live.mp3',
-      duration: const Duration(minutes: 60),
-      category: 'Health & Wellness',
-      publishDate: DateTime.now(),
-      episodeNumber: 28,
-      totalEpisodes: 50,
-      seriesId: 'mindfulness_monday',
-      seriesTitle: 'Mindfulness Monday',
-      tags: ['wellness', 'meditation', 'live'],
-    ),
-    PodcastModel(
-      id: '3',
-      title: 'Business Insights Live',
-      description: 'Real-time business news and analysis',
-      host: 'Michael Rodriguez',
-      imageUrl: 'https://via.placeholder.com/300x300/F59E0B/FFFFFF?text=Biz+Live',
-      audioUrl: 'https://example.com/business-live.mp3',
-      duration: const Duration(minutes: 75),
-      category: 'Business',
-      publishDate: DateTime.now(),
-      episodeNumber: 156,
-      totalEpisodes: 200,
-      seriesId: 'business_insights',
-      seriesTitle: 'Business Insights Live',
-      tags: ['business', 'finance', 'live'],
-    ),
-  ];
+  bool _isLoading = true;
+  String? _error;
+  List<PodcastModel> _trendingPodcasts = [];
+  List<PodcastModel> _allPodcasts = [];
 
-  final List<PodcastModel> _upcomingPodcasts = [
-    PodcastModel(
-      id: '4',
-      title: 'Science Weekly',
-      description: 'Upcoming episode about space exploration',
-      host: 'Dr. Alex Thompson',
-      imageUrl: 'https://via.placeholder.com/300x300/06B6D4/FFFFFF?text=Science',
-      audioUrl: '',
-      duration: const Duration(minutes: 45),
-      category: 'Science',
-      publishDate: DateTime.now().add(const Duration(hours: 2)),
-      episodeNumber: 89,
-      totalEpisodes: 120,
-      seriesId: 'science_weekly',
-      seriesTitle: 'Science Weekly',
-      tags: ['science', 'space', 'exploration'],
-    ),
-    PodcastModel(
-      id: '5',
-      title: 'Art & Culture',
-      description: 'Discussion about contemporary art movements',
-      host: 'Lisa Park',
-      imageUrl: 'https://via.placeholder.com/300x300/EC4899/FFFFFF?text=Art',
-      audioUrl: '',
-      duration: const Duration(minutes: 50),
-      category: 'Arts',
-      publishDate: DateTime.now().add(const Duration(hours: 4)),
-      episodeNumber: 67,
-      totalEpisodes: 80,
-      seriesId: 'art_culture',
-      seriesTitle: 'Art & Culture',
-      tags: ['art', 'culture', 'contemporary'],
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadPodcasts();
+  }
+
+  Future<void> _loadPodcasts() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+    try {
+      final podcastService = context.read<PodcastService>();
+      final results = await Future.wait([
+        podcastService.getTrendingPodcasts(),
+        podcastService.getPodcasts(),
+      ]);
+      if (!mounted) return;
+      setState(() {
+        _trendingPodcasts = results[0];
+        _allPodcasts = results[1];
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e is ApiException ? e.message : 'Failed to load podcasts';
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF111827),
-      body: CustomScrollView(
-        slivers: [
-          _buildAppBar(),
-          SliverToBoxAdapter(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 20),
-                _buildLiveIndicator(),
-                const SizedBox(height: 24),
-                _buildCurrentlyLive(),
-                const SizedBox(height: 32),
-                _buildSectionHeader('Live Now'),
-                const SizedBox(height: 16),
-                _buildLivePodcasts(),
-                const SizedBox(height: 32),
-                _buildSectionHeader('Upcoming Shows'),
-                const SizedBox(height: 16),
-                _buildUpcomingPodcasts(),
-                const SizedBox(height: 32),
-                _buildSectionHeader('Popular Series'),
-                const SizedBox(height: 16),
-                _buildPopularSeries(),
-                const SizedBox(height: 48),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: Text(
-                    'Recent Podcast Activity',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                const CommentSectionWidget(
-                  contentType: 'podcast',
-                  contentId: 'general_podcast_hub',
-                ),
-                const SizedBox(height: 100),
-              ],
-            ),
-          ),
-        ],
+      body: RefreshIndicator(
+        onRefresh: _loadPodcasts,
+        child: CustomScrollView(
+          slivers: [
+            _buildAppBar(),
+            SliverToBoxAdapter(child: _buildBody()),
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _buildBody() {
+    if (_isLoading) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 80),
+        child: Center(child: CircularProgressIndicator(color: Color(0xFF8B5CF6))),
+      );
+    }
+
+    if (_error != null) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 80, horizontal: 24),
+        child: Column(
+          children: [
+            Text(
+              _error!,
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white.withOpacity(0.7)),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _loadPodcasts,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF8B5CF6),
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_trendingPodcasts.isEmpty && _allPodcasts.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 80),
+        child: Center(
+          child: Text(
+            'No podcasts available yet',
+            style: TextStyle(color: Colors.white.withOpacity(0.6)),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 20),
+        if (_trendingPodcasts.isNotEmpty) ...[
+          _buildSectionHeader('Trending'),
+          const SizedBox(height: 16),
+          _buildPodcastRow(_trendingPodcasts),
+          const SizedBox(height: 32),
+        ],
+        if (_allPodcasts.isNotEmpty) ...[
+          _buildSectionHeader('All Podcasts'),
+          const SizedBox(height: 16),
+          _buildPodcastRow(_allPodcasts),
+          const SizedBox(height: 32),
+        ],
+        const SizedBox(height: 100),
+      ],
     );
   }
 
@@ -163,162 +145,12 @@ class _PodcastStreamPageState extends State<PodcastStreamPage> {
         onPressed: () => Navigator.pop(context),
       ),
       title: const Text(
-        'Live Podcasts',
+        'Podcasts',
         style: TextStyle(
           color: Colors.white,
           fontSize: 20,
           fontWeight: FontWeight.bold,
         ),
-      ),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.search, color: Colors.white),
-          onPressed: () => print('Search podcasts'),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildLiveIndicator() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.green.withOpacity(0.2),
-            Colors.green.withOpacity(0.1),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.green.withOpacity(0.3)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 12,
-            height: 12,
-            decoration: const BoxDecoration(
-              color: Colors.green,
-              shape: BoxShape.circle,
-            ),
-          ),
-          const SizedBox(width: 12),
-          const Text(
-            '3 podcasts live now',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const Spacer(),
-          const Icon(Icons.mic, color: Colors.green, size: 20),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCurrentlyLive() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            const Color(0xFF8B5CF6).withOpacity(0.2),
-            const Color(0xFF8B5CF6).withOpacity(0.1),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF8B5CF6).withOpacity(0.3)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  image: const DecorationImage(
-                    image: NetworkImage('https://via.placeholder.com/300x300/8B5CF6/FFFFFF?text=Live'),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Currently Live',
-                      style: TextStyle(
-                        color: Color(0xFF8B5CF6),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    const Text(
-                      'Tech Talk Live - Episode 42',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Technology • 850 listening',
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.7),
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.green,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Text(
-                  'LIVE',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: () => _openPodcastPlayer(_livePodcasts[0]),
-              icon: const Icon(Icons.play_arrow, size: 20),
-              label: const Text('Join Live Podcast'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF8B5CF6),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -337,111 +169,58 @@ class _PodcastStreamPageState extends State<PodcastStreamPage> {
     );
   }
 
-  Widget _buildLivePodcasts() {
+  Widget _buildPodcastRow(List<PodcastModel> podcasts) {
     return SizedBox(
       height: 220,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: _livePodcasts.length,
+        itemCount: podcasts.length,
         itemBuilder: (context, index) {
-          final podcast = _livePodcasts[index];
+          final podcast = podcasts[index];
           return Container(
             width: 180,
             margin: const EdgeInsets.only(right: 12),
-            child: _buildPodcastCard(podcast, true),
+            child: _buildPodcastCard(podcast),
           );
         },
       ),
     );
   }
 
-  Widget _buildUpcomingPodcasts() {
-    return SizedBox(
-      height: 220,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: _upcomingPodcasts.length,
-        itemBuilder: (context, index) {
-          final podcast = _upcomingPodcasts[index];
-          return Container(
-            width: 180,
-            margin: const EdgeInsets.only(right: 12),
-            child: _buildPodcastCard(podcast, false),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildPopularSeries() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        children: [
-          _buildSeriesItem('Tech Talk Live', 'Technology', 100, 'https://via.placeholder.com/300x300/10B981/FFFFFF?text=Tech'),
-          const SizedBox(height: 12),
-          _buildSeriesItem('Mindfulness Monday', 'Health & Wellness', 50, 'https://via.placeholder.com/300x300/8B5CF6/FFFFFF?text=Mind'),
-          const SizedBox(height: 12),
-          _buildSeriesItem('Business Insights', 'Business', 200, 'https://via.placeholder.com/300x300/F59E0B/FFFFFF?text=Biz'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPodcastCard(PodcastModel podcast, bool isLive) {
+  Widget _buildPodcastCard(PodcastModel podcast) {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         color: Colors.white.withOpacity(0.05),
-        border: Border.all(
-          color: isLive ? Colors.green.withOpacity(0.3) : Colors.white.withOpacity(0.1),
-        ),
+        border: Border.all(color: Colors.white.withOpacity(0.1)),
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => isLive ? _openPodcastPlayer(podcast) : null,
+          onTap: () => _openPodcastPlayer(podcast),
           borderRadius: BorderRadius.circular(16),
           child: Padding(
             padding: const EdgeInsets.all(12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Stack(
-                  children: [
-                    Container(
-                      height: 100,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        image: DecorationImage(
-                          image: NetworkImage(podcast.imageUrl),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                    if (isLive)
-                      Positioned(
-                        top: 8,
-                        right: 8,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.green,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Text(
-                            'LIVE',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
+                Container(
+                  height: 100,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    color: Colors.white.withOpacity(0.08),
+                    image: podcast.imageUrl.isNotEmpty
+                        ? DecorationImage(
+                            image: NetworkImage(podcast.imageUrl),
+                            fit: BoxFit.cover,
+                          )
+                        : null,
+                  ),
+                  child: podcast.imageUrl.isEmpty
+                      ? Icon(Icons.podcasts, color: Colors.white.withOpacity(0.4), size: 32)
+                      : null,
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -476,13 +255,13 @@ class _PodcastStreamPageState extends State<PodcastStreamPage> {
                 Row(
                   children: [
                     Icon(
-                      Icons.people,
+                      Icons.play_circle_outline,
                       color: Colors.white.withOpacity(0.5),
                       size: 12,
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      '${_formatNumber(podcast.playCount)} listening',
+                      '${_formatNumber(podcast.playCount)} plays',
                       style: TextStyle(
                         color: Colors.white.withOpacity(0.5),
                         fontSize: 10,
@@ -498,70 +277,14 @@ class _PodcastStreamPageState extends State<PodcastStreamPage> {
     );
   }
 
-  Widget _buildSeriesItem(String title, String category, int episodes, String imageUrl) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              image: DecorationImage(
-                image: NetworkImage(imageUrl),
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  category,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.7),
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '$episodes episodes',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.5),
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          IconButton(
-            onPressed: () => print('Subscribe to $title'),
-            icon: const Icon(Icons.add_circle_outline, color: Colors.white),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _openPodcastPlayer(PodcastModel podcast) {
-    // Convert podcast to music model for playback
+    if (podcast.audioUrl.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('This podcast has no playable episode yet')),
+      );
+      return;
+    }
+
     final musicModel = MusicModel(
       id: podcast.id,
       title: podcast.title,
@@ -573,7 +296,7 @@ class _PodcastStreamPageState extends State<PodcastStreamPage> {
       genre: podcast.category,
       releaseDate: podcast.publishDate,
     );
-    
+
     context.read<AudioProvider>().playMusic(musicModel);
     showModalBottomSheet(
       context: context,

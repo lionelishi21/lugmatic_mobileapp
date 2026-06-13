@@ -37,6 +37,19 @@ class _MixerPageState extends State<MixerPage> with SingleTickerProviderStateMix
   Duration _position = Duration.zero;
   Duration _duration = Duration.zero;
 
+  // FX and Tempo state
+  String _selectedTempo = 'medium';
+  double _bassBoost = 0.0;
+  double _echoAmount = 0.0;
+  double _crossfadeSpeed = 2.0;
+
+  static const Map<String, double> _tempoSpeeds = {
+    'slow': 0.85,
+    'medium': 1.0,
+    'fast': 1.1,
+    'turbo': 1.2,
+  };
+
   // Saved mixes
   List<MixModel> _savedMixes = [];
   bool _showSavedMixes = false;
@@ -94,10 +107,10 @@ class _MixerPageState extends State<MixerPage> with SingleTickerProviderStateMix
 
   Future<void> _generateMix() async {
     setState(() { _isGenerating = true; _generateError = null; _currentMix = null; _mixSaved = false; });
+    final service = context.read<MixerService>();
     await _player.stop();
 
     try {
-      final service = context.read<MixerService>();
       final mix = await service.generateMix(
         mood: _selectedMood,
         genre: _selectedGenre,
@@ -166,6 +179,7 @@ class _MixerPageState extends State<MixerPage> with SingleTickerProviderStateMix
       setState(() => _isPlayingTransition = true);
       try {
         await _player.setAudioSource(AudioSource.uri(Uri.parse(transition.audioUrl!)));
+        await _player.setSpeed(_tempoSpeeds[_selectedTempo] ?? 1.0);
         await _player.play();
         // Wait for transition to finish
         await _player.playerStateStream.firstWhere(
@@ -178,9 +192,29 @@ class _MixerPageState extends State<MixerPage> with SingleTickerProviderStateMix
     if (!mounted) return;
     try {
       await _player.setAudioSource(AudioSource.uri(Uri.parse(_resolveUrl(song.audioFile))));
+      await _player.setSpeed(_tempoSpeeds[_selectedTempo] ?? 1.0);
       await _player.play();
     } catch (e) {
       debugPrint('Error playing song: $e');
+    }
+  }
+
+  void _setTempo(String tempo) {
+    if (_selectedTempo != tempo) {
+      setState(() {
+        _selectedTempo = tempo;
+      });
+      _player.setSpeed(_tempoSpeeds[tempo] ?? 1.0);
+    }
+  }
+
+  void _updatePulseDuration() {
+    final baseDurationMs = 900;
+    final speedFactor = 1.0 + (_bassBoost * 1.5); // speeds up visualizer pulse
+    final newDuration = Duration(milliseconds: (baseDurationMs / speedFactor).round());
+    _pulseController.duration = newDuration;
+    if (_pulseController.isAnimating) {
+      _pulseController.repeat(reverse: true);
     }
   }
 
@@ -251,7 +285,11 @@ class _MixerPageState extends State<MixerPage> with SingleTickerProviderStateMix
                   if (_currentMix != null) ...[
                     const SizedBox(height: 24),
                     _buildMixHeader(),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 16),
+                    _buildTempoSection(),
+                    const SizedBox(height: 20),
+                    _buildEffectsSection(),
+                    const SizedBox(height: 24),
                     _buildMixQueue(),
                   ],
                   if (_showSavedMixes) ...[
@@ -266,6 +304,215 @@ class _MixerPageState extends State<MixerPage> with SingleTickerProviderStateMix
         ],
       ),
       bottomNavigationBar: _currentMix != null ? _buildBottomControls() : null,
+    );
+  }
+
+  Widget _buildTempoSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'TEMPO CONTROL',
+          style: TextStyle(
+            color: Colors.white70,
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.2,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: _tempoSpeeds.keys.map((tempo) {
+            final isSel = _selectedTempo == tempo;
+            final label = tempo.toUpperCase();
+            final speed = _tempoSpeeds[tempo];
+            return Expanded(
+              child: GestureDetector(
+                onTap: () => _setTempo(tempo),
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  decoration: BoxDecoration(
+                    color: isSel ? _green.withOpacity(0.2) : Colors.white.withOpacity(0.04),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: isSel ? _green : Colors.white.withOpacity(0.08),
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        label,
+                        style: TextStyle(
+                          color: isSel ? _green : Colors.white70,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${speed}x',
+                        style: TextStyle(
+                          color: isSel ? _green.withOpacity(0.8) : Colors.white38,
+                          fontSize: 9,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEffectsSection() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.03),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.06)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(Icons.tune, color: _green, size: 16),
+              SizedBox(width: 8),
+              Text(
+                'SOUNDCLASH FX HUD',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.2,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          
+          // Bass Boost Slider
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Bass Boost', style: TextStyle(color: Colors.white70, fontSize: 13)),
+                  Text(
+                    '${(_bassBoost * 100).round()}%',
+                    style: const TextStyle(color: _green, fontWeight: FontWeight.bold, fontSize: 13),
+                  ),
+                ],
+              ),
+              SliderTheme(
+                data: SliderTheme.of(context).copyWith(
+                  trackHeight: 4,
+                  thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+                  overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
+                  activeTrackColor: _green,
+                  inactiveTrackColor: Colors.white10,
+                  thumbColor: _green,
+                ),
+                child: Slider(
+                  value: _bassBoost,
+                  min: 0.0,
+                  max: 1.0,
+                  onChanged: (val) {
+                    setState(() {
+                      _bassBoost = val;
+                      _updatePulseDuration();
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          // Echo Slider
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Echo Amount', style: TextStyle(color: Colors.white70, fontSize: 13)),
+                  Text(
+                    '${(_echoAmount * 100).round()}%',
+                    style: const TextStyle(color: _purple, fontWeight: FontWeight.bold, fontSize: 13),
+                  ),
+                ],
+              ),
+              SliderTheme(
+                data: SliderTheme.of(context).copyWith(
+                  trackHeight: 4,
+                  thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+                  overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
+                  activeTrackColor: _purple,
+                  inactiveTrackColor: Colors.white10,
+                  thumbColor: _purple,
+                ),
+                child: Slider(
+                  value: _echoAmount,
+                  min: 0.0,
+                  max: 1.0,
+                  onChanged: (val) {
+                    setState(() {
+                      _echoAmount = val;
+                      _updatePulseDuration();
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          // Crossfade Slider
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Crossfade Speed', style: TextStyle(color: Colors.white70, fontSize: 13)),
+                  Text(
+                    '${_crossfadeSpeed.toStringAsFixed(1)}s',
+                    style: const TextStyle(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 13),
+                  ),
+                ],
+              ),
+              SliderTheme(
+                data: SliderTheme.of(context).copyWith(
+                  trackHeight: 4,
+                  thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+                  overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
+                  activeTrackColor: Colors.white30,
+                  inactiveTrackColor: Colors.white10,
+                  thumbColor: Colors.white70,
+                ),
+                child: Slider(
+                  value: _crossfadeSpeed,
+                  min: 1.0,
+                  max: 5.0,
+                  onChanged: (val) {
+                    setState(() {
+                      _crossfadeSpeed = val;
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -310,6 +557,7 @@ class _MixerPageState extends State<MixerPage> with SingleTickerProviderStateMix
       ),
       child: Stack(
         children: [
+          // Beat-reactive background glow scaled by _bassBoost and _echoAmount
           Center(
             child: AnimatedBuilder(
               animation: _pulseController,
@@ -318,7 +566,13 @@ class _MixerPageState extends State<MixerPage> with SingleTickerProviderStateMix
                 height: 120 + 30 * _pulseController.value,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  boxShadow: [BoxShadow(color: _green.withOpacity(0.25 * _pulseController.value), blurRadius: 40, spreadRadius: 20)],
+                  boxShadow: [
+                    BoxShadow(
+                      color: _green.withOpacity((0.25 + _bassBoost * 0.25) * _pulseController.value),
+                      blurRadius: 40 + _echoAmount * 20,
+                      spreadRadius: 20 + _bassBoost * 15,
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -339,12 +593,65 @@ class _MixerPageState extends State<MixerPage> with SingleTickerProviderStateMix
               ],
             ),
           ),
+          // LIVE Badge Overlay
+          Positioned(
+            top: 16,
+            left: 16,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.red.withOpacity(0.5)),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('🔴', style: TextStyle(fontSize: 8)),
+                  SizedBox(width: 4),
+                  Text(
+                    'LIVE',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // Audio Status Overlay
+          Positioned(
+            top: 16,
+            right: 16,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.white.withOpacity(0.1)),
+              ),
+              child: Text(
+                _isPlaying ? 'STABLE FEED' : 'RADIO STANDBY',
+                style: TextStyle(
+                  color: _isPlaying ? _green : Colors.white60,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ),
+          ),
+          // Visualizer bars with height scaled by _bassBoost and _echoAmount
           Positioned(
             bottom: 16, left: 16, right: 16,
             child: SizedBox(
-              height: 32,
+              height: 48, // Increased slightly to give space for boosted heights
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: List.generate(24, (i) {
                   return AnimatedBuilder(
                     animation: _pulseController,
@@ -352,9 +659,13 @@ class _MixerPageState extends State<MixerPage> with SingleTickerProviderStateMix
                       final h = (_isPlaying || _isGenerating)
                           ? 6 + 24 * math.Random(i + (_isGenerating ? DateTime.now().millisecond : 0)).nextDouble() * _pulseController.value
                           : 4.0;
+                      final bassMultiplier = 1.0 + (_bassBoost * 1.5);
+                      final echoMultiplier = 1.0 + (_echoAmount * 0.8);
+                      final scaledH = h * bassMultiplier * echoMultiplier;
+                      final finalH = math.min(scaledH, 48.0);
                       return Container(
                         width: 3,
-                        height: h,
+                        height: finalH,
                         decoration: BoxDecoration(color: _green.withOpacity(0.7), borderRadius: BorderRadius.circular(2)),
                       );
                     },

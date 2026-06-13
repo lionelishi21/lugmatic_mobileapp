@@ -48,6 +48,7 @@ import 'package:lugmatic_flutter/core/network/token_storage.dart';
 import 'package:lugmatic_flutter/data/models/genre_model.dart';
 import 'package:lugmatic_flutter/features/music/presentation/pages/genre_music_page.dart';
 import 'package:lugmatic_flutter/shared/widgets/role_switcher_button.dart';
+import 'package:lugmatic_flutter/shared/widgets/brand_gradient_fallback.dart';
 import 'package:lugmatic_flutter/features/home/presentation/widgets/billboard_list_item.dart';
 import 'package:lugmatic_flutter/features/live_stream/presentation/pages/recorded_streams_page.dart';
 import 'package:lugmatic_flutter/data/providers/message_provider.dart';
@@ -1463,10 +1464,15 @@ class _HomePageState extends State<HomePage> {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(color: Colors.white, width: 2),
-                        image: DecorationImage(
-                          image: NetworkImage(artist.imageUrl),
-                          fit: BoxFit.cover,
-                        ),
+                      ),
+                      child: ClipOval(
+                        child: artist.imageUrl.isNotEmpty
+                            ? Image.network(
+                                artist.imageUrl,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => const BrandGradientFallback(iconSize: 24, borderRadius: BorderRadius.zero),
+                              )
+                            : const BrandGradientFallback(iconSize: 24, borderRadius: BorderRadius.zero),
                       ),
                     ),
                     const SizedBox(height: 8),

@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../data/models/onboarding_item.dart';
@@ -23,7 +24,7 @@ class OnboardingPage extends StatelessWidget {
               image: AssetImage(item.backgroundImage),
               fit: BoxFit.cover,
               colorFilter: ColorFilter.mode(
-                Colors.black.withOpacity(0.6),
+                Colors.black.withOpacity(0.3),
                 BlendMode.darken,
               ),
             ),
@@ -32,32 +33,61 @@ class OnboardingPage extends StatelessWidget {
         
         // Gradient overlay
         Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: AppColors.backgroundGradient,
-              stops: AppColors.gradientStops,
+              colors: [
+                Colors.transparent,
+                AppColors.background.withOpacity(0.6),
+                AppColors.background,
+              ],
+              stops: const [0.0, 0.6, 1.0],
             ),
           ),
         ),
         
-        // Content
+        // Content Card
         FadeTransition(
           opacity: animation,
-          child: Center(
+          child: Align(
+            alignment: Alignment.bottomCenter,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _buildIcon(),
-                  const SizedBox(height: 32),
-                  _buildTitle(),
-                  const SizedBox(height: 16),
-                  _buildDescription(),
-                  const SizedBox(height: 120),
-                ],
+              padding: const EdgeInsets.only(left: 24, right: 24, bottom: 200),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(32),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(32),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(32),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.1),
+                        width: 1,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 30,
+                          spreadRadius: -5,
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _buildIcon(),
+                        const SizedBox(height: 24),
+                        _buildTitle(),
+                        const SizedBox(height: 16),
+                        _buildDescription(),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
@@ -68,32 +98,32 @@ class OnboardingPage extends StatelessWidget {
 
   Widget _buildIcon() {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppColors.primaryGreen.withOpacity(0.3),
-            AppColors.primaryGreen.withOpacity(0.1),
+            AppColors.primaryGreen.withOpacity(0.2),
+            AppColors.primaryGreen.withOpacity(0.05),
           ],
         ),
-        borderRadius: BorderRadius.circular(32),
+        borderRadius: BorderRadius.circular(24),
         border: Border.all(
           color: AppColors.primaryGreen.withOpacity(0.3),
-          width: 2,
+          width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primaryGreen.withOpacity(0.2),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
+            color: AppColors.primaryGreen.withOpacity(0.15),
+            blurRadius: 20,
+            spreadRadius: 2,
           ),
         ],
       ),
       child: Icon(
         item.icon,
-        size: 96,
+        size: 56,
         color: AppColors.primaryGreen,
       ),
     );
@@ -102,19 +132,21 @@ class OnboardingPage extends StatelessWidget {
   Widget _buildTitle() {
     return ShaderMask(
       shaderCallback: (bounds) => LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
         colors: [
-          AppColors.white,
-          AppColors.white.withOpacity(0.9),
+          Colors.white,
+          Colors.white.withOpacity(0.7),
         ],
       ).createShader(bounds),
       child: Text(
-        item.title,
+        item.title.toUpperCase(),
         style: const TextStyle(
-          color: AppColors.white,
-          fontSize: 42,
-          fontWeight: FontWeight.w800,
-          height: 1.2,
-          letterSpacing: -1,
+          fontFamily: 'Bebas Neue',
+          color: Colors.white,
+          fontSize: 48,
+          height: 1.0,
+          letterSpacing: 1.5,
         ),
         textAlign: TextAlign.center,
       ),
@@ -122,19 +154,16 @@ class OnboardingPage extends StatelessWidget {
   }
 
   Widget _buildDescription() {
-    return Container(
-      constraints: const BoxConstraints(maxWidth: 340),
-      child: Text(
-        item.description,
-        style: TextStyle(
-          color: AppColors.greyLight.withOpacity(0.9),
-          fontSize: 17,
-          height: 1.5,
-          fontWeight: FontWeight.w400,
-          letterSpacing: 0.2,
-        ),
-        textAlign: TextAlign.center,
+    return Text(
+      item.description,
+      style: TextStyle(
+        color: Colors.white.withOpacity(0.7),
+        fontSize: 16,
+        height: 1.5,
+        fontWeight: FontWeight.w400,
+        letterSpacing: 0.3,
       ),
+      textAlign: TextAlign.center,
     );
   }
 }

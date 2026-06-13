@@ -56,7 +56,7 @@ class PodcastModel {
       host: hostName,
       imageUrl: ApiConfig.resolveUrl(rawImage is String ? rawImage : ''),
       audioUrl: ApiConfig.resolveUrl(rawAudio is String ? rawAudio : ''),
-      duration: Duration(seconds: (json['duration'] ?? 0) is int ? json['duration'] : (json['duration'] as num).toInt()),
+      duration: Duration(seconds: _parseDurationSeconds(json['duration'])),
       category: json['category']?.toString() ?? json['genre']?.toString() ?? '',
       publishDate: json['publishDate'] != null
           ? DateTime.tryParse(json['publishDate'].toString()) ?? DateTime.now()
@@ -92,5 +92,13 @@ class PodcastModel {
       'seriesId': seriesId,
       'seriesTitle': seriesTitle,
     };
+  }
+
+  static int _parseDurationSeconds(dynamic value) {
+    if (value == null) return 0;
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    if (value is String) return int.tryParse(value) ?? 0;
+    return 0;
   }
 }

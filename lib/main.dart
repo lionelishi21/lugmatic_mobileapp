@@ -41,6 +41,8 @@ import 'data/services/contributor/contributor_service.dart';
 import 'data/providers/contributor_provider.dart';
 import 'data/services/artist/upload_service.dart';
 import 'data/services/support_service.dart';
+import 'data/services/podcast_service.dart';
+import 'data/services/rhythm_service.dart';
 import 'features/store/presentation/pages/store_page.dart';
 import 'features/mixer/presentation/pages/mixer_page.dart';
 import 'ui/widgets/mini_player.dart';
@@ -113,6 +115,7 @@ void main() async {
     final uploadService = UploadService(apiClient: apiClient);
     final contributorService = ContributorService(apiClient: apiClient);
     final supportService = SupportService(apiClient: apiClient);
+    final podcastService = PodcastService(apiClient: apiClient);
     
     // Initialize FCM
     final fcmService = FcmService(notificationService: notificationService);
@@ -150,6 +153,7 @@ void main() async {
           Provider<MixerService>.value(value: mixerService),
           Provider<ManagementService>.value(value: managementService),
           Provider<MessageService>.value(value: messageService),
+          Provider<PodcastService>.value(value: podcastService),
           ChangeNotifierProvider(
             create: (context) => MessageProvider(
               messageService: messageService,
@@ -179,6 +183,12 @@ void main() async {
           Provider<UploadService>.value(value: uploadService),
           Provider<ContributorService>.value(value: contributorService),
           Provider<SupportService>.value(value: supportService),
+          Provider<RhythmService>(
+            create: (context) => RhythmService(
+              baseUrl: context.read<ApiClient>().baseUrl,
+              authService: context.read<AuthService>(),
+            ),
+          ),
           ChangeNotifierProvider(
             create: (context) => ContributorProvider(
               service: contributorService,

@@ -10,12 +10,39 @@ class PodcastService {
 
   PodcastService({required ApiClient apiClient}) : _apiClient = apiClient;
 
-  /// Fetch all podcasts.
-  Future<List<PodcastModel>> getPodcasts({int page = 1, int limit = 20}) async {
+  /// Fetch all podcasts, optionally filtered by search query and/or category.
+  Future<List<PodcastModel>> getPodcasts({
+    int page = 1,
+    int limit = 20,
+    String? search,
+    String? category,
+  }) async {
     try {
       final response = await _apiClient.dio.get(
         ApiConfig.podcasts,
-        queryParameters: {'page': page, 'limit': limit},
+        queryParameters: {
+          'page': page,
+          'limit': limit,
+          if (search != null && search.isNotEmpty) 'search': search,
+          if (category != null && category.isNotEmpty) 'category': category,
+        },
+      );
+      final body = response.data;
+      final items = body['data'] ?? body['podcasts'] ?? [];
+      return (items as List)
+          .map((json) => PodcastModel.fromJson(json as Map<String, dynamic>))
+          .toList();
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// Fetch trending podcasts.
+  Future<List<PodcastModel>> getTrendingPodcasts({int limit = 10}) async {
+    try {
+      final response = await _apiClient.dio.get(
+        ApiConfig.podcastTrending,
+        queryParameters: {'limit': limit},
       );
       final body = response.data;
       final items = body['data'] ?? body['podcasts'] ?? [];

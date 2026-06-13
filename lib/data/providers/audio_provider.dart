@@ -35,6 +35,7 @@ class AudioProvider extends ChangeNotifier {
   Duration get duration => _duration;
   Duration get position => _position;
   List<MusicModel> get queue => _queue;
+  int get currentIndex => _currentIndex;
   String? get errorMessage => _errorMessage;
   RepeatMode get repeatMode => _repeatMode;
   bool get shuffle => _shuffle;

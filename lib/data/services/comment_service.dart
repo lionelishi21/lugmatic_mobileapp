@@ -12,8 +12,7 @@ class CommentService {
   Future<List<CommentModel>> getComments(String contentType, String contentId) async {
     try {
       final response = await _apiClient.dio.get(
-        ApiConfig.comments,
-        queryParameters: {'contentType': contentType, 'contentId': contentId},
+        '${ApiConfig.comments}/$contentType/$contentId',
       );
       final body = response.data;
       final items = body['data'] ?? [];
