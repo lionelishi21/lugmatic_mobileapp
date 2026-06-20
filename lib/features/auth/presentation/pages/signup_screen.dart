@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import 'dart:ui';
 import '../../../../data/providers/auth_provider.dart';
@@ -54,6 +55,38 @@ class _SignUpScreenState extends State<SignUpScreen>
     _confirmCtrl.dispose();
     _animCtrl.dispose();
     super.dispose();
+  }
+
+  Future<void> _signUpWithGoogle() async {
+    try {
+      final GoogleSignIn googleSignIn = GoogleSignIn();
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+      if (googleUser == null) return; // User canceled
+      
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final String? idToken = googleAuth.idToken;
+      
+      if (idToken != null) {
+        final auth = context.read<AuthProvider>();
+        final ok = await auth.loginWithGoogle(idToken: idToken);
+        if (!mounted) return;
+        if (ok) {
+          Navigator.pushReplacement(
+              context, MaterialPageRoute(builder: (_) => const HomePage()));
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(auth.errorMessage ?? 'Google sign-up failed'),
+            backgroundColor: AppColors.destructive,
+          ));
+        }
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Google sign-up failed: $e'),
+        backgroundColor: AppColors.destructive,
+      ));
+    }
   }
 
   Future<void> _signUp() async {
@@ -374,8 +407,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                                     text: AppStrings.googleSignIn,
                                     iconPath:
                                         'assets/images/google_icon.png',
-                                    onPressed: () =>
-                                        _showComingSoon('Google'),
+                                    onPressed: _signUpWithGoogle,
                                   ),
                                   const SizedBox(height: 10),
                                   SocialLoginButton(

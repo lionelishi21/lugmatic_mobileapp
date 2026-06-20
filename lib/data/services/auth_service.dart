@@ -38,6 +38,11 @@ class User {
       roles.contains('artist') || isArtist || role == 'artist';
   bool get hasContributorRole =>
       roles.contains('contributor') || isContributor;
+  bool get hasProviderRole =>
+      roles.contains('provider') || role == 'provider';
+  bool get hasAdminRole =>
+      roles.contains('admin') || roles.contains('super admin') ||
+      role == 'admin' || role == 'super admin';
 
   factory User.fromJson(Map<String, dynamic> json) {
     final rawRoles = json['roles'];

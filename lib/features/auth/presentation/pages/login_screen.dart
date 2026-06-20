@@ -72,11 +72,35 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   Future<void> _signInWithGoogle() async {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      content: Text('Google sign-in is temporarily disabled'),
-      backgroundColor: AppColors.secondary,
-    ));
+    try {
+      final GoogleSignIn googleSignIn = GoogleSignIn();
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+      if (googleUser == null) return; // User canceled
+      
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final String? idToken = googleAuth.idToken;
+      
+      if (idToken != null) {
+        final auth = context.read<AuthProvider>();
+        final ok = await auth.loginWithGoogle(idToken: idToken);
+        if (!mounted) return;
+        if (ok) {
+          Navigator.pushReplacement(
+              context, MaterialPageRoute(builder: (_) => const HomePage()));
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(auth.errorMessage ?? 'Google login failed'),
+            backgroundColor: AppColors.destructive,
+          ));
+        }
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Google sign-in failed: $e'),
+        backgroundColor: AppColors.destructive,
+      ));
+    }
   }
 
   @override

@@ -83,7 +83,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            if (user.role == 'admin' || user.role == 'super admin') ...[
+            if (user.role == 'admin' || user.role == 'super admin' || user.roles.contains('admin') || user.roles.contains('super admin')) ...[
                SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(

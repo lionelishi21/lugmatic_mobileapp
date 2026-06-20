@@ -32,6 +32,8 @@ class AuthProvider extends ChangeNotifier {
   bool get isLoading => _status == AuthStatus.loading;
   bool get hasArtistRole => _user?.hasArtistRole ?? false;
   bool get hasContributorRole => _user?.hasContributorRole ?? false;
+  bool get hasProviderRole => _user?.hasProviderRole ?? false;
+  bool get hasAdminRole => _user?.hasAdminRole ?? false;
 
   /// Check if user has a stored session on app start.
   Future<void> checkAuthStatus() async {

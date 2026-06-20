@@ -21,50 +21,66 @@ class RoleSwitcherButton extends StatelessWidget {
 
     final hasArtist = auth.hasArtistRole;
     final hasContributor = auth.hasContributorRole;
-    if (!hasArtist && !hasContributor) return const SizedBox.shrink();
+    final hasProvider = auth.hasProviderRole;
+    if (!hasArtist && !hasContributor && !hasProvider) return const SizedBox.shrink();
+
+    final chips = <Widget>[];
+
+    if (hasArtist) {
+      chips.add(_RoleChip(
+        label: 'Artist Mode',
+        icon: Icons.mic_rounded,
+        color: AppColors.primary,
+        onTap: () {
+          context.read<TrackProvider>().clear();
+          context.read<DashboardProvider>().clear();
+          context.read<SectionProvider>().switchTo(AppSection.artist);
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              fullscreenDialog: false,
+              builder: (_) => const ArtistShell(),
+            ),
+          );
+        },
+      ));
+    }
+
+    if (hasContributor) {
+      if (chips.isNotEmpty) chips.add(const SizedBox(width: 8));
+      chips.add(_RoleChip(
+        label: 'Contributor',
+        icon: Icons.piano_rounded,
+        color: AppColors.secondary,
+        onTap: () {
+          context.read<TrackProvider>().clear();
+          context.read<DashboardProvider>().clear();
+          context.read<SectionProvider>().switchTo(AppSection.contributor);
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              fullscreenDialog: false,
+              builder: (_) => const ContributorShell(),
+            ),
+          );
+        },
+      ));
+    }
+
+    if (hasProvider) {
+      if (chips.isNotEmpty) chips.add(const SizedBox(width: 8));
+      chips.add(_RoleChip(
+        label: 'Provider',
+        icon: Icons.business_rounded,
+        color: const Color(0xFF6366F1), // indigo
+        onTap: () {
+          // TODO: replace with ProviderShell once the provider feature is built
+          Navigator.of(context).pushNamed('/provider_dashboard');
+        },
+      ));
+    }
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (hasArtist)
-            _RoleChip(
-              label: 'Artist Mode',
-              icon: Icons.mic_rounded,
-              color: AppColors.primary,
-              onTap: () {
-                context.read<TrackProvider>().clear();
-                context.read<DashboardProvider>().clear();
-                context.read<SectionProvider>().switchTo(AppSection.artist);
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    fullscreenDialog: false,
-                    builder: (_) => const ArtistShell(),
-                  ),
-                );
-              },
-            ),
-          if (hasArtist && hasContributor) const SizedBox(width: 8),
-          if (hasContributor)
-            _RoleChip(
-              label: 'Contributor',
-              icon: Icons.piano_rounded,
-              color: AppColors.secondary,
-              onTap: () {
-                context.read<TrackProvider>().clear();
-                context.read<DashboardProvider>().clear();
-                context.read<SectionProvider>().switchTo(AppSection.contributor);
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    fullscreenDialog: false,
-                    builder: (_) => const ContributorShell(),
-                  ),
-                );
-              },
-            ),
-        ],
-      ),
+      child: Row(mainAxisSize: MainAxisSize.min, children: chips),
     );
   }
 }
