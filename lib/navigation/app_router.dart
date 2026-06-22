@@ -31,6 +31,7 @@ import '../features/artist/account/payout_settings_screen.dart';
 import '../features/regular_clash/regular_clash_detail_page.dart';
 import '../features/regular_clash/regular_clash_feed_page.dart';
 import '../features/video/presentation/pages/video_recording_page.dart';
+import '../features/provider/navigation/provider_shell.dart';
 
 class AppRouter {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
@@ -156,6 +157,9 @@ class AppRouter {
 
       case '/admin_dashboard':
         return MaterialPageRoute(builder: (_) => const AdminDashboardPage());
+
+      case '/provider_dashboard':
+        return MaterialPageRoute(builder: (_) => const ProviderShell());
 
       case '/artist_dashboard':
         return MaterialPageRoute(builder: (_) => const ArtistDashboardPage());

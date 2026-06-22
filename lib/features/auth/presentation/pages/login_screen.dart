@@ -73,13 +73,9 @@ class _LoginScreenState extends State<LoginScreen>
 
   Future<void> _signInWithGoogle() async {
     try {
-      final GoogleSignIn googleSignIn = GoogleSignIn();
-      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
-      if (googleUser == null) return; // User canceled
-      
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      final String? idToken = googleAuth.idToken;
-      
+      final googleUser = await GoogleSignIn.instance.authenticate();
+      final String? idToken = googleUser.authentication.idToken;
+
       if (idToken != null) {
         final auth = context.read<AuthProvider>();
         final ok = await auth.loginWithGoogle(idToken: idToken);
@@ -94,6 +90,8 @@ class _LoginScreenState extends State<LoginScreen>
           ));
         }
       }
+    } on GoogleSignInException {
+      return; // User cancelled
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(

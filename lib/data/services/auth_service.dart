@@ -77,6 +77,9 @@ class AuthService {
   })  : _apiClient = apiClient,
         _tokenStorage = tokenStorage;
 
+  /// Returns the stored access token (used by services that need raw bearer auth).
+  Future<String?> getToken() => _tokenStorage.getAccessToken();
+
   /// Log in with email/password. Returns the User on success.
   Future<User> login({
     required String email,

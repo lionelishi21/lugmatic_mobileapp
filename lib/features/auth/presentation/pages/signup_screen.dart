@@ -9,6 +9,7 @@ import '../../../../core/constants/app_strings.dart';
 import '../../utils/auth_validator.dart';
 import '../widgets/social_login_button.dart';
 import '../../../../ui/widgets/custom_preloader.dart';
+import '../../../../features/home/presentation/pages/home_page.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key}) : super(key: key);
@@ -59,20 +60,16 @@ class _SignUpScreenState extends State<SignUpScreen>
 
   Future<void> _signUpWithGoogle() async {
     try {
-      final GoogleSignIn googleSignIn = GoogleSignIn();
-      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
-      if (googleUser == null) return; // User canceled
-      
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      final String? idToken = googleAuth.idToken;
-      
+      final googleUser = await GoogleSignIn.instance.authenticate();
+      final String? idToken = googleUser.authentication.idToken;
+
       if (idToken != null) {
         final auth = context.read<AuthProvider>();
         final ok = await auth.loginWithGoogle(idToken: idToken);
         if (!mounted) return;
         if (ok) {
           Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (_) => const HomePage()));
+              context, MaterialPageRoute(builder: (_) => HomePage()));
         } else {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(auth.errorMessage ?? 'Google sign-up failed'),

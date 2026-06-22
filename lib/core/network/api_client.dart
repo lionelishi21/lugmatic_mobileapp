@@ -24,6 +24,8 @@ class ApiClient {
       if (kDebugMode) _LoggingInterceptor(),
     ]);
   }
+
+  String get baseUrl => ApiConfig.baseUrl;
 }
 
 /// Attaches the access token and handles 401 -> token refresh.
