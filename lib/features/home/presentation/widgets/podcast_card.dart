@@ -18,8 +18,8 @@ class PodcastCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(right: 16),
-      width: 280,
+      margin: const EdgeInsets.only(right: 12),
+      width: 160,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -27,8 +27,8 @@ class PodcastCard extends StatelessWidget {
           GestureDetector(
             onTap: onTap,
             child: Container(
-              height: 160,
-              width: 280,
+              height: 100,
+              width: 160,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
                 image: DecorationImage(
@@ -61,16 +61,16 @@ class PodcastCard extends StatelessWidget {
                   ),
                   // Play button
                   Positioned(
-                    bottom: 12,
-                    left: 12,
+                    bottom: 8,
+                    left: 8,
                     child: GestureDetector(
                       onTap: onPlay,
                       child: Container(
-                        width: 48,
-                        height: 48,
+                        width: 32,
+                        height: 32,
                         decoration: BoxDecoration(
                           color: const Color(0xFF10B981),
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.3),
@@ -82,7 +82,7 @@ class PodcastCard extends StatelessWidget {
                         child: const Icon(
                           Icons.play_arrow,
                           color: Colors.white,
-                          size: 28,
+                          size: 20,
                         ),
                       ),
                     ),
@@ -111,77 +111,44 @@ class PodcastCard extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 12),
-          // Podcast Title
+          const SizedBox(height: 8),
           Text(
             podcast.title,
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 16,
+              fontSize: 13,
               fontWeight: FontWeight.w600,
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 4),
-          // Host Name
+          const SizedBox(height: 2),
           Text(
             podcast.host,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
-              fontSize: 14,
+              color: Colors.white.withOpacity(0.6),
+              fontSize: 11,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 8),
-          // Description
-          Text(
-            podcast.description,
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.6),
-              fontSize: 12,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 8),
-          // Bottom Row
+          const SizedBox(height: 4),
           Row(
             children: [
-              // Category
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF10B981).withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
+              Expanded(
                 child: Text(
                   podcast.category,
-                  style: const TextStyle(
-                    color: Color(0xFF10B981),
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: const TextStyle(color: Color(0xFF10B981), fontSize: 10),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-              const SizedBox(width: 8),
-              // Duration
-              Text(
-                _formatDuration(podcast.duration),
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.5),
-                  fontSize: 12,
-                ),
-              ),
-              const Spacer(),
-              // Like button
               GestureDetector(
                 onTap: onLike,
                 child: Icon(
                   podcast.isLiked ? Icons.favorite : Icons.favorite_border,
-                  color: podcast.isLiked ? Colors.red : Colors.white.withOpacity(0.5),
-                  size: 20,
+                  color: podcast.isLiked ? Colors.red : Colors.white.withOpacity(0.4),
+                  size: 16,
                 ),
               ),
             ],

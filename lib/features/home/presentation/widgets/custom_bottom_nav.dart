@@ -35,7 +35,7 @@ class CustomBottomNav extends StatelessWidget {
             child: Row(
               children: [
                 _item(context, Icons.home_rounded, 'Home', 0),
-                _item(context, Icons.grid_view_rounded, 'Explore', 1),
+                _item(context, Icons.auto_awesome_rounded, 'For You', 1),
                 _item(context, Icons.sensors_rounded, 'Live', 2),
                 _item(context, Icons.play_circle_outline_rounded, 'Video', 3),
                 _item(context, Icons.library_music_rounded, 'Library', 4),

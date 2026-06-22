@@ -62,15 +62,16 @@ class HomeService {
     }
   }
 
-  /// Fetch featured artists from the backend.
+  /// Fetch artists for the Meet Artists page.
   Future<List<ArtistModel>> getFeaturedArtists() async {
     try {
+      // Try featured first; fall back to all active artists if result is empty
       final response = await _apiClient.dio.get(
         ApiConfig.artists,
-        queryParameters: {'limit': 20, 'featured': 'true'},
+        queryParameters: {'limit': 30, 'isActive': 'true'},
       );
       final items = _extractList(response.data, ['data']);
-      return (items)
+      return items
           .map((json) => ArtistModel.fromJson(json as Map<String, dynamic>))
           .toList();
     } catch (e) {

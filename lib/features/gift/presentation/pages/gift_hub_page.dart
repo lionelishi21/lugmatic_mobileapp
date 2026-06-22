@@ -82,7 +82,7 @@ class _GiftHubPageState extends State<GiftHubPage>
         controller: _tabController,
         children: const [
           GiftSendPage(),
-          StorePage(),
+          StorePage(embedded: true),
         ],
       ),
     );

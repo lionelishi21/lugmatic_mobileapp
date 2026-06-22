@@ -23,6 +23,7 @@ import 'package:lugmatic_flutter/shared/widgets/demand_artist_dialog.dart';
 import 'package:lugmatic_flutter/data/services/notification_service.dart';
 import 'package:lugmatic_flutter/features/home/presentation/pages/create_playlist_screen.dart';
 import 'package:lugmatic_flutter/features/home/presentation/pages/explore_hub_page.dart';
+import 'package:lugmatic_flutter/features/home/presentation/pages/for_you_feed_page.dart';
 import 'package:lugmatic_flutter/features/home/presentation/pages/home_page.dart';
 import 'package:lugmatic_flutter/features/home/presentation/pages/radio_page.dart';
 import 'package:lugmatic_flutter/features/home/presentation/pages/library_page.dart';
@@ -413,7 +414,7 @@ class _HomePageState extends State<HomePage> {
         index: _currentIndex,
         children: [
           _buildHomePage(),
-          const ExploreHubPage(),
+          const ForYouFeedPage(),
           const TikTokLivePage(),
           const VideosPage(),
           const LibraryPage(),
@@ -1166,7 +1167,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildPopularPodcasts() {
     return SizedBox(
-      height: 240,
+      height: 180,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: _featuredPodcasts.length,
@@ -1184,15 +1185,30 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _openPodcastPlayer(PodcastModel podcast) {
-    // Convert podcast to music model for playback
+    if (podcast.episodes.isEmpty && podcast.audioUrl.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No episodes available yet')),
+      );
+      return;
+    }
+
+    final ep = podcast.episodes.isNotEmpty ? podcast.episodes.first : null;
+    final audioUrl = ep?.audioUrl ?? podcast.audioUrl;
+    if (audioUrl.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No audio available')),
+      );
+      return;
+    }
+
     final musicModel = MusicModel(
-      id: podcast.id,
-      title: podcast.title,
+      id: ep?.id ?? podcast.id,
+      title: ep != null ? '${podcast.title} — ${ep.title}' : podcast.title,
       artist: podcast.host,
       album: podcast.seriesTitle,
       imageUrl: podcast.imageUrl,
-      audioUrl: podcast.audioUrl,
-      duration: podcast.duration,
+      audioUrl: audioUrl,
+      duration: ep?.duration ?? podcast.duration,
       genre: podcast.category,
       releaseDate: podcast.publishDate,
     );

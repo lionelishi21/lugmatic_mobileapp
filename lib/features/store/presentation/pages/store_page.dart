@@ -25,7 +25,9 @@ class CoinPackage {
 }
 
 class StorePage extends StatefulWidget {
-  const StorePage({Key? key}) : super(key: key);
+  /// Set to true when embedded inside a parent Scaffold (e.g. TabBarView).
+  final bool embedded;
+  const StorePage({Key? key, this.embedded = false}) : super(key: key);
 
   @override
   State<StorePage> createState() => _StorePageState();
@@ -110,70 +112,116 @@ class _StorePageState extends State<StorePage> {
       if (!mounted) return;
 
       if (error == null) {
-        // Success
         await _fetchBalance();
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('🪙 $amount coins added to your wallet!'),
-          backgroundColor: Colors.green,
-        ));
+        _showDialog(
+          icon: Icons.check_circle,
+          iconColor: Colors.green,
+          title: 'Purchase Complete!',
+          message: '$amount coins have been added to your wallet.',
+        );
       } else if (error.isNotEmpty) {
-        // Real error (empty string = user cancelled, show nothing)
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(error),
-          backgroundColor: Colors.redAccent,
-        ));
+        _showDialog(
+          icon: Icons.error_outline,
+          iconColor: Colors.redAccent,
+          title: 'Purchase Failed',
+          message: error,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        _showDialog(
+          icon: Icons.error_outline,
+          iconColor: Colors.redAccent,
+          title: 'Purchase Failed',
+          message: 'Something went wrong. Please try again.',
+        );
       }
     } finally {
       if (mounted) setState(() => _purchasingAmount = null);
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: CustomScrollView(
-        slivers: [
-          _buildAppBar(),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                   _buildHeader(),
-                   const SizedBox(height: 32),
-                   _buildBalanceCard(),
-                   const SizedBox(height: 32),
-                   const Text(
-                     'Select a Package',
-                     style: TextStyle(
-                       color: Colors.white,
-                       fontSize: 18,
-                       fontWeight: FontWeight.bold,
-                     ),
-                   ),
-                   const SizedBox(height: 16),
-                ],
-              ),
-            ),
+  void _showDialog({
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required String message,
+  }) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: const Color(0xFF1F2937),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: iconColor, size: 48),
+            const SizedBox(height: 12),
+            Text(title,
+                style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center),
+            const SizedBox(height: 8),
+            Text(message,
+                style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 14),
+                textAlign: TextAlign.center),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK', style: TextStyle(color: Color(0xFF10B981))),
           ),
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) => Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: _buildPackageCard(_packages[index]),
-                ),
-                childCount: _packages.length,
-              ),
-            ),
-          ),
-          const SliverToBoxAdapter(child: SizedBox(height: 40)),
         ],
       ),
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final content = CustomScrollView(
+      slivers: [
+        if (!widget.embedded) _buildAppBar(),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeader(),
+                const SizedBox(height: 32),
+                _buildBalanceCard(),
+                const SizedBox(height: 32),
+                const Text(
+                  'Select a Package',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) => Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: _buildPackageCard(_packages[index]),
+              ),
+              childCount: _packages.length,
+            ),
+          ),
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 40)),
+      ],
+    );
+
+    if (widget.embedded) return content;
+    return Scaffold(backgroundColor: Colors.black, body: content);
   }
 
   Widget _buildAppBar() {

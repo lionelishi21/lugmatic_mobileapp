@@ -32,8 +32,8 @@ class _TikTokLivePageState extends State<TikTokLivePage>
   final PageController _pageController = PageController();
   final TextEditingController _commentController = TextEditingController();
 
-  late LiveStreamService _liveStreamService;
-  late SocketService _socketService;
+  LiveStreamService? _liveStreamService;
+  SocketService? _socketService;
 
   List<LiveStreamModel> _liveStreams = [];
   List<LiveStreamChatMessage> _comments = [];
@@ -80,13 +80,13 @@ class _TikTokLivePageState extends State<TikTokLivePage>
     _liveStreamService = LiveStreamService(apiClient: apiClient);
     _socketService = SocketService.getInstance(tokenStorage: tokenStorage);
 
-    await _socketService.connect();
+    await _socketService!.connect();
     _setupSocketListeners();
     await _fetchStreams();
   }
 
   void _setupSocketListeners() {
-    _chatSub = _socketService.onChatMessage.listen((msg) {
+    _chatSub = _socketService?.onChatMessage.listen((msg) {
       if (mounted) {
         setState(() {
           _comments.add(msg);
@@ -98,13 +98,13 @@ class _TikTokLivePageState extends State<TikTokLivePage>
       }
     });
 
-    _viewerCountSub = _socketService.onViewerCountChanged.listen((count) {
+    _viewerCountSub = _socketService?.onViewerCountChanged.listen((count) {
       if (mounted) {
         setState(() => _viewerCount = count);
       }
     });
 
-    _streamEndedSub = _socketService.onStreamEnded.listen((_) {
+    _streamEndedSub = _socketService?.onStreamEnded.listen((_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Stream has ended')),
@@ -112,7 +112,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
       }
     });
 
-    _clashStartedSub = _socketService.onClashStarted.listen((data) async {
+    _clashStartedSub = _socketService?.onClashStarted.listen((data) async {
       if (!mounted) return;
       final clash = LiveClashModel.fromJson(data);
       setState(() => _activeClash = clash);
@@ -120,7 +120,8 @@ class _TikTokLivePageState extends State<TikTokLivePage>
       // Fetch shared clash room token so ClashVideoWidget connects to the right room
       if (clash.id.isNotEmpty) {
         try {
-          final tokenMap = await _liveStreamService.getClashToken(clash.id);
+          final tokenMap = await _liveStreamService?.getClashToken(clash.id);
+          if (tokenMap == null) return;
           if (mounted) {
             setState(() {
               _clashRoomTokenData = LiveStreamTokenData.fromJson(tokenMap);
@@ -132,7 +133,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
       }
     });
 
-    _clashEndedSub = _socketService.onClashEnded.listen((data) {
+    _clashEndedSub = _socketService?.onClashEnded.listen((data) {
       if (mounted) {
         setState(() {
           _activeClash = null;
@@ -145,13 +146,13 @@ class _TikTokLivePageState extends State<TikTokLivePage>
       }
     });
 
-    _clashInvitationSub = _socketService.onClashInvitation.listen((data) {
+    _clashInvitationSub = _socketService?.onClashInvitation.listen((data) {
       if (mounted) {
         _showClashInvitationDialog(data);
       }
     });
 
-    _clashScoreSub = _socketService.onClashScoreUpdate.listen((data) {
+    _clashScoreSub = _socketService?.onClashScoreUpdate.listen((data) {
       if (mounted && _activeClash != null) {
         setState(() {
           _activeClash = _activeClash!.copyWith(
@@ -163,13 +164,13 @@ class _TikTokLivePageState extends State<TikTokLivePage>
     });
 
     // Realm change from any participant
-    _realmChangedSub = _socketService.onRealmChanged.listen((data) {
+    _realmChangedSub = _socketService?.onRealmChanged.listen((data) {
       if (mounted && _activeClash != null) {
         setState(() => _activeClash = _activeClash!.copyWith(realm: data['realm'] as String?));
       }
     });
 
-    _hostSwitchedSessionSub = _socketService.onHostSwitchedSession.listen((_) {
+    _hostSwitchedSessionSub = _socketService?.onHostSwitchedSession.listen((_) {
       final current = _liveStreams.isNotEmpty ? _liveStreams[_currentStreamIndex] : null;
       final token = current != null ? _tokenCache[current.id] : null;
       if (mounted && token != null && token.isHost) {
@@ -202,7 +203,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
         actions: [
           TextButton(
             onPressed: () {
-              _liveStreamService.rejectClash(clashId);
+              _liveStreamService?.rejectClash(clashId);
               Navigator.pop(context);
             },
             child: const Text('REJECT', style: TextStyle(color: Colors.red)),
@@ -210,7 +211,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
           ElevatedButton(
             onPressed: () async {
               try {
-                await _liveStreamService.acceptClash(clashId);
+                await _liveStreamService?.acceptClash(clashId);
                 Navigator.pop(context);
               } catch (e) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -247,7 +248,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
 
     if (opponentId != null) {
       try {
-        await _liveStreamService.inviteToClash(opponentId, 300);
+        await _liveStreamService?.inviteToClash(opponentId, 300);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Invitation sent! 🔥')),
@@ -265,7 +266,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
 
   Future<void> _fetchStreams() async {
     try {
-      final streams = await _liveStreamService.getLiveStreams(status: 'live');
+      final streams = await _liveStreamService?.getLiveStreams(status: 'live') ?? [];
       if (mounted) {
         setState(() {
           _liveStreams = streams;
@@ -295,7 +296,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
   void _joinCurrentStream() {
     if (_liveStreams.isEmpty) return;
     final stream = _liveStreams[_currentStreamIndex];
-    _socketService.joinStream(stream.id);
+    _socketService?.joinStream(stream.id);
     _viewerCount = stream.currentViewers;
     _likeCount = stream.totalGiftsReceived;
     _comments.clear();
@@ -312,7 +313,8 @@ class _TikTokLivePageState extends State<TikTokLivePage>
   Future<void> _fetchToken(String streamId) async {
     if (_tokenCache.containsKey(streamId)) return;
     try {
-      final tokenData = await _liveStreamService.getStreamToken(streamId);
+      final tokenData = await _liveStreamService?.getStreamToken(streamId);
+      if (tokenData == null) return;
       if (mounted) {
         setState(() {
           _tokenCache[streamId] = tokenData;
@@ -350,7 +352,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
     _hostSwitchedSessionSub?.cancel();
     _realmChangedSub?.cancel();
     if (_liveStreams.isNotEmpty) {
-      _socketService.leaveStream(_liveStreams[_currentStreamIndex].id);
+      _socketService?.leaveStream(_liveStreams[_currentStreamIndex].id);
     }
     _liveIndicatorController.dispose();
     _pageController.dispose();
@@ -361,7 +363,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
   void _sendComment() {
     if (_commentController.text.trim().isEmpty || _liveStreams.isEmpty) return;
     final streamId = _liveStreams[_currentStreamIndex].id;
-    _socketService.sendChat(streamId, _commentController.text.trim());
+    _socketService?.sendChat(streamId, _commentController.text.trim());
     _commentController.clear();
   }
 
@@ -371,7 +373,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
       _likeCount += _isLiked ? 1 : -1;
     });
     if (_liveStreams.isNotEmpty) {
-      _socketService.sendReaction(
+      _socketService?.sendReaction(
         _liveStreams[_currentStreamIndex].id,
         _isLiked ? 'like' : 'unlike',
       );
@@ -503,7 +505,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
             scrollDirection: Axis.vertical,
             onPageChanged: (index) {
               // Leave old stream, join new
-              _socketService.leaveStream(_liveStreams[_currentStreamIndex].id);
+              _socketService?.leaveStream(_liveStreams[_currentStreamIndex].id);
               setState(() {
                 _currentStreamIndex = index;
               });

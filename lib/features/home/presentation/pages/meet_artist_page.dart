@@ -39,9 +39,11 @@ class _MeetArtistPageState extends State<MeetArtistPage> {
     super.dispose();
   }
 
+  String? _error;
+
   Future<void> _loadArtists() async {
     if (!mounted) return;
-    setState(() => _isLoading = true);
+    setState(() { _isLoading = true; _error = null; });
 
     try {
       final artists = await _homeService.getFeaturedArtists();
@@ -52,7 +54,7 @@ class _MeetArtistPageState extends State<MeetArtistPage> {
         });
       }
     } catch (e) {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) setState(() { _isLoading = false; _error = e.toString(); });
     }
   }
 
@@ -106,6 +108,25 @@ class _MeetArtistPageState extends State<MeetArtistPage> {
                 child: Center(
                   child: CircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF10B981)),
+                  ),
+                ),
+              )
+            else if (_error != null)
+              SliverFillRemaining(
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.wifi_off, color: Colors.white38, size: 48),
+                      const SizedBox(height: 12),
+                      Text('Could not load artists', style: TextStyle(color: Colors.white.withOpacity(0.6))),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: _loadArtists,
+                        style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF10B981)),
+                        child: const Text('Retry'),
+                      ),
+                    ],
                   ),
                 ),
               )
