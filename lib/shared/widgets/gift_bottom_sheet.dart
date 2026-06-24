@@ -8,6 +8,7 @@ import '../../data/models/gift_model.dart';
 import '../../data/providers/auth_provider.dart';
 import '../../data/services/stripe_service.dart';
 import '../../data/services/gift_service.dart';
+import '../../core/gifts/gift_pop_controller.dart';
 
 class GiftBottomSheet extends StatefulWidget {
   final String artistId;
@@ -119,6 +120,11 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> with SingleTickerProv
             _coinBalance -= gift.price.toInt();
             _sendingId = null;
           });
+          GiftPopController.instance.fire(GiftPopEvent(
+            giftName: gift.name,
+            giftImageUrl: gift.imageUrl,
+            coinCost: gift.price,
+          ));
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('🎁 Gift sent to ${widget.artistName}!'),

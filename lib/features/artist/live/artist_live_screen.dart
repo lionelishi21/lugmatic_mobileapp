@@ -140,11 +140,17 @@ class _ArtistLiveScreenState extends State<ArtistLiveScreen> with WidgetsBinding
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<LiveStreamingProvider>();
+    final inClash = provider.hasClashRoom && provider.activeClash != null;
 
+    // Lock to portrait during a clash — the split-screen is a fixed top/bottom
+    // stack, so a mid-battle rotation to landscape would distort both feeds.
+    // Outside of a clash, a regular solo stream can still rotate freely.
     SystemChrome.setPreferredOrientations(
-      provider.isStreaming
-          ? [DeviceOrientation.portraitUp, DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]
-          : [DeviceOrientation.portraitUp],
+      inClash
+          ? [DeviceOrientation.portraitUp]
+          : provider.isStreaming
+              ? [DeviceOrientation.portraitUp, DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]
+              : [DeviceOrientation.portraitUp],
     );
 
     return provider.isStreaming ? _buildLiveView(provider) : _buildSetupScaffold(provider);

@@ -37,6 +37,7 @@ import 'data/services/socket_service.dart';
 import 'data/services/live_stream_service.dart';
 import 'data/providers/audio_provider.dart';
 import 'data/providers/live_streaming_provider.dart';
+import 'core/gifts/gift_pop_overlay.dart';
 import 'data/services/contributor/contributor_service.dart';
 import 'data/providers/contributor_provider.dart';
 import 'data/services/artist/upload_service.dart';
@@ -232,7 +233,12 @@ class LugmaticApp extends StatelessWidget {
         '/mixer': (context) => const MixerPage(),
         '/premium': (context) => const SubscriptionPage(),
       },
-      builder: (context, child) => child!,
+      builder: (context, child) => Stack(
+        children: [
+          child!,
+          const GiftPopOverlayHost(),
+        ],
+      ),
     );
   }
 }

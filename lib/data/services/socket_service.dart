@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import '../../core/config/api_config.dart';
 import '../../core/network/token_storage.dart';
+import '../../core/gifts/gift_pop_controller.dart';
 import '../models/live_stream_model.dart';
 
 /// Singleton Socket.io service for real-time live stream features.
@@ -159,6 +160,12 @@ class SocketService {
           giftValue: data['giftValue'],
           timestamp: DateTime.now(),
         ));
+        GiftPopController.instance.fire(GiftPopEvent(
+          username: data['username']?.toString(),
+          giftName: data['giftName']?.toString() ?? 'Gift',
+          giftImageUrl: data['giftImage']?.toString(),
+          coinCost: (data['giftValue'] as num?)?.toDouble() ?? 0,
+        ));
       }
     });
 
@@ -218,6 +225,15 @@ class SocketService {
     _socket!.on('clash:score-update', (data) {
       if (data is Map<String, dynamic>) {
         _clashScoreController.add(data);
+        final lastGift = data['lastGift'];
+        if (lastGift is Map) {
+          GiftPopController.instance.fire(GiftPopEvent(
+            username: lastGift['senderUsername']?.toString(),
+            giftName: lastGift['name']?.toString() ?? 'Gift',
+            giftImageUrl: lastGift['image']?.toString(),
+            coinCost: ((lastGift['coinCost'] ?? lastGift['points']) as num?)?.toDouble() ?? 0,
+          ));
+        }
       }
     });
 

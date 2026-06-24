@@ -7,6 +7,7 @@ import 'package:lugmatic_flutter/data/services/home_service.dart';
 import 'package:lugmatic_flutter/data/services/stripe_service.dart';
 import 'package:lugmatic_flutter/core/theme/neumorphic_theme.dart';
 import 'package:lugmatic_flutter/core/network/api_exception.dart';
+import 'package:lugmatic_flutter/core/gifts/gift_pop_controller.dart';
 import 'package:dio/dio.dart';
 import 'dart:async';
 
@@ -880,8 +881,12 @@ class _GiftSendPageState extends State<GiftSendPage> {
         message: _message,
       );
 
-      // Animation & Haptic could go here
-      
+      GiftPopController.instance.fire(GiftPopEvent(
+        giftName: _selectedGift!.name,
+        giftImageUrl: _selectedGift!.imageUrl,
+        coinCost: _selectedGift!.price,
+      ));
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

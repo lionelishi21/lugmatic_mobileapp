@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 import '../../../../data/models/music_model.dart';
 import '../../../../core/theme/neumorphic_theme.dart';
+import '../../../../shared/widgets/playlist_selection_bottom_sheet.dart';
 
 class SongPage extends StatefulWidget {
   final MusicModel song;
@@ -165,84 +166,8 @@ class _SongPageState extends State<SongPage> with TickerProviderStateMixin {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        decoration: BoxDecoration(
-          color: NeumorphicTheme.surfaceColor,
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(30),
-            topRight: Radius.circular(30),
-          ),
-        ),
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: NeumorphicTheme.textTertiary,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'Add to Playlist',
-              style: TextStyle(
-                color: NeumorphicTheme.textPrimary,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 20),
-            ListTile(
-              leading: Container(
-                width: 50,
-                height: 50,
-                decoration: NeumorphicTheme.gradientNeumorphicDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(Icons.add, color: Colors.white),
-              ),
-              title: const Text(
-                'Create New Playlist',
-                style: TextStyle(
-                  color: NeumorphicTheme.textPrimary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Create playlist feature coming soon!')),
-                );
-              },
-            ),
-            const SizedBox(height: 12),
-            ListTile(
-              leading: Container(
-                width: 50,
-                height: 50,
-                decoration: NeumorphicTheme.flatNeumorphicDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(Icons.favorite, color: NeumorphicTheme.primaryAccent),
-              ),
-              title: const Text(
-                'Favorites',
-                style: TextStyle(
-                  color: NeumorphicTheme.textPrimary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                _toggleFavorite();
-              },
-            ),
-          ],
-        ),
-      ),
+      isScrollControlled: true,
+      builder: (context) => PlaylistSelectionBottomSheet(song: widget.song),
     );
   }
 
@@ -260,8 +185,10 @@ class _SongPageState extends State<SongPage> with TickerProviderStateMixin {
           ],
         ),
       ),
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
+      child: Stack(
+        children: [
+          Scaffold(
+            backgroundColor: Colors.transparent,
         body: CustomScrollView(
           slivers: [
             _buildAppBar(),
@@ -299,7 +226,51 @@ class _SongPageState extends State<SongPage> with TickerProviderStateMixin {
           ],
         ),
       ),
-    );
+          if (_isLoading)
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withOpacity(0.6),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 80,
+                        height: 80,
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: NeumorphicTheme.surfaceColor,
+                          borderRadius: BorderRadius.circular(24),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.5),
+                              blurRadius: 20,
+                            ),
+                          ],
+                        ),
+                        child: const CircularProgressIndicator(
+                          color: Color(0xFF10B981),
+                          strokeWidth: 3,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      const Text(
+                        'Loading Track...',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
   }
 
   Widget _buildAppBar() {

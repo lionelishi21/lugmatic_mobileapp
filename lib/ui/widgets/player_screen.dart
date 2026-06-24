@@ -8,6 +8,7 @@ import '../../core/theme/neumorphic_theme.dart';
 import 'package:video_player/video_player.dart';
 import 'neumorphic_button.dart';
 import '../../shared/widgets/gift_bottom_sheet.dart';
+import '../../shared/widgets/playlist_selection_bottom_sheet.dart';
 
 class PlayerScreen extends StatefulWidget {
   final MusicModel music;
@@ -151,7 +152,8 @@ class _PlayerScreenState extends State<PlayerScreen> {
               ),
 
               // Foreground Layer
-              Scaffold(
+              SafeArea(
+                child: Scaffold(
                 backgroundColor: Colors.transparent,
                 appBar: AppBar(
                   backgroundColor: Colors.transparent,
@@ -399,8 +401,11 @@ class _PlayerScreenState extends State<PlayerScreen> {
                               ),
                               IconButton(
                                 onPressed: () {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Added to Playlist')),
+                                  showModalBottomSheet(
+                                    context: context,
+                                    backgroundColor: Colors.transparent,
+                                    isScrollControlled: true,
+                                    builder: (context) => PlaylistSelectionBottomSheet(song: currentMusic),
                                   );
                                 },
                                 icon: const Icon(Icons.playlist_add, color: Colors.white60),
@@ -596,6 +601,55 @@ class _PlayerScreenState extends State<PlayerScreen> {
                     ),
                   ),
                 ),
+              ),
+              ),
+
+              // Loading Splash Screen Overlay
+              Consumer<AudioProvider>(
+                builder: (context, audioProvider, child) {
+                  if (!audioProvider.isLoading) return const SizedBox();
+                  return Positioned.fill(
+                    child: Container(
+                      color: Colors.black.withOpacity(0.6),
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 80,
+                              height: 80,
+                              padding: const EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                color: NeumorphicTheme.surfaceColor,
+                                borderRadius: BorderRadius.circular(24),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.5),
+                                    blurRadius: 20,
+                                  ),
+                                ],
+                              ),
+                              child: const CircularProgressIndicator(
+                                color: Color(0xFF10B981),
+                                strokeWidth: 3,
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                            const Text(
+                              'Loading Track...',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.2,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
             ],
           ),
