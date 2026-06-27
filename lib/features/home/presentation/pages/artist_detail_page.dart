@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../../../shared/widgets/brand_gradient_fallback.dart';
 import '../../../../core/config/api_config.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -15,6 +16,9 @@ import '../../../../data/models/video_model.dart';
 import '../../../../ui/widgets/player_screen.dart';
 import '../../../video/presentation/pages/videos_page.dart';
 import '../../../../data/providers/message_provider.dart';
+
+const Color _kBg = Color(0xFF0F172A);
+const Color _kAccent = Color(0xFF10B981);
 
 class ArtistDetailPage extends StatefulWidget {
   final String artistId;
@@ -45,7 +49,7 @@ class _ArtistDetailPageState extends State<ArtistDetailPage> {
     final apiClient = context.read<ApiClient>();
     try {
       final results = await Future.wait([
-        apiClient.dio.get('${ApiConfig.artistDetails}/${widget.artistId}'),
+        apiClient.dio.get('${ApiConfig.mobileArtists}/${widget.artistId}'),
         apiClient.dio.get(
           ApiConfig.songs,
           queryParameters: {'artist': widget.artistId, 'limit': 20},
@@ -92,529 +96,719 @@ class _ArtistDetailPageState extends State<ArtistDetailPage> {
     }
   }
 
+  Future<void> _toggleFollow() async {
+    final artistService = context.read<ArtistService>();
+    final oldState = _isFollowing;
+    setState(() => _isFollowing = !_isFollowing);
+    try {
+      if (oldState) {
+        await artistService.unfollowArtist(widget.artistId);
+      } else {
+        await artistService.followArtist(widget.artistId);
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isFollowing = oldState);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update following: $e')),
+        );
+      }
+    }
+  }
 
+  Future<void> _messageArtist(ArtistModel artist) async {
+    if (artist.userId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('This artist cannot be messaged directly.')),
+      );
+      return;
+    }
+    final provider = context.read<MessageProvider>();
+    try {
+      final conv = await provider.startConversation(artist.userId!);
+      if (!context.mounted) return;
+      Navigator.pushNamed(context, '/chat', arguments: conv);
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to start chat: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final artist = _artist;
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: _kBg,
       body: _loading && artist == null
           ? const Center(
               child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF10B981)),
+                valueColor: AlwaysStoppedAnimation<Color>(_kAccent),
               ),
             )
           : artist == null
               ? const Center(child: Text('Artist not found', style: TextStyle(color: Colors.white)))
-              : _buildContent(context, artist),
-    );
-  }
-
-  Widget _buildContent(BuildContext context, ArtistModel artist) {
-    final hasImage = artist.imageUrl.isNotEmpty;
-
-    return CustomScrollView(
-      slivers: [
-        // Immersive Hero sliver
-        SliverAppBar(
-          expandedHeight: 380,
-          pinned: true,
-          stretch: true,
-          backgroundColor: const Color(0xFF0F172A),
-          elevation: 0,
-          leading: Padding(
-            padding: const EdgeInsets.only(left: 8),
-            child: Center(
-              child: ClipOval(
-                child: Material(
-                  color: Colors.black.withOpacity(0.3),
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 18),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          actions: [
-             Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: Center(
-                child: ClipOval(
-                  child: Material(
-                    color: Colors.black.withOpacity(0.3),
-                    child: IconButton(
-                      icon: const Icon(Icons.more_horiz, color: Colors.white),
-                      onPressed: () {},
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-          flexibleSpace: FlexibleSpaceBar(
-            stretchModes: const [
-              StretchMode.zoomBackground,
-              StretchMode.blurBackground,
-              StretchMode.fadeTitle,
-            ],
-            background: Stack(
-              fit: StackFit.expand,
-              children: [
-                hasImage
-                    ? Image.network(
-                        artist.imageUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => const BrandGradientFallback(iconSize: 64, borderRadius: BorderRadius.zero),
-                      )
-                    : const BrandGradientFallback(iconSize: 64, borderRadius: BorderRadius.zero),
-                // Dynamic Overlays
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.black.withOpacity(0.4),
-                        Colors.transparent,
-                        const Color(0xFF0F172A).withOpacity(0.6),
-                        const Color(0xFF0F172A),
-                      ],
-                      stops: const [0.0, 0.3, 0.8, 1.0],
-                    ),
-                  ),
-                ),
-                // Artist Name & Status at bottom of hero
-                Positioned(
-                  bottom: 40,
-                  left: 20,
-                  right: 20,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (artist.isVerified)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF10B981).withOpacity(0.9),
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [BoxShadow(color: const Color(0xFF10B981).withOpacity(0.3), blurRadius: 10)],
-                          ),
-                          child: const Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.verified, color: Colors.white, size: 14),
-                              SizedBox(width: 6),
-                              Text('VERIFIED ARTIST', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
+              : DefaultTabController(
+                  length: 3,
+                  child: NestedScrollView(
+                    headerSliverBuilder: (context, innerBoxIsScrolled) => [
+                      _buildBannerAppBar(context, artist),
+                      SliverToBoxAdapter(child: _buildProfileHeader(context, artist)),
+                      SliverPersistentHeader(
+                        pinned: true,
+                        delegate: _StickyTabBarDelegate(
+                          const TabBar(
+                            indicatorColor: _kAccent,
+                            indicatorWeight: 3,
+                            labelColor: _kAccent,
+                            unselectedLabelColor: Colors.white54,
+                            labelStyle: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, letterSpacing: 0.3),
+                            tabs: [
+                              Tab(text: 'Music'),
+                              Tab(text: 'Community'),
+                              Tab(text: 'About'),
                             ],
                           ),
                         ),
-                      if (artist.isLive) ...[
-                        const SizedBox(height: 8),
-                        GestureDetector(
-                          onTap: () => Navigator.pushNamed(context, '/live', arguments: artist.id), // placeholder route
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: AppColors.error,
-                              borderRadius: BorderRadius.circular(20),
-                              boxShadow: [BoxShadow(color: AppColors.error.withOpacity(0.5), blurRadius: 10)],
-                            ),
-                            child: const Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.fiber_manual_record, color: Colors.white, size: 10),
-                                SizedBox(width: 6),
-                                Text('LIVE NOW - TAP TO JOIN', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                      const SizedBox(height: 12),
-                      Text(
-                        artist.name,
-                        style: const TextStyle(
-                          color: Colors.white, 
-                          fontSize: 48, 
-                          fontWeight: FontWeight.w900, 
-                          letterSpacing: -1.5,
-                          height: 1.1,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '${artist.followers} Followers',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
                       ),
                     ],
+                    body: TabBarView(
+                      children: [
+                        _buildMusicTab(artist),
+                        _buildCommunityTab(artist),
+                        _buildAboutTab(artist),
+                      ],
+                    ),
                   ),
                 ),
-              ],
+    );
+  }
+
+  Widget _buildBannerAppBar(BuildContext context, ArtistModel artist) {
+    final hasImage = artist.imageUrl.isNotEmpty;
+    return SliverAppBar(
+      expandedHeight: 200,
+      pinned: true,
+      backgroundColor: _kBg,
+      elevation: 0,
+      leading: Padding(
+        padding: const EdgeInsets.only(left: 8),
+        child: Center(
+          child: ClipOval(
+            child: Material(
+              color: Colors.black.withOpacity(0.35),
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 18),
+                onPressed: () => Navigator.pop(context),
+              ),
             ),
           ),
         ),
-
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Quick Actions Panel
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.04),
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: Colors.white.withOpacity(0.08)),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: _PlayButton(
-                          onTap: _songs.isNotEmpty
-                              ? () {
-                                  context.read<AudioProvider>().playMusic(_songs[0], queue: _songs);
-                                  showModalBottomSheet(
-                                    context: context,
-                                    isScrollControlled: true,
-                                    backgroundColor: Colors.transparent,
-                                    builder: (context) => PlayerScreen(music: _songs[0]),
-                                  );
-                                }
-                              : null,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      _CircleActionButton(
-                        icon: _isFollowing ? Icons.person_add_disabled : Icons.person_add,
-                        isActive: _isFollowing,
-                        onTap: () async {
-                          final artistService = context.read<ArtistService>();
-                          final oldState = _isFollowing;
-                          setState(() => _isFollowing = !_isFollowing);
-                          try {
-                            if (oldState) {
-                              await artistService.unfollowArtist(widget.artistId);
-                            } else {
-                              await artistService.followArtist(widget.artistId);
-                            }
-                          } catch (e) {
-                            if (context.mounted) {
-                              setState(() => _isFollowing = oldState);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Failed to update following: $e')),
-                              );
-                            }
-                          }
-                        },
-                      ),
-                      const SizedBox(width: 12),
-                      _CircleActionButton(
-                        icon: Icons.chat_bubble_outline,
-                        color: Colors.white,
-                        onTap: () async {
-                          final provider = context.read<MessageProvider>();
-                          try {
-                            final conv = await provider.startConversation(widget.artistId);
-                            if (!context.mounted) return;
-                            Navigator.pushNamed(context, '/chat', arguments: conv);
-                          } catch (e) {
-                            if (!context.mounted) return;
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Failed to start chat: $e')),
-                            );
-                          }
-                        },
-                      ),
-                      const SizedBox(width: 12),
-                      _CircleActionButton(
-                        icon: Icons.mail_outline,
-                        color: Colors.white,
-                        onTap: () async {
-                          final provider = context.read<MessageProvider>();
-                          try {
-                            final conv = await provider.startConversation(widget.artistId);
-                            if (!context.mounted) return;
-                            Navigator.pushNamed(context, '/chat', arguments: conv);
-                          } catch (e) {
-                            if (!context.mounted) return;
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Failed to start chat: $e')),
-                            );
-                          }
-                        },
-                      ),
-                      const SizedBox(width: 12),
-                      _CircleActionButton(
-                        icon: Icons.card_giftcard,
-                        color: const Color(0xFFFFD700),
-                        onTap: () => GiftBottomSheet.show(
-                          context,
-                          artistId: widget.artistId,
-                          artistName: artist.name,
-                        ),
-                      ),
-                    ],
-                  ),
+      ),
+      actions: [
+        Padding(
+          padding: const EdgeInsets.only(right: 8),
+          child: Center(
+            child: ClipOval(
+              child: Material(
+                color: Colors.black.withOpacity(0.35),
+                child: IconButton(
+                  icon: const Icon(Icons.ios_share, color: Colors.white, size: 18),
+                  onPressed: () => Share.share('Check out ${artist.name} on Lugmatic!'),
                 ),
-                const SizedBox(height: 32),
-                const SizedBox(height: 32),
-
-                // Popular Tracks Section
-                if (_songs.isNotEmpty) ...[
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('Popular Tracks', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: -0.5)),
-                      TextButton(
-                        onPressed: () {},
-                        child: Text('See all', style: TextStyle(color: const Color(0xFF10B981).withOpacity(0.8), fontWeight: FontWeight.w700)),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: _songs.length.clamp(0, 5),
-                    separatorBuilder: (_, __) => const SizedBox(height: 8),
-                    itemBuilder: (context, i) {
-                      final s = _songs[i];
-                      return _TrackRow(
-                        index: i + 1,
-                        song: s,
-                        coverUrl: s.imageUrl.isNotEmpty ? s.imageUrl : (artist.imageUrl.isNotEmpty ? artist.imageUrl : ''),
-                        onTap: () {
-                          context.read<AudioProvider>().playMusic(s, queue: _songs);
-                          showModalBottomSheet(
-                            context: context,
-                            isScrollControlled: true,
-                            backgroundColor: Colors.transparent,
-                            builder: (context) => PlayerScreen(music: s),
-                          );
-                        },
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 40),
-                ],
-
-                // Discography Section
-                if (_albums.isNotEmpty) ...[
-                  const Text('Discography', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: -0.5)),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    height: 220,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: _albums.length,
-                      itemBuilder: (ctx, i) {
-                        final al = _albums[i];
-                        final coverArt = ApiConfig.resolveUrl(al['coverArt']?.toString() ?? '');
-                        return GestureDetector(
-                          onTap: () {
-                            Navigator.pushNamed(context, '/album', arguments: al['_id']);
-                          },
-                          child: Container(
-                            width: 160,
-                            margin: const EdgeInsets.only(right: 16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(16),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.4),
-                                        blurRadius: 15,
-                                        offset: const Offset(0, 8),
-                                      ),
-                                    ],
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(16),
-                                    child: coverArt.isNotEmpty
-                                        ? Image.network(coverArt, width: 160, height: 160, fit: BoxFit.cover,
-                                            errorBuilder: (_, __, ___) => const BrandGradientFallback(iconSize: 48, borderRadius: BorderRadius.zero))
-                                        : const BrandGradientFallback(iconSize: 48, borderRadius: BorderRadius.zero),
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                                Text(al['name']?.toString() ?? al['title']?.toString() ?? '',
-                                    maxLines: 1, overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700)),
-                                Text('${al['releaseDate']?.toString().split('-')[0] ?? ''} • Album',
-                                    style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12, fontWeight: FontWeight.w500)),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 40),
-                ],
-
-                // Music Videos Section
-                if (_videos.isNotEmpty) ...[
-                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('Music Videos', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: -0.5)),
-                      TextButton(
-                        onPressed: () {}, // No 'See All' for videos yet
-                        child: Text('See all', style: TextStyle(color: const Color(0xFF10B981).withOpacity(0.8), fontWeight: FontWeight.w700)),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    height: 180,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: _videos.length,
-                      itemBuilder: (ctx, i) {
-                        final v = _videos[i];
-                        return GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => VideoPlayerScreen(video: v),
-                              ),
-                            );
-                          },
-                          child: Container(
-                            width: 240,
-                            margin: const EdgeInsets.only(right: 16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Stack(
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(16),
-                                      child: v.thumbnailUrl.isNotEmpty
-                                          ? Image.network(v.thumbnailUrl, width: 240, height: 135, fit: BoxFit.cover,
-                                              errorBuilder: (_, __, ___) => _videoPlaceholder())
-                                          : _videoPlaceholder(),
-                                    ),
-                                    const Positioned.fill(
-                                      child: Center(
-                                        child: Icon(Icons.play_circle_fill, color: Colors.white70, size: 40),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 10),
-                                Text(v.title,
-                                    maxLines: 1, overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700)),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 40),
-                  const SizedBox(height: 40),
-                ],
-
-                // Past Lives Section (Placeholder until backend fully integrated)
-                const Text('Past Lives', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: -0.5)),
-                const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.04),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.white.withOpacity(0.08)),
-                  ),
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.videocam_off, color: Colors.white.withOpacity(0.3), size: 48),
-                        const SizedBox(height: 12),
-                        Text(
-                          'No recorded sessions yet',
-                          style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 16, fontWeight: FontWeight.w600),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'When ${artist.name} saves a live stream, it will appear here.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 13),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 40),
-
-                // About Section
-                if (artist.bio.isNotEmpty || artist.genres.isNotEmpty) ...[
-                  const Text('About', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: -0.5)),
-                  const SizedBox(height: 16),
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.04),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.white.withOpacity(0.08)),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (artist.bio.isNotEmpty) ...[
-                          Text(artist.bio,
-                            style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 15, height: 1.6)),
-                          const SizedBox(height: 20),
-                        ],
-                        if (artist.genres.isNotEmpty)
-                          Wrap(
-                            spacing: 10,
-                            runSpacing: 10,
-                            children: artist.genres.map((g) => Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF10B981).withOpacity(0.12),
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(color: const Color(0xFF10B981).withOpacity(0.3)),
-                              ),
-                              child: Text(g, style: const TextStyle(color: Color(0xFF10B981), fontSize: 13, fontWeight: FontWeight.w700)),
-                            )).toList(),
-                          ),
-                      ],
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 40),
-
-                // Comments
-                const Text('Comments', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: -0.5)),
-                const SizedBox(height: 16),
-                CommentSectionWidget(contentType: 'artist', contentId: widget.artistId),
-
-                const SizedBox(height: 120),
-              ],
+              ),
             ),
           ),
         ),
       ],
+      flexibleSpace: FlexibleSpaceBar(
+        background: Stack(
+          fit: StackFit.expand,
+          children: [
+            hasImage
+                ? Image.network(
+                    artist.imageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => const BrandGradientFallback(iconSize: 64, borderRadius: BorderRadius.zero),
+                  )
+                : const BrandGradientFallback(iconSize: 64, borderRadius: BorderRadius.zero),
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withOpacity(0.35),
+                    Colors.transparent,
+                    _kBg.withOpacity(0.85),
+                    _kBg,
+                  ],
+                  stops: const [0.0, 0.35, 0.85, 1.0],
+                ),
+              ),
+            ),
+            Positioned(
+              top: 50,
+              right: 16,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.35),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text('${artist.followers} Followers',
+                        style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700)),
+                    if (artist.totalSongs > 0) ...[
+                      const SizedBox(height: 2),
+                      Text('${artist.totalSongs} Tracks',
+                          style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 11, fontWeight: FontWeight.w600)),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+            if (artist.isLive)
+              Positioned(
+                top: 50,
+                left: 16,
+                child: GestureDetector(
+                  onTap: () => Navigator.pushNamed(context, '/live', arguments: artist.id),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: AppColors.error,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [BoxShadow(color: AppColors.error.withOpacity(0.5), blurRadius: 10)],
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.fiber_manual_record, color: Colors.white, size: 9),
+                        SizedBox(width: 6),
+                        Text('LIVE — TAP TO JOIN', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 0.4)),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 
+  Widget _buildProfileHeader(BuildContext context, ArtistModel artist) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            margin: const EdgeInsets.only(top: -40),
+            width: 84,
+            height: 84,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: _kBg, width: 4),
+              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.4), blurRadius: 12)],
+            ),
+            child: ClipOval(
+              child: artist.imageUrl.isNotEmpty
+                  ? Image.network(artist.imageUrl, fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => const BrandGradientFallback(iconSize: 32, borderRadius: BorderRadius.zero))
+                  : const BrandGradientFallback(iconSize: 32, borderRadius: BorderRadius.zero),
+            ),
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Flexible(
+                child: Text(
+                  artist.name,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w900, letterSpacing: -0.5),
+                ),
+              ),
+              if (artist.isVerified) ...[
+                const SizedBox(width: 6),
+                const Icon(Icons.verified, color: _kAccent, size: 20),
+              ],
+            ],
+          ),
+          const SizedBox(height: 6),
+          GestureDetector(
+            onTap: () => _showRatingDialog(context, artist),
+            child: Row(
+              children: [
+                const Icon(Icons.star, color: Color(0xFFFFD700), size: 15),
+                const SizedBox(width: 4),
+                Text(
+                  artist.averageRating > 0 ? artist.averageRating.toStringAsFixed(1) : 'New',
+                  style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700),
+                ),
+                if (artist.ratingCount > 0)
+                  Text(' (${artist.ratingCount})', style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12)),
+                if (artist.location.isNotEmpty) ...[
+                  Text('  •  ', style: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 12)),
+                  Icon(Icons.location_on, color: Colors.white.withOpacity(0.4), size: 13),
+                  const SizedBox(width: 3),
+                  Text(artist.location, style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12, fontWeight: FontWeight.w600)),
+                ],
+              ],
+            ),
+          ),
+          if (artist.genres.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: artist.genres.map((g) => Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: _kAccent.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: _kAccent.withOpacity(0.3)),
+                ),
+                child: Text(g.toUpperCase(),
+                    style: const TextStyle(color: _kAccent, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
+              )).toList(),
+            ),
+          ],
+          if (artist.bio.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            Text(
+              artist.bio,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 14, height: 1.5),
+            ),
+          ],
+          const SizedBox(height: 18),
+          Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onTap: _toggleFollow,
+                  child: Container(
+                    height: 46,
+                    decoration: BoxDecoration(
+                      color: _isFollowing ? Colors.transparent : _kAccent,
+                      borderRadius: BorderRadius.circular(23),
+                      border: _isFollowing ? Border.all(color: Colors.white.withOpacity(0.25)) : null,
+                    ),
+                    child: Center(
+                      child: Text(
+                        _isFollowing ? 'Following' : 'Follow',
+                        style: TextStyle(
+                          color: _isFollowing ? Colors.white : _kBg,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => _messageArtist(artist),
+                  child: Container(
+                    height: 46,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(23),
+                      border: Border.all(color: Colors.white.withOpacity(0.25)),
+                    ),
+                    child: const Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.chat_bubble_outline, color: Colors.white, size: 16),
+                          SizedBox(width: 6),
+                          Text('Message', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              GestureDetector(
+                onTap: () => GiftBottomSheet.show(context, artistId: widget.artistId, artistName: artist.name),
+                child: Container(
+                  width: 46,
+                  height: 46,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: const Color(0xFFFFD700).withOpacity(0.4)),
+                  ),
+                  child: const Icon(Icons.card_giftcard, color: Color(0xFFFFD700), size: 20),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 
+  void _showRatingDialog(BuildContext context, ArtistModel artist) {
+    double currentRating = artist.userRating ?? 5.0;
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              backgroundColor: const Color(0xFF1E293B),
+              title: const Text('Rate Artist', style: TextStyle(color: Colors.white)),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('How would you rate this artist?', style: TextStyle(color: Colors.white70)),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(5, (index) {
+                      return IconButton(
+                        icon: Icon(
+                          index < currentRating ? Icons.star : Icons.star_border,
+                          color: const Color(0xFFFFD700),
+                          size: 36,
+                        ),
+                        onPressed: () {
+                          setDialogState(() {
+                            currentRating = index + 1.0;
+                          });
+                        },
+                      );
+                    }),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: _kAccent),
+                  onPressed: () async {
+                    Navigator.pop(ctx);
+                    try {
+                      await context.read<ArtistService>().rateArtist(artist.id, currentRating);
+                      if (mounted) {
+                        ScaffoldMessenger.of(this.context).showSnackBar(const SnackBar(content: Text('Rating submitted!')));
+                        _loadData(); // reload to get new rating
+                      }
+                    } catch (e) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(this.context).showSnackBar(SnackBar(content: Text('Failed to rate: $e')));
+                      }
+                    }
+                  },
+                  child: const Text('Submit'),
+                ),
+              ],
+            );
+          }
+        );
+      },
+    );
+  }
+
+  Widget _buildMusicTab(ArtistModel artist) {
+    return ListView(
+      padding: const EdgeInsets.all(20),
+      children: [
+        if (_songs.isNotEmpty) ...[
+          _PlayButton(
+            onTap: () {
+              context.read<AudioProvider>().playMusic(_songs[0], queue: _songs);
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (context) => PlayerScreen(music: _songs[0]),
+              );
+            },
+          ),
+          const SizedBox(height: 28),
+        ],
+
+        // Popular Tracks Section
+        if (_songs.isNotEmpty) ...[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('Popular', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: -0.5)),
+              if (_songs.length > 5)
+                TextButton(
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => _ArtistAllTracksPage(artist: artist, songs: _songs),
+                    ),
+                  ),
+                  child: Text('See all', style: TextStyle(color: _kAccent.withOpacity(0.8), fontWeight: FontWeight.w700)),
+                ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: _songs.length.clamp(0, 5),
+            separatorBuilder: (_, __) => const SizedBox(height: 8),
+            itemBuilder: (context, i) {
+              final s = _songs[i];
+              return _TrackRow(
+                index: i + 1,
+                song: s,
+                coverUrl: s.imageUrl.isNotEmpty ? s.imageUrl : (artist.imageUrl.isNotEmpty ? artist.imageUrl : ''),
+                onTap: () {
+                  context.read<AudioProvider>().playMusic(s, queue: _songs);
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (context) => PlayerScreen(music: s),
+                  );
+                },
+              );
+            },
+          ),
+          const SizedBox(height: 40),
+        ],
+
+        // Discography Section
+        if (_albums.isNotEmpty) ...[
+          const Text('Discography', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: -0.5)),
+          const SizedBox(height: 20),
+          SizedBox(
+            height: 220,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: _albums.length,
+              itemBuilder: (ctx, i) {
+                final al = _albums[i];
+                final coverArt = ApiConfig.resolveUrl(al['coverArt']?.toString() ?? '');
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.pushNamed(context, '/album', arguments: al['_id']);
+                  },
+                  child: Container(
+                    width: 160,
+                    margin: const EdgeInsets.only(right: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.4),
+                                blurRadius: 15,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: coverArt.isNotEmpty
+                                ? Image.network(coverArt, width: 160, height: 160, fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => const BrandGradientFallback(iconSize: 48, borderRadius: BorderRadius.zero))
+                                : const BrandGradientFallback(iconSize: 48, borderRadius: BorderRadius.zero),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(al['name']?.toString() ?? al['title']?.toString() ?? '',
+                            maxLines: 1, overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700)),
+                        Text('${al['releaseDate']?.toString().split('-')[0] ?? ''} • Album',
+                            style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12, fontWeight: FontWeight.w500)),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 40),
+        ],
+
+        // Music Videos Section
+        if (_videos.isNotEmpty) ...[
+          const Text('Music Videos', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: -0.5)),
+          const SizedBox(height: 20),
+          SizedBox(
+            height: 180,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: _videos.length,
+              itemBuilder: (ctx, i) {
+                final v = _videos[i];
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => VideoPlayerScreen(video: v),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    width: 240,
+                    margin: const EdgeInsets.only(right: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Stack(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: v.thumbnailUrl.isNotEmpty
+                                  ? Image.network(v.thumbnailUrl, width: 240, height: 135, fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) => _videoPlaceholder())
+                                  : _videoPlaceholder(),
+                            ),
+                            const Positioned.fill(
+                              child: Center(
+                                child: Icon(Icons.play_circle_fill, color: Colors.white70, size: 40),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        Text(v.title,
+                            maxLines: 1, overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700)),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 40),
+        ],
+
+        // Past Lives Section
+        const Text('Past Lives', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: -0.5)),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.04),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.white.withOpacity(0.08)),
+          ),
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.videocam_off, color: Colors.white.withOpacity(0.3), size: 48),
+                const SizedBox(height: 12),
+                Text(
+                  'No recorded sessions yet',
+                  style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'When ${artist.name} saves a live stream, it will appear here.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 13),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 40),
+      ],
+    );
+  }
+
+  Widget _buildCommunityTab(ArtistModel artist) {
+    return ListView(
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      children: [
+        CommentSectionWidget(contentType: 'artist', contentId: widget.artistId),
+      ],
+    );
+  }
+
+  Widget _buildAboutTab(ArtistModel artist) {
+    return ListView(
+      padding: const EdgeInsets.all(20),
+      children: [
+        Row(
+          children: [
+            Expanded(child: _StatCard(label: 'Followers', value: '${artist.followers}')),
+            const SizedBox(width: 12),
+            Expanded(child: _StatCard(label: 'Tracks', value: '${artist.totalSongs}')),
+            const SizedBox(width: 12),
+            Expanded(child: _StatCard(label: 'Releases', value: '${artist.totalAlbums}')),
+          ],
+        ),
+        const SizedBox(height: 24),
+        if (artist.bio.isNotEmpty || artist.genres.isNotEmpty) ...[
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.04),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: Colors.white.withOpacity(0.08)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (artist.bio.isNotEmpty) ...[
+                  const Text('Biography', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 12),
+                  Text(artist.bio,
+                    style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 15, height: 1.6)),
+                  const SizedBox(height: 24),
+                ],
+                if (artist.genres.isNotEmpty) ...[
+                  const Text('Genres', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: artist.genres.map((g) => Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: _kAccent.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: _kAccent.withOpacity(0.3)),
+                      ),
+                      child: Text(g, style: const TextStyle(color: _kAccent, fontSize: 13, fontWeight: FontWeight.w700)),
+                    )).toList(),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ] else ...[
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(40),
+              child: Text(
+                'No additional information available for this artist.',
+                style: TextStyle(color: Colors.white.withOpacity(0.5)),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+        ]
+      ],
+    );
+  }
 
   Widget _videoPlaceholder() => Container(
     width: 240, height: 135, color: const Color(0xFF1A2332),
@@ -622,7 +816,49 @@ class _ArtistDetailPageState extends State<ArtistDetailPage> {
   );
 }
 
+class _StickyTabBarDelegate extends SliverPersistentHeaderDelegate {
+  final TabBar tabBar;
+  _StickyTabBarDelegate(this.tabBar);
+
+  @override
+  double get minExtent => tabBar.preferredSize.height;
+  @override
+  double get maxExtent => tabBar.preferredSize.height;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Container(color: _kBg, child: tabBar);
+  }
+
+  @override
+  bool shouldRebuild(SliverPersistentHeaderDelegate oldDelegate) => false;
+}
+
 // ── Supporting widgets ───────────────────────────────────────────────────────
+class _StatCard extends StatelessWidget {
+  final String label;
+  final String value;
+  const _StatCard({required this.label, required this.value});
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.04),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.08)),
+      ),
+      child: Column(
+        children: [
+          Text(value, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900)),
+          const SizedBox(height: 4),
+          Text(label, style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12, fontWeight: FontWeight.w600)),
+        ],
+      ),
+    );
+  }
+}
+
 class _PlayButton extends StatelessWidget {
   final VoidCallback? onTap;
   const _PlayButton({required this.onTap});
@@ -635,13 +871,13 @@ class _PlayButton extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           gradient: const LinearGradient(
-            colors: [Color(0xFF10B981), Color(0xFF059669)],
+            colors: [_kAccent, Color(0xFF059669)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF10B981).withOpacity(0.3),
+              color: _kAccent.withOpacity(0.3),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -652,36 +888,10 @@ class _PlayButton extends StatelessWidget {
           children: [
             Icon(onTap == null ? Icons.block : Icons.play_arrow_rounded, color: Colors.white, size: 28),
             const SizedBox(width: 8),
-            Text(onTap == null ? 'NO TRACKS' : 'PLAY ALL', 
+            Text(onTap == null ? 'NO TRACKS' : 'PLAY ALL',
               style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 16, letterSpacing: 0.5)),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _CircleActionButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-  final bool isActive;
-  final Color? color;
-  const _CircleActionButton({required this.icon, required this.onTap, this.isActive = false, this.color});
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 56, height: 56,
-        decoration: BoxDecoration(
-          color: isActive ? Colors.white.withOpacity(0.12) : Colors.white.withOpacity(0.06),
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: isActive ? const Color(0xFF10B981).withOpacity(0.5) : Colors.white.withOpacity(0.1),
-            width: 1,
-          ),
-        ),
-        child: Icon(icon, color: color ?? (isActive ? const Color(0xFF10B981) : Colors.white), size: 24),
       ),
     );
   }
@@ -731,9 +941,50 @@ class _TrackRow extends StatelessWidget {
             Text(_fmtDur(song.duration),
                 style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 12)),
             const SizedBox(width: 8),
-            const Icon(Icons.play_circle_outline, color: Color(0xFF10B981), size: 22),
+            const Icon(Icons.play_circle_outline, color: _kAccent, size: 22),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _ArtistAllTracksPage extends StatelessWidget {
+  final ArtistModel artist;
+  final List<MusicModel> songs;
+
+  const _ArtistAllTracksPage({required this.artist, required this.songs});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: _kBg,
+      appBar: AppBar(
+        backgroundColor: _kBg,
+        elevation: 0,
+        title: Text('${artist.name} — All Tracks', style: const TextStyle(color: Colors.white, fontSize: 18)),
+      ),
+      body: ListView.separated(
+        padding: const EdgeInsets.all(20),
+        itemCount: songs.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 8),
+        itemBuilder: (context, i) {
+          final s = songs[i];
+          return _TrackRow(
+            index: i + 1,
+            song: s,
+            coverUrl: s.imageUrl.isNotEmpty ? s.imageUrl : (artist.imageUrl.isNotEmpty ? artist.imageUrl : ''),
+            onTap: () {
+              context.read<AudioProvider>().playMusic(s, queue: songs);
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (context) => PlayerScreen(music: s),
+              );
+            },
+          );
+        },
       ),
     );
   }

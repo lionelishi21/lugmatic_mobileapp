@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import '../../../../core/theme/neumorphic_theme.dart';
 
 class BattleBarWidget extends StatefulWidget {
   final double challengerScore;

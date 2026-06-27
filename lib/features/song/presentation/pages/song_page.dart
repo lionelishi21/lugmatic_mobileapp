@@ -189,7 +189,9 @@ class _SongPageState extends State<SongPage> with TickerProviderStateMixin {
         children: [
           Scaffold(
             backgroundColor: Colors.transparent,
-        body: CustomScrollView(
+        body: SafeArea(
+          bottom: false,
+          child: CustomScrollView(
           slivers: [
             _buildAppBar(),
             SliverToBoxAdapter(
@@ -224,6 +226,7 @@ class _SongPageState extends State<SongPage> with TickerProviderStateMixin {
               ),
             ),
           ],
+        ),
         ),
       ),
           if (_isLoading)

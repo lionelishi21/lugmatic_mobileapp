@@ -36,11 +36,11 @@ class MessageService {
     }
   }
 
-  Future<ConversationModel> startConversation(String artistId) async {
+  Future<ConversationModel> startConversation(String userId) async {
     try {
       final response = await _apiClient.dio.post(
         ApiConfig.startConversation,
-        data: {'artistId': artistId},
+        data: {'userId': userId},
       );
       final body = response.data;
       final data = body['data'] ?? body;

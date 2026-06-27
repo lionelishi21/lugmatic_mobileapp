@@ -12,7 +12,6 @@ import '../widgets/clash_artist_picker.dart';
 import '../widgets/clash_video_widget.dart';
 import '../widgets/battle_bar_widget.dart';
 import '../../../../data/models/live_clash_model.dart';
-import '../pages/tiktok_live_page.dart';
 
 /// The broadcasting dashboard for the artist.
 class LiveHostScreen extends StatefulWidget {
@@ -32,12 +31,10 @@ class _LiveHostScreenState extends State<LiveHostScreen>
   late LiveStreamService _liveStreamService;
   late SocketService _socketService;
 
-  LiveStreamModel? _stream;
   LiveStreamTokenData? _tokenData;
   List<LiveStreamChatMessage> _messages = [];
   int _viewerCount = 0;
   bool _isLoading = true;
-  String? _error;
   LiveClashModel? _activeClash;
 
   StreamSubscription? _chatSub;
@@ -97,7 +94,6 @@ class _LiveHostScreenState extends State<LiveHostScreen>
     _clashEndedSub = _socketService.onClashEnded.listen((data) {
       if (mounted) {
         setState(() => _activeClash = null);
-        final winnerId = data['winnerId'];
         final winnerName = data['winnerName'] ?? 'Someone';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -144,7 +140,6 @@ class _LiveHostScreenState extends State<LiveHostScreen>
 
       if (mounted) {
         setState(() {
-          _stream = stream;
           _tokenData = tokenData;
           _viewerCount = stream.currentViewers;
           _messages = List.from(stream.chatMessages);
@@ -155,7 +150,6 @@ class _LiveHostScreenState extends State<LiveHostScreen>
       if (mounted) {
         setState(() {
           _isLoading = false;
-          _error = e.toString();
         });
       }
     }

@@ -47,7 +47,7 @@ class CommentModel {
       content: json['content'] ?? '',
       contentType: json['contentType'] ?? '',
       contentId: json['contentId'] ?? '',
-      likes: json['likesCount'] ?? json['likes'] ?? 0,
+      likes: json['likeCount'] ?? (json['likes'] is List ? (json['likes'] as List).length : json['likes']) ?? 0,
       isLiked: json['isLiked'] ?? false,
       createdAt: json['createdAt'] != null 
           ? DateTime.tryParse(json['createdAt'].toString()) ?? DateTime.now() 

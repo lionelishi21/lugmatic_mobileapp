@@ -62,6 +62,7 @@ class ApiConfig {
   static const String createPaymentIntent = '/gift/create-payment-intent';
   static const String verifyPurchase = '/gift/verify-purchase';
   static const String coinBalance = '/gift/balance';
+  static const String paypalCaptureOrder = '/payments/paypal/capture-order';
 
   // ── Album endpoints ─────────────────────────────────────────────
   static const String albums = '/album/list';
@@ -86,8 +87,9 @@ class ApiConfig {
   static const String podcastTrending = '/podcast/trending';
 
   // ── Comment endpoints ───────────────────────────────────────────
-  static const String comments = '/comment';
-  static const String commentLike = '/comment'; // + /:id/like
+  // Backend mounts commentRoutes at /api/comments (plural) — see app.js.
+  static const String comments = '/comments';
+  static const String commentLike = '/comments'; // + /:id/like
 
   // ── Notification endpoints ──────────────────────────────────────
   static const String notifications = '/notification';

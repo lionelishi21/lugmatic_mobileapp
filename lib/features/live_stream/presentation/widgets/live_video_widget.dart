@@ -117,10 +117,8 @@ class _LiveVideoWidgetState extends State<LiveVideoWidget>
 
     // First, check remote participants for a video track (viewer mode)
     for (final participant in _room!.remoteParticipants.values) {
-      final pubs = participant is LocalParticipant 
-          ? participant.videoTrackPublications 
-          : (participant is RemoteParticipant ? participant.videoTrackPublications : []);
-          
+      final pubs = participant.videoTrackPublications;
+
       for (final pub in pubs) {
         if (pub.track != null && pub.subscribed == true) {
           track = pub.track as VideoTrack;
@@ -373,6 +371,31 @@ class _LiveVideoWidgetState extends State<LiveVideoWidget>
                 style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12),
                 textAlign: TextAlign.center,
               ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    side: const BorderSide(color: Colors.white54),
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Go Back'),
+                ),
+                const SizedBox(width: 12),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      _error = null;
+                      _isConnecting = true;
+                    });
+                    _connectToRoom();
+                  },
+                  child: const Text('Retry'),
+                ),
+              ],
             ),
           ],
         ),

@@ -9,6 +9,7 @@ import '../../data/providers/auth_provider.dart';
 import '../../data/services/stripe_service.dart';
 import '../../data/services/gift_service.dart';
 import '../../core/gifts/gift_pop_controller.dart';
+import '../../features/store/presentation/pages/paypal_checkout_page.dart';
 
 class GiftBottomSheet extends StatefulWidget {
   final String artistId;
@@ -43,6 +44,7 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> with SingleTickerProv
   int _coinBalance = 0;
   bool _loading = true;
   String? _sendingId;
+  String? _error;
 
   @override
   void initState() {
@@ -61,6 +63,10 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> with SingleTickerProv
   }
 
   Future<void> _loadData() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
     final apiClient = context.read<ApiClient>();
     try {
       final results = await Future.wait([
@@ -87,7 +93,16 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> with SingleTickerProv
         _animationController.forward(from: 0);
       }
     } catch (e) {
-      if (mounted) setState(() => _loading = false);
+      // Surface the failure instead of silently leaving the coin balance at 0 —
+      // a balance fetch error must never look identical to "you have 0 coins".
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _error = e is DioException
+              ? (e.response?.data is Map ? e.response!.data['message']?.toString() : null) ?? e.message ?? 'Network error'
+              : e.toString();
+        });
+      }
     }
   }
 
@@ -111,7 +126,7 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> with SingleTickerProv
       final apiClient = context.read<ApiClient>();
       final res = await apiClient.dio.post(
         ApiConfig.sendGift,
-        data: {'artistId': widget.artistId, 'giftId': gift.id},
+        data: {'artistId': widget.artistId, 'giftId': gift.id, 'quantity': 1},
       );
       final body = res.data;
       if (body['success'] == true) {
@@ -258,7 +273,31 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> with SingleTickerProv
                         valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF10B981)),
                       ),
                     )
-                  : _gifts.isEmpty
+                  : _error != null
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.error_outline, color: Colors.redAccent.withOpacity(0.7), size: 40),
+                              const SizedBox(height: 12),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 32),
+                                child: Text(
+                                  'Could not load gifts or balance: $_error',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(color: Colors.white.withOpacity(0.7)),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              ElevatedButton(
+                                onPressed: _loadData,
+                                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF10B981)),
+                                child: const Text('Retry'),
+                              ),
+                            ],
+                          ),
+                        )
+                      : _gifts.isEmpty
                       ? Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -539,6 +578,7 @@ class _TopUpDialog extends StatefulWidget {
 class _TopUpDialogState extends State<_TopUpDialog> {
   bool _loading = false;
   int? _loadingAmount;
+  bool _usePaypal = false;
 
   final List<Map<String, dynamic>> _packages = [
     {'amount': 500, 'price': '\$5', 'label': 'Starter'},
@@ -547,41 +587,87 @@ class _TopUpDialogState extends State<_TopUpDialog> {
     {'amount': 5000, 'price': '\$50', 'label': 'Supporter'},
   ];
 
-  Future<void> _handlePurchase(int amount) async {
+  void _handleBuy(int amount) {
+    if (_usePaypal) {
+      _handlePayPalPurchase(amount);
+    } else {
+      _handleCardPurchase(amount);
+    }
+  }
+
+  Future<void> _handleCardPurchase(int amount) async {
+    setState(() {
+      _loading = true;
+      _loadingAmount = amount;
+    });
+    try {
+      final stripeService = context.read<StripeService>();
+      final error = await stripeService.purchaseCoins(amount);
+      if (!mounted) return;
+
+      if (error == null) {
+        final giftService = context.read<GiftService>();
+        final balanceData = await giftService.getCoinBalance();
+        final newBalance = balanceData['coins'] as int? ?? 0;
+        if (!mounted) return;
+        widget.onSuccess(newBalance);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('$amount coins added to your wallet!'), backgroundColor: const Color(0xFF10B981)),
+        );
+        Navigator.pop(context);
+      } else if (error.isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(error), backgroundColor: const Color(0xFFEF4444)),
+        );
+      }
+      // empty string = user cancelled, no error shown
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString()), backgroundColor: const Color(0xFFEF4444)),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _handlePayPalPurchase(int amount) async {
     setState(() {
       _loading = true;
       _loadingAmount = amount;
     });
 
     try {
-      final stripeService = context.read<StripeService>();
       final giftService = context.read<GiftService>();
-      
-      final error = await stripeService.purchaseCoins(amount);
-      
+      final order = await giftService.createPaypalCoinOrder(amount);
+
+      if (order.approveUrl == null) throw Exception('Could not start PayPal checkout');
       if (!mounted) return;
 
-      if (error == null) {
-        // Success: Fetch new balance
-        final balData = await giftService.getCoinBalance();
-        final newCoins = balData['data']?['coins'] ?? balData['coins'] ?? 0;
-        widget.onSuccess(newCoins is int ? newCoins : (newCoins as num).toInt());
-        
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Coins added successfully!'), backgroundColor: Color(0xFF10B981)),
-          );
-          Navigator.pop(context);
-        }
-      } else if (error.isNotEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(error), backgroundColor: const Color(0xFFEF4444)),
-        );
-      }
+      final approved = await Navigator.push<bool>(
+        context,
+        MaterialPageRoute(
+          builder: (_) => PayPalCheckoutPage(approveUrl: order.approveUrl!),
+        ),
+      );
+
+      if (approved != true) return; // user cancelled — no error needed
+
+      await giftService.capturePaypalOrder(order.orderId);
+      final balanceData = await giftService.getCoinBalance();
+      final newBalance = balanceData['coins'] as int? ?? 0;
+
+      if (!mounted) return;
+      widget.onSuccess(newBalance);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$amount coins added to your wallet!'), backgroundColor: const Color(0xFF10B981)),
+      );
+      Navigator.pop(context); // Close the dialog
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Purchase failed'), backgroundColor: Color(0xFFEF4444)),
+          SnackBar(content: Text(e.toString()), backgroundColor: const Color(0xFFEF4444)),
         );
       }
     } finally {
@@ -613,13 +699,39 @@ class _TopUpDialogState extends State<_TopUpDialog> {
                 textAlign: TextAlign.center,
               ),
             ],
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Expanded(
+                  child: ChoiceChip(
+                    label: const Text('Card'),
+                    selected: !_usePaypal,
+                    onSelected: (_) => setState(() => _usePaypal = false),
+                    selectedColor: const Color(0xFF10B981),
+                    labelStyle: TextStyle(color: !_usePaypal ? Colors.black : Colors.white60, fontWeight: FontWeight.w700),
+                    backgroundColor: Colors.white.withOpacity(0.05),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: ChoiceChip(
+                    label: const Text('PayPal'),
+                    selected: _usePaypal,
+                    onSelected: (_) => setState(() => _usePaypal = true),
+                    selectedColor: const Color(0xFF10B981),
+                    labelStyle: TextStyle(color: _usePaypal ? Colors.black : Colors.white60, fontWeight: FontWeight.w700),
+                    backgroundColor: Colors.white.withOpacity(0.05),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
             ..._packages.map((pkg) {
               final isThisLoading = _loading && _loadingAmount == pkg['amount'];
               return Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: InkWell(
-                  onTap: _loading ? null : () => _handlePurchase(pkg['amount']),
+                  onTap: _loading ? null : () => _handleBuy(pkg['amount']),
                   borderRadius: BorderRadius.circular(16),
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

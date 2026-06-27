@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import '../../../../data/models/genre_model.dart';
 import '../../../../data/services/music_service.dart';
 import '../../../../core/network/api_client.dart';
-import '../../../../core/config/api_config.dart';
 
 class GenreListPage extends StatefulWidget {
   const GenreListPage({Key? key}) : super(key: key);

@@ -91,6 +91,39 @@ class GiftService {
     }
   }
 
+  /// Create a PayPal order for a coin purchase. Returns the orderId and the
+  /// PayPal approval URL to open in a WebView — the user approves there, then
+  /// the app calls [capturePaypalOrder] to finish the purchase.
+  Future<({String orderId, String? approveUrl})> createPaypalCoinOrder(int amount) async {
+    try {
+      final response = await _apiClient.dio.post(
+        ApiConfig.purchaseCoins,
+        data: {'amount': amount},
+      );
+      final data = response.data['data'];
+      final orderId = data?['orderId'] as String?;
+      if (orderId == null || orderId.isEmpty) {
+        throw Exception('Failed to create PayPal order');
+      }
+      return (orderId: orderId, approveUrl: data?['approveUrl'] as String?);
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// Capture an approved PayPal order — this is what actually credits the coins.
+  Future<Map<String, dynamic>> capturePaypalOrder(String orderId) async {
+    try {
+      final response = await _apiClient.dio.post(
+        ApiConfig.paypalCaptureOrder,
+        data: {'orderId': orderId},
+      );
+      return response.data['data'] ?? {};
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
   /// Verify a completed Stripe payment intent and credit coins to the user.
   Future<Map<String, dynamic>> verifyPurchase(String paymentIntentId) async {
     try {

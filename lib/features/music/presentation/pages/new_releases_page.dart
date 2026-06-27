@@ -16,7 +16,7 @@ class NewReleasesPage extends StatefulWidget {
 
 class _NewReleasesPageState extends State<NewReleasesPage> {
   late MusicService _musicService;
-  List<MusicModel> _songs = [];
+  final List<MusicModel> _songs = [];
   bool _isLoading = true;
   int _currentPage = 1;
   bool _hasMore = true;

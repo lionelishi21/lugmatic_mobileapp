@@ -8,7 +8,6 @@ import '../../../../data/models/playlist_model.dart';
 import '../../../../data/providers/audio_provider.dart';
 import '../../../../data/providers/auth_provider.dart';
 import '../../../../data/services/music_service.dart';
-import 'package:dio/dio.dart';
 
 class LibraryPage extends StatefulWidget {
   const LibraryPage({Key? key}) : super(key: key);
@@ -27,6 +26,17 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
   List<ArtistModel> _artists = [];
   List<MusicModel> _history = [];
   List<MusicModel> _artistSongs = [];
+
+  // Each tab's fetch is independent — one section failing (auth hiccup, bad
+  // response shape, etc.) must not blank out every other tab. Previously all
+  // requests ran under one Future.wait with a single shared catch, so any one
+  // failure silently emptied the entire page with no error shown anywhere.
+  String? _playlistsError;
+  String? _songsError;
+  String? _albumsError;
+  String? _artistsError;
+  String? _historyError;
+  String? _artistSongsError;
   bool _isArtist = false;
 
   @override
@@ -49,55 +59,91 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
     if (!mounted) return;
     setState(() => _isLoading = true);
 
+    // Each section is fetched and error-handled independently so a failure in
+    // any one (auth hiccup, malformed response, etc.) can't blank out the rest.
+    await Future.wait([
+      _loadPlaylists(api),
+      _loadFavorites(api, type: 'song', onLoaded: (items) => _songs = items, onError: (e) => _songsError = e),
+      _loadAlbums(api),
+      _loadFollowing(api),
+      _loadHistory(api),
+      if (_isArtist) _loadArtistCatalog(api),
+    ]);
+
+    if (mounted) setState(() => _isLoading = false);
+  }
+
+  Future<void> _loadPlaylists(ApiClient api) async {
     try {
-      final results = await Future.wait([
-        api.dio.get(ApiConfig.mobilePlaylists), // Fetches user playlists
-        api.dio.get(ApiConfig.mobileFavorites, queryParameters: {'type': 'song'}), // Liked songs
-        api.dio.get(ApiConfig.mobileFavorites, queryParameters: {'type': 'album'}), // Liked albums
-        api.dio.get(ApiConfig.mobileFavorites, queryParameters: {'type': 'artist'}), // Following
-        api.dio.get(ApiConfig.recentlyPlayed), // History
-        if (_isArtist) MusicService(apiClient: api).getArtistCatalog(),
-      ]);
-
-      if (mounted) {
-        final playlistBody = (results[0] as Response).data;
-        final favoritesBody = (results[1] as Response).data;
-        final albumBody = (results[2] as Response).data;
-        final artistBody = (results[3] as Response).data;
-        final historyBody = (results[4] as Response).data;
-
-        setState(() {
-          final playlistsRaw = playlistBody['data'] ?? [];
-          _playlists = (playlistsRaw as List).map((p) => PlaylistModel.fromJson(p as Map<String, dynamic>)).toList();
-          
-          // Fix: favorites and artists return { items: [...], nextCursor: ... }
-          final songItems = favoritesBody['data']?['items'] ?? [];
-          _songs = (songItems as List).map((j) => MusicModel.fromJson(j as Map<String, dynamic>)).toList();
-          
-          final albumItems = albumBody['data']?['items'] ?? [];
-          _albums = List<Map<String, dynamic>>.from(albumItems);
-          
-          final artistItems = artistBody['data']?['items'] ?? [];
-          _artists = (artistItems as List).map((j) => ArtistModel.fromJson(j as Map<String, dynamic>)).toList();
-          
-          // Fix: history returns { success, data: [ { song: {...}, playedAt: ... } ] }
-          final historyRaw = historyBody['data'] ?? [];
-          _history = (historyRaw as List)
-              .map((item) => item['song'] != null 
-                  ? MusicModel.fromJson(item['song'] as Map<String, dynamic>) 
-                  : null)
-              .whereType<MusicModel>()
-              .toList();
-          
-          if (_isArtist && results.length > 5) {
-            _artistSongs = results[5] as List<MusicModel>;
-          }
-          
-          _isLoading = false;
-        });
-      }
+      final res = await api.dio.get(ApiConfig.mobilePlaylists);
+      final raw = res.data['data'] ?? [];
+      final playlists = (raw as List).map((p) => PlaylistModel.fromJson(p as Map<String, dynamic>)).toList();
+      if (mounted) setState(() { _playlists = playlists; _playlistsError = null; });
     } catch (e) {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) setState(() => _playlistsError = e.toString());
+    }
+  }
+
+  Future<void> _loadFavorites(
+    ApiClient api, {
+    required String type,
+    required void Function(List<MusicModel>) onLoaded,
+    required void Function(String?) onError,
+  }) async {
+    try {
+      final res = await api.dio.get(ApiConfig.mobileFavorites, queryParameters: {'type': type});
+      // Favorites return { items: [...], nextCursor: ... }
+      final items = res.data['data']?['items'] ?? [];
+      final songs = (items as List).map((j) => MusicModel.fromJson(j as Map<String, dynamic>)).toList();
+      if (mounted) setState(() { onLoaded(songs); onError(null); });
+    } catch (e) {
+      if (mounted) setState(() => onError(e.toString()));
+    }
+  }
+
+  Future<void> _loadAlbums(ApiClient api) async {
+    try {
+      final res = await api.dio.get(ApiConfig.mobileFavorites, queryParameters: {'type': 'album'});
+      final items = res.data['data']?['items'] ?? [];
+      final albums = List<Map<String, dynamic>>.from(items as List);
+      if (mounted) setState(() { _albums = albums; _albumsError = null; });
+    } catch (e) {
+      if (mounted) setState(() => _albumsError = e.toString());
+    }
+  }
+
+  Future<void> _loadFollowing(ApiClient api) async {
+    try {
+      final res = await api.dio.get(ApiConfig.mobileFavorites, queryParameters: {'type': 'artist'});
+      final items = res.data['data']?['items'] ?? [];
+      final artists = (items as List).map((j) => ArtistModel.fromJson(j as Map<String, dynamic>)).toList();
+      if (mounted) setState(() { _artists = artists; _artistsError = null; });
+    } catch (e) {
+      if (mounted) setState(() => _artistsError = e.toString());
+    }
+  }
+
+  Future<void> _loadHistory(ApiClient api) async {
+    try {
+      final res = await api.dio.get(ApiConfig.recentlyPlayed);
+      // History returns { success, data: [ { song: {...}, playedAt: ... } ] }
+      final raw = res.data['data'] ?? [];
+      final history = (raw as List)
+          .map((item) => item['song'] != null ? MusicModel.fromJson(item['song'] as Map<String, dynamic>) : null)
+          .whereType<MusicModel>()
+          .toList();
+      if (mounted) setState(() { _history = history; _historyError = null; });
+    } catch (e) {
+      if (mounted) setState(() => _historyError = e.toString());
+    }
+  }
+
+  Future<void> _loadArtistCatalog(ApiClient api) async {
+    try {
+      final songs = await MusicService(apiClient: api).getArtistCatalog();
+      if (mounted) setState(() { _artistSongs = songs; _artistSongsError = null; });
+    } catch (e) {
+      if (mounted) setState(() => _artistSongsError = e.toString());
     }
   }
 
@@ -144,10 +190,22 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
                 controller: _tabController,
                 children: [
                   _buildPlaylistsTab(),
-                  _buildSongsTab(), // Liked Songs
+                  _buildSongsTab(
+                    error: _songsError,
+                    onRetry: () => _loadFavorites(
+                      context.read<ApiClient>(),
+                      type: 'song',
+                      onLoaded: (items) => _songs = items,
+                      onError: (e) => _songsError = e,
+                    ),
+                  ), // Liked Songs
                   _buildAlbumsTab(),
                   _buildFollowingTab(),
-                  _buildSongsTab(songs: _history), // History
+                  _buildSongsTab(
+                    songs: _history,
+                    error: _historyError,
+                    onRetry: () => _loadHistory(context.read<ApiClient>()),
+                  ), // History
                   if (_isArtist) _buildArtistSongsTab(),
                 ],
               ),
@@ -185,7 +243,9 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
         const SizedBox(height: 16),
         _buildCreatePlaylistCard(),
         const SizedBox(height: 24),
-        if (_playlists.isEmpty)
+        if (_playlistsError != null)
+          _buildErrorState(_playlistsError!, () => _loadPlaylists(context.read<ApiClient>()))
+        else if (_playlists.isEmpty)
           _buildEmptyState('No playlists yet', Icons.library_music)
         else
           ..._playlists.map((p) => _buildPlaylistItem(p)),
@@ -236,8 +296,12 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
     return GestureDetector(
       onTap: () async {
         final result = await Navigator.pushNamed(context, '/create_playlist');
-        if (result == true) {
-          _loadData(); // Refresh if created
+        if (result is PlaylistModel) {
+          setState(() {
+            _playlists.insert(0, result);
+          });
+        } else if (result == true) {
+          _loadData(); // Fallback if returned true instead of model
         }
       },
       child: Container(
@@ -320,8 +384,11 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
     );
   }
 
-  Widget _buildSongsTab({List<MusicModel>? songs}) {
+  Widget _buildSongsTab({List<MusicModel>? songs, String? error, VoidCallback? onRetry}) {
     final list = songs ?? _songs;
+    if (error != null) {
+      return Center(child: _buildErrorState(error, onRetry ?? () {}));
+    }
     if (list.isEmpty) {
       return Center(child: _buildEmptyState('No songs in library', Icons.music_note));
     }
@@ -380,6 +447,9 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
   }
 
   Widget _buildFollowingTab() {
+    if (_artistsError != null) {
+      return Center(child: _buildErrorState(_artistsError!, () => _loadFollowing(context.read<ApiClient>())));
+    }
     if (_artists.isEmpty) {
       return Center(child: _buildEmptyState('No followed artists yet', Icons.people));
     }
@@ -466,6 +536,9 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
   }
 
   Widget _buildAlbumsTab() {
+    if (_albumsError != null) {
+      return Center(child: _buildErrorState(_albumsError!, () => _loadAlbums(context.read<ApiClient>())));
+    }
     if (_albums.isEmpty) {
       return Center(child: _buildEmptyState('No liked albums yet', Icons.album));
     }
@@ -543,7 +616,39 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
     );
   }
 
+  // Distinct from _buildEmptyState — this means the fetch actually failed,
+  // not that the user genuinely has nothing here. Always paired with Retry.
+  Widget _buildErrorState(String error, VoidCallback onRetry) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 60),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.error_outline, color: Colors.redAccent.withOpacity(0.7), size: 48),
+          const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              'Could not load this — $error',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 14),
+            ),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: onRetry,
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF10B981)),
+            child: const Text('Retry'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildArtistSongsTab() {
+    if (_artistSongsError != null) {
+      return Center(child: _buildErrorState(_artistSongsError!, () => _loadArtistCatalog(context.read<ApiClient>())));
+    }
     if (_artistSongs.isEmpty) {
       return Center(child: _buildEmptyState('No music in your artist catalog yet', Icons.library_music));
     }

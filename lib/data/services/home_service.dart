@@ -31,11 +31,11 @@ class HomeService {
   }
 
   /// Fetch trending songs from the backend.
-  Future<List<MusicModel>> getTrendingSongs() async {
+  Future<List<MusicModel>> getTrendingSongs({String period = 'week'}) async {
     try {
       final response = await _apiClient.dio.get(
         ApiConfig.billboard,
-        queryParameters: {'limit': 20, 'period': 'week'},
+        queryParameters: {'limit': 20, 'period': period},
       );
       final items = _extractList(response.data, ['data', 'songs']);
       return (items)

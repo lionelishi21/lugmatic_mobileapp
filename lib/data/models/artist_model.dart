@@ -11,8 +11,12 @@ class ArtistModel {
   final int totalSongs;
   final int totalAlbums;
   final double rating;
+  final double averageRating;
+  final int ratingCount;
+  final double? userRating;
   final bool isFollowing;
   final bool isLive;
+  final String? userId;
 
   ArtistModel({
     required this.id,
@@ -27,9 +31,39 @@ class ArtistModel {
     this.totalSongs = 0,
     this.totalAlbums = 0,
     this.rating = 0.0,
+    this.averageRating = 0.0,
+    this.ratingCount = 0,
+    this.userRating,
     this.isFollowing = false,
     this.isLive = false,
+    this.userId,
   });
+
+  ArtistModel copyWith({
+    int? followers,
+    bool? isFollowing,
+  }) {
+    return ArtistModel(
+      id: id,
+      name: name,
+      imageUrl: imageUrl,
+      bio: bio,
+      followers: followers ?? this.followers,
+      genres: genres,
+      isVerified: isVerified,
+      location: location,
+      socialLinks: socialLinks,
+      totalSongs: totalSongs,
+      totalAlbums: totalAlbums,
+      rating: rating,
+      averageRating: averageRating,
+      ratingCount: ratingCount,
+      userRating: userRating,
+      isFollowing: isFollowing ?? this.isFollowing,
+      isLive: isLive,
+      userId: userId,
+    );
+  }
 
   factory ArtistModel.fromJson(Map<String, dynamic> json) {
     // Handle location: backend sends {city, country} object
@@ -68,8 +102,12 @@ class ArtistModel {
       totalSongs: json['songCount'] ?? json['totalSongs'] ?? 0,
       totalAlbums: json['albumCount'] ?? json['totalAlbums'] ?? 0,
       rating: (json['rating'] ?? 0.0).toDouble(),
+      averageRating: (json['averageRating'] ?? 0.0).toDouble(),
+      ratingCount: json['ratingCount'] ?? 0,
+      userRating: json['userRating']?.toDouble(),
       isFollowing: json['isFollowing'] ?? false,
       isLive: json['isLive'] ?? false,
+      userId: json['user']?['id'] ?? json['user']?['_id'],
     );
   }
 
@@ -87,8 +125,12 @@ class ArtistModel {
       'totalSongs': totalSongs,
       'totalAlbums': totalAlbums,
       'rating': rating,
+      'averageRating': averageRating,
+      'ratingCount': ratingCount,
+      if (userRating != null) 'userRating': userRating,
       'isFollowing': isFollowing,
       'isLive': isLive,
+      if (userId != null) 'user': {'id': userId},
     };
   }
 }

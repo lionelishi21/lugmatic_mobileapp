@@ -1,5 +1,6 @@
 // lib/features/home/data/models/playlist_model.dart
 import '../../../../data/models/music_model.dart';
+import '../../core/config/api_config.dart';
 
 class PlaylistModel {
   final String id;
@@ -30,19 +31,40 @@ class PlaylistModel {
     var songsList = <MusicModel>[];
     if (json['songs'] != null) {
       songsList = (json['songs'] as List)
+          // Songs can come back as raw ObjectId strings when not populated
+          // (e.g. a playlist fetched without a songs.populate) — skip those
+          // instead of crashing.
+          .whereType<Map>()
           .map((i) => MusicModel.fromJson(i as Map<String, dynamic>))
           .toList();
     }
+
+    // `owner` is only populated on some endpoints (e.g. public/admin playlist
+    // listings) — on "my playlists" it's just a raw ObjectId string, since the
+    // owner is always the requesting user. Guard against indexing a String.
+    final owner = json['owner'];
+    final ownerMap = owner is Map ? owner : null;
+
+    // Backend's mediaEnricher exposes the resolved cover art as `coverArtUrl`
+    // (falls back to the raw `coverArt` key, or the legacy `artwork.thumbnail`).
+    // Resolve here so every consumer gets a ready-to-use absolute URL.
+    final artwork = json['artwork'];
+    final rawImage = json['imageUrl'] ??
+        json['coverArtUrl'] ??
+        json['coverArt'] ??
+        (artwork is Map ? artwork['thumbnail'] : null) ??
+        '';
+    final imageUrl = ApiConfig.resolveUrl(rawImage is String ? rawImage : '');
 
     return PlaylistModel(
       id: json['_id'] ?? json['id'] ?? '',
       title: json['title'] ?? json['name'] ?? '',
       subtitle: json['subtitle'] ?? json['description'] ?? '',
-      imageUrl: json['imageUrl'] ?? json['artwork']?['thumbnail'] ?? '',
+      imageUrl: imageUrl,
       type: json['type'] ?? 'playlist',
       description: json['description'],
-      ownerId: json['owner']?['_id'],
-      ownerName: json['owner'] != null ? '${json['owner']['firstName']} ${json['owner']['lastName']}' : null,
+      ownerId: ownerMap?['_id'] ?? (owner is String ? owner : null),
+      ownerName: ownerMap != null ? '${ownerMap['firstName'] ?? ''} ${ownerMap['lastName'] ?? ''}'.trim() : null,
       isRecommended: json['isRecommended'] ?? false,
       songs: songsList,
     );

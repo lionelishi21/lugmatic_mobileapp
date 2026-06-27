@@ -16,7 +16,7 @@ class TrendingSongsPage extends StatefulWidget {
 
 class _TrendingSongsPageState extends State<TrendingSongsPage> {
   late MusicService _musicService;
-  List<MusicModel> _songs = [];
+  final List<MusicModel> _songs = [];
   bool _isLoading = true;
   int _currentPage = 1;
   bool _hasMore = true;

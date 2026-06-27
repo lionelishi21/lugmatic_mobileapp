@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -22,10 +23,11 @@ class PlayerScreen extends StatefulWidget {
   State<PlayerScreen> createState() => _PlayerScreenState();
 }
 
-class _PlayerScreenState extends State<PlayerScreen> {
+class _PlayerScreenState extends State<PlayerScreen> with SingleTickerProviderStateMixin {
   bool _isFavorited = false;
   VideoPlayerController? _videoController;
   String? _lastVideoUrl;
+  late AnimationController _bgAnimController;
 
   @override
   void initState() {
@@ -33,6 +35,12 @@ class _PlayerScreenState extends State<PlayerScreen> {
     _lastVideoUrl = widget.music.videoUrl;
     _isFavorited = widget.music.isLiked;
     _initVideo(widget.music.videoUrl);
+
+    // Slow ambient "breathing" zoom for the blurred album-art background.
+    _bgAnimController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 18),
+    )..repeat(reverse: true);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -100,6 +108,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
       audioProvider.removeListener(_onAudioProviderChanged);
     } catch (_) {}
     _videoController?.dispose();
+    _bgAnimController.dispose();
     super.dispose();
   }
 
@@ -136,19 +145,28 @@ class _PlayerScreenState extends State<PlayerScreen> {
                           ),
                         ),
                       )
-                    : Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              NeumorphicTheme.backgroundColor,
-                              NeumorphicTheme.surfaceColor,
-                              NeumorphicTheme.backgroundColor,
-                            ],
-                          ),
-                        ),
+                    : _BlurredArtBackground(
+                        imageUrl: currentMusic.imageUrl,
+                        animation: _bgAnimController,
                       ),
+              ),
+
+              // Dark scrim so the blurred art blends into the background
+              // instead of competing with the foreground text/icons.
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withOpacity(0.55),
+                        Colors.black.withOpacity(0.75),
+                        Colors.black.withOpacity(0.92),
+                      ],
+                    ),
+                  ),
+                ),
               ),
 
               // Foreground Layer
@@ -305,47 +323,25 @@ class _PlayerScreenState extends State<PlayerScreen> {
                           ),
                           const SizedBox(height: 20),
 
-                          // Shuffle + Repeat row (above main controls)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                // Shuffle button
-                                IconButton(
-                                  onPressed: audioProvider.toggleShuffle,
-                                  icon: Icon(
-                                    Icons.shuffle,
-                                    color: audioProvider.shuffle
-                                        ? const Color(0xFF10B981)
-                                        : Colors.white38,
-                                    size: 22,
-                                  ),
-                                ),
-                                // Repeat button
-                                IconButton(
-                                  onPressed: audioProvider.toggleRepeat,
-                                  icon: Icon(
-                                    audioProvider.repeatMode == RepeatMode.one
-                                        ? Icons.repeat_one
-                                        : Icons.repeat,
-                                    color: audioProvider.repeatMode != RepeatMode.off
-                                        ? const Color(0xFF10B981)
-                                        : Colors.white38,
-                                    size: 22,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          // Main Playback Controls
+                          // Playback Controls — shuffle / previous / play / next / repeat,
+                          // all in one evenly-spaced row so every icon lines up consistently
+                          // instead of shuffle/repeat floating off at the screen edges.
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
                               IconButton(
+                                onPressed: audioProvider.toggleShuffle,
+                                icon: Icon(
+                                  Icons.shuffle,
+                                  color: audioProvider.shuffle
+                                      ? const Color(0xFF10B981)
+                                      : Colors.white38,
+                                  size: 22,
+                                ),
+                              ),
+                              IconButton(
                                 onPressed: audioProvider.previous,
-                                icon: const Icon(Icons.skip_previous, color: Colors.white, size: 40),
+                                icon: const Icon(Icons.skip_previous, color: Colors.white, size: 36),
                               ),
                               GestureDetector(
                                 onTap: () {
@@ -379,7 +375,19 @@ class _PlayerScreenState extends State<PlayerScreen> {
                               ),
                               IconButton(
                                 onPressed: audioProvider.next,
-                                icon: const Icon(Icons.skip_next, color: Colors.white, size: 40),
+                                icon: const Icon(Icons.skip_next, color: Colors.white, size: 36),
+                              ),
+                              IconButton(
+                                onPressed: audioProvider.toggleRepeat,
+                                icon: Icon(
+                                  audioProvider.repeatMode == RepeatMode.one
+                                      ? Icons.repeat_one
+                                      : Icons.repeat,
+                                  color: audioProvider.repeatMode != RepeatMode.off
+                                      ? const Color(0xFF10B981)
+                                      : Colors.white38,
+                                  size: 22,
+                                ),
                               ),
                             ],
                           ),
@@ -671,4 +679,58 @@ class _PlayerScreenState extends State<PlayerScreen> {
       debugPrint("Favorite toggle error: $e");
     }
   }
+}
+
+/// Heavily blurred, slowly "breathing" album-art background — fills the
+/// screen behind the player so it feels alive without distracting from the
+/// foreground controls. Crossfades smoothly when the track (and art) changes.
+class _BlurredArtBackground extends StatelessWidget {
+  final String imageUrl;
+  final Animation<double> animation;
+
+  const _BlurredArtBackground({required this.imageUrl, required this.animation});
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRect(
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 600),
+        child: imageUrl.isEmpty
+            ? _fallbackGradient(key: const ValueKey('fallback'))
+            : AnimatedBuilder(
+                key: ValueKey(imageUrl),
+                animation: animation,
+                builder: (context, child) {
+                  final scale = 1.08 + (animation.value * 0.12);
+                  return Transform.scale(
+                    scale: scale,
+                    child: ImageFiltered(
+                      imageFilter: ImageFilter.blur(sigmaX: 45, sigmaY: 45, tileMode: TileMode.decal),
+                      child: Image.network(
+                        imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => _fallbackGradient(),
+                      ),
+                    ),
+                  );
+                },
+              ),
+      ),
+    );
+  }
+
+  Widget _fallbackGradient({Key? key}) => Container(
+        key: key,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              NeumorphicTheme.backgroundColor,
+              NeumorphicTheme.surfaceColor,
+              NeumorphicTheme.backgroundColor,
+            ],
+          ),
+        ),
+      );
 }

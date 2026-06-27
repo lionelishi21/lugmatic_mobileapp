@@ -31,6 +31,14 @@ class ApiException implements Exception {
 
         if (data is Map<String, dynamic>) {
           message = data['message'] as String? ?? message;
+          // Many endpoints return a generic message + a separate `error` field
+          // with the actual root cause (e.g. "PayPal is not configured...").
+          // Surface both so failures are actually debuggable instead of just
+          // showing a generic "Something went wrong" / "Error purchasing coins".
+          final detail = data['error'] as String?;
+          if (detail != null && detail.isNotEmpty && detail != message) {
+            message = '$message: $detail';
+          }
         }
 
         return ApiException(

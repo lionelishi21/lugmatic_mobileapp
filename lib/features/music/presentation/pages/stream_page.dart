@@ -18,7 +18,6 @@ class _StreamPageState extends State<StreamPage> {
   List<LiveStreamModel> _upcomingStreams = [];
   List<LiveStreamModel> _pastStreams = [];
   bool _isLoading = true;
-  String? _error;
 
   @override
   void initState() {
@@ -36,7 +35,6 @@ class _StreamPageState extends State<StreamPage> {
     if (!mounted) return;
     setState(() {
       _isLoading = true;
-      _error = null;
     });
 
     try {
@@ -52,7 +50,6 @@ class _StreamPageState extends State<StreamPage> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _error = 'Failed to load streams';
           _isLoading = false;
         });
       }

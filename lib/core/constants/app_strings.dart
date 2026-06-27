@@ -1,17 +1,20 @@
 class AppStrings {
   // Onboarding
-  static const String streamMusicTitle = "Lugmatic";
-  static const String streamMusicDescription = 
-      "Access a vast library of songs in high-quality audio, anytime, anywhere.";
-      
-  static const String viewArtistsTitle = "View Artists Live";
-  static const String viewArtistsDescription = 
-      "Experience real-time concerts with interactive features. Never miss a show.";
-      
-  static const String giftArtistsTitle = "Gift Your Artists";
-  static const String giftArtistsDescription = 
-      "Support your favorite musicians by sending them virtual gifts during their live shows.";
-      
+  static const String streamMusicEyebrow = "LISTENING ROOMS";
+  static const String streamMusicTitle = "Tune in, together";
+  static const String streamMusicDescription =
+      "Fans and artists press play on the same beat. One room, one timeline — everybody in sync.";
+
+  static const String viewArtistsEyebrow = "LIVE SHOWS";
+  static const String viewArtistsTitle = "Go live, together";
+  static const String viewArtistsDescription =
+      "Watch real-time concerts and sound clashes as they happen. Chat, react, never miss a show.";
+
+  static const String giftArtistsEyebrow = "DIRECT SUPPORT";
+  static const String giftArtistsTitle = "Give, together";
+  static const String giftArtistsDescription =
+      "Send virtual gifts straight to the artists you love, live, and keep the culture funded.";
+
   static const String nextButton = "Next";
   static const String startListeningButton = "Start Listening";
 

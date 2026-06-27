@@ -428,6 +428,20 @@ class _ArtistLiveScreenState extends State<ArtistLiveScreen> with WidgetsBinding
                   label: provider.isCameraOn ? 'Cam' : 'Cam Off',
                 ),
                 const SizedBox(height: 16),
+                _controlBtn(
+                  Icons.blur_on,
+                  provider.isBlurOn ? Colors.greenAccent : Colors.white70,
+                  () {
+                    provider.toggleBackgroundBlur();
+                    if (!provider.isBlurOn) {
+                      _showSnack('Background Blur Enabled (Native Processing Required)');
+                    } else {
+                      _showSnack('Background Blur Disabled');
+                    }
+                  },
+                  label: provider.isBlurOn ? 'Blur On' : 'Blur Off',
+                ),
+                const SizedBox(height: 16),
                 _controlBtn(Icons.stop_circle_outlined, Colors.redAccent, _stopStreaming, label: 'End'),
               ]),
             ),

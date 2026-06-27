@@ -31,7 +31,7 @@ class _BillboardPageState extends State<BillboardPage> {
   Future<void> _loadBillboard() async {
     setState(() => _isLoading = true);
     try {
-      final songs = await _homeService.getTrendingSongs();
+      final songs = await _homeService.getTrendingSongs(period: _period);
       if (mounted) {
         setState(() {
           _songs = songs;

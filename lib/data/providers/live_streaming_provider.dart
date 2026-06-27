@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:livekit_client/livekit_client.dart';
+import 'package:flutter/services.dart';
 import '../services/live_stream_service.dart';
 import '../services/socket_service.dart';
 
@@ -29,6 +30,9 @@ class LiveStreamingProvider extends ChangeNotifier {
 
   bool _isMicOn = true;
   bool _isCameraOn = true;
+  bool _isBlurOn = false;
+  static const MethodChannel _blurChannel = MethodChannel('com.lugmatic/background_blur');
+
   Map<String, dynamic>? _lastGift;
   Map<String, dynamic>? _activeClash;
   String? _clashRoomUrl;
@@ -55,6 +59,7 @@ class LiveStreamingProvider extends ChangeNotifier {
   String get elapsedTime => _elapsedTime;
   bool get isMicOn => _isMicOn;
   bool get isCameraOn => _isCameraOn;
+  bool get isBlurOn => _isBlurOn;
   Map<String, dynamic>? get lastGift => _lastGift;
   Map<String, dynamic>? get activeClash => _activeClash;
   String? get clashRoomUrl => _clashRoomUrl;
@@ -231,6 +236,20 @@ class LiveStreamingProvider extends ChangeNotifier {
     if (_room == null) return;
     _isCameraOn = !_isCameraOn;
     await _room!.localParticipant?.setCameraEnabled(_isCameraOn);
+    notifyListeners();
+  }
+
+  Future<void> toggleBackgroundBlur() async {
+    if (_room == null) return;
+    _isBlurOn = !_isBlurOn;
+    
+    try {
+      await _blurChannel.invokeMethod('setBlurEnabled', {'enabled': _isBlurOn});
+      debugPrint('Background blur native channel invoked: $_isBlurOn');
+    } on PlatformException catch (e) {
+      debugPrint('Failed to toggle background blur natively: ${e.message}');
+      // Fallback or warning message about native implementation
+    }
     notifyListeners();
   }
 

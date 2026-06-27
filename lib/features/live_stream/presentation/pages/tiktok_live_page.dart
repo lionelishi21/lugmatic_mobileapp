@@ -37,7 +37,8 @@ class _TikTokLivePageState extends State<TikTokLivePage>
 
   List<LiveStreamModel> _liveStreams = [];
   List<LiveStreamChatMessage> _comments = [];
-  Map<String, LiveStreamTokenData> _tokenCache = {};
+  final Map<String, LiveStreamTokenData> _tokenCache = {};
+  final Map<String, String> _tokenErrors = {};
 
   int _currentStreamIndex = 0;
   int _viewerCount = 0;
@@ -227,16 +228,6 @@ class _TikTokLivePageState extends State<TikTokLivePage>
     );
   }
 
-  void _handleClashAction(Map<String, dynamic> data) {
-    // Basic implementation: show toast or brief overlay
-    final action = data['action'];
-    if (action == 'flame_overlay') {
-      // Trigger flame animation
-    } else if (action == 'noise') {
-      // Play sound
-    }
-  }
-
   void _inviteToClash() async {
     final currentStream = _liveStreams[_currentStreamIndex];
     final opponentId = await showModalBottomSheet<String>(
@@ -312,9 +303,15 @@ class _TikTokLivePageState extends State<TikTokLivePage>
 
   Future<void> _fetchToken(String streamId) async {
     if (_tokenCache.containsKey(streamId)) return;
+    if (mounted) setState(() => _tokenErrors.remove(streamId));
     try {
       final tokenData = await _liveStreamService?.getStreamToken(streamId);
-      if (tokenData == null) return;
+      if (tokenData == null) {
+        if (mounted) {
+          setState(() => _tokenErrors[streamId] = 'Could not join this stream.');
+        }
+        return;
+      }
       if (mounted) {
         setState(() {
           _tokenCache[streamId] = tokenData;
@@ -328,13 +325,19 @@ class _TikTokLivePageState extends State<TikTokLivePage>
         }
       }
     } on ApiException catch (e) {
-      if (mounted && e.statusCode == 409) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.message)),
-        );
+      if (mounted) {
+        setState(() => _tokenErrors[streamId] = e.message);
+        if (e.statusCode == 409) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(e.message)),
+          );
+        }
       }
       debugPrint('Failed to fetch token for stream $streamId: $e');
     } catch (e) {
+      if (mounted) {
+        setState(() => _tokenErrors[streamId] = 'Could not join this stream.');
+      }
       debugPrint('Failed to fetch token for stream $streamId: $e');
     }
   }
@@ -550,6 +553,10 @@ class _TikTokLivePageState extends State<TikTokLivePage>
                   isHost: tokenData.isHost,
                 );
               }
+              final tokenError = _tokenErrors[stream.id];
+              if (tokenError != null) {
+                return _buildPlaceholderBackground(stream, error: tokenError);
+              }
               // While token is loading, show gradient placeholder
               return _buildPlaceholderBackground(stream);
             },
@@ -568,7 +575,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
     );
   }
 
-  Widget _buildPlaceholderBackground(LiveStreamModel stream) {
+  Widget _buildPlaceholderBackground(LiveStreamModel stream, {String? error}) {
     return Container(
       width: double.infinity,
       height: double.infinity,
@@ -640,7 +647,42 @@ class _TikTokLivePageState extends State<TikTokLivePage>
               ),
             ),
             const SizedBox(height: 16),
-            const CircularProgressIndicator(color: Colors.white54),
+            if (error == null)
+              const CircularProgressIndicator(color: Colors.white54)
+            else ...[
+              const Icon(Icons.error_outline, color: Colors.white70, size: 32),
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32),
+                child: Text(
+                  error,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.white70, fontSize: 14),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      side: const BorderSide(color: Colors.white54),
+                    ),
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Go Back'),
+                  ),
+                  const SizedBox(width: 12),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() => _tokenErrors.remove(stream.id));
+                      _fetchToken(stream.id);
+                    },
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            ],
           ],
         ),
       ),

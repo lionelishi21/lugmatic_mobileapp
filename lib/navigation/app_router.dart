@@ -31,7 +31,10 @@ import '../features/artist/account/payout_settings_screen.dart';
 import '../features/regular_clash/regular_clash_detail_page.dart';
 import '../features/regular_clash/regular_clash_feed_page.dart';
 import '../features/video/presentation/pages/video_recording_page.dart';
+import '../features/video/presentation/pages/video_player_page.dart';
 import '../features/provider/navigation/provider_shell.dart';
+import '../features/home/presentation/pages/browse_page.dart';
+import '../data/models/video_model.dart';
 
 class AppRouter {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
@@ -200,6 +203,16 @@ class AppRouter {
           return MaterialPageRoute(
             builder: (_) => VideoRecordingPage(clashId: args['clashId'] as String),
           );
+        }
+        return _notFound();
+
+      case '/search':
+        return MaterialPageRoute(builder: (_) => const BrowsePage());
+
+      case '/video-player':
+        final args = settings.arguments;
+        if (args is VideoModel) {
+          return MaterialPageRoute(builder: (_) => VideoPlayerPage(video: args));
         }
         return _notFound();
 

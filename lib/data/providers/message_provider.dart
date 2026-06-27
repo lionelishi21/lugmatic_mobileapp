@@ -90,7 +90,7 @@ class MessageProvider with ChangeNotifier {
     return msg;
   }
 
-  Future<ConversationModel> startConversation(String artistId) async {
-    return await _messageService.startConversation(artistId);
+  Future<ConversationModel> startConversation(String userId) async {
+    return await _messageService.startConversation(userId);
   }
 }

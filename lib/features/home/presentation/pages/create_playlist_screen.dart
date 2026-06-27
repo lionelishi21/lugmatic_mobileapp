@@ -45,7 +45,7 @@ class _CreatePlaylistScreenState extends State<CreatePlaylistScreen> {
     setState(() => _isLoading = true);
 
     try {
-      await _playlistService.createPlaylist(
+      final newPlaylist = await _playlistService.createPlaylist(
         name: _nameController.text.trim(),
         description: _descriptionController.text.trim(),
       );
@@ -57,7 +57,7 @@ class _CreatePlaylistScreenState extends State<CreatePlaylistScreen> {
             backgroundColor: NeumorphicTheme.primaryAccent,
           ),
         );
-        Navigator.pop(context, true); // Return true to indicate success
+        Navigator.pop(context, newPlaylist); // Return the newly created playlist
       }
     } catch (e) {
       if (mounted) {

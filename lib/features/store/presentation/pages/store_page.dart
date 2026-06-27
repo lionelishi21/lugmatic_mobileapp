@@ -3,6 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:lugmatic_flutter/data/services/gift_service.dart';
 import 'package:lugmatic_flutter/data/services/stripe_service.dart';
 import 'package:lugmatic_flutter/core/theme/neumorphic_theme.dart';
+import 'paypal_checkout_page.dart';
+
+enum _PaymentMethod { card, paypal }
 
 class CoinPackage {
   final String label;
@@ -37,6 +40,7 @@ class _StorePageState extends State<StorePage> {
   int? _balance;
   bool _isLoadingBalance = true;
   int? _purchasingAmount;
+  _PaymentMethod _method = _PaymentMethod.card;
 
   final List<CoinPackage> _packages = [
     CoinPackage(
@@ -133,11 +137,71 @@ class _StorePageState extends State<StorePage> {
           icon: Icons.error_outline,
           iconColor: Colors.redAccent,
           title: 'Purchase Failed',
-          message: 'Something went wrong. Please try again.',
+          message: e.toString(),
         );
       }
     } finally {
       if (mounted) setState(() => _purchasingAmount = null);
+    }
+  }
+
+  Future<void> _handlePayPalPurchase(int amount) async {
+    setState(() => _purchasingAmount = amount);
+    try {
+      final giftService = context.read<GiftService>();
+      final order = await giftService.createPaypalCoinOrder(amount);
+
+      if (order.approveUrl == null) {
+        if (mounted) {
+          _showDialog(
+            icon: Icons.error_outline,
+            iconColor: Colors.redAccent,
+            title: 'Purchase Failed',
+            message: 'Could not start PayPal checkout. Please try again.',
+          );
+        }
+        return;
+      }
+
+      if (!mounted) return;
+      final approved = await Navigator.push<bool>(
+        context,
+        MaterialPageRoute(
+          builder: (_) => PayPalCheckoutPage(approveUrl: order.approveUrl!),
+        ),
+      );
+
+      if (approved != true) return; // user cancelled — no error dialog needed
+
+      await giftService.capturePaypalOrder(order.orderId);
+
+      if (!mounted) return;
+      await _fetchBalance();
+      _showDialog(
+        icon: Icons.check_circle,
+        iconColor: Colors.green,
+        title: 'Purchase Complete!',
+        message: '$amount coins have been added to your wallet.',
+      );
+    } catch (e) {
+      if (mounted) {
+        _showDialog(
+          icon: Icons.error_outline,
+          iconColor: Colors.redAccent,
+          title: 'Purchase Failed',
+          message: e.toString(),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _purchasingAmount = null);
+    }
+  }
+
+  void _handleBuy(int amount) {
+    if (_method == _PaymentMethod.card) {
+      _handlePurchase(amount);
+    } else {
+      _handlePayPalPurchase(amount);
     }
   }
 
@@ -191,6 +255,8 @@ class _StorePageState extends State<StorePage> {
                 const SizedBox(height: 32),
                 _buildBalanceCard(),
                 const SizedBox(height: 32),
+                _buildMethodPicker(),
+                const SizedBox(height: 24),
                 const Text(
                   'Select a Package',
                   style: TextStyle(
@@ -285,6 +351,52 @@ class _StorePageState extends State<StorePage> {
             fontSize: 14,
           ),
         ),
+      ],
+    );
+  }
+
+  Widget _buildMethodPicker() {
+    Widget option(_PaymentMethod method, IconData icon, String label) {
+      final selected = _method == method;
+      return Expanded(
+        child: GestureDetector(
+          onTap: () => setState(() => _method = method),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            decoration: BoxDecoration(
+              color: selected ? const Color(0xFF10B981).withOpacity(0.12) : Colors.white.withOpacity(0.04),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: selected ? const Color(0xFF10B981) : Colors.white.withOpacity(0.08),
+                width: selected ? 1.5 : 1,
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, size: 18, color: selected ? const Color(0xFF10B981) : Colors.white60),
+                const SizedBox(width: 8),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: selected ? const Color(0xFF10B981) : Colors.white60,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Row(
+      children: [
+        option(_PaymentMethod.card, Icons.credit_card, 'Card'),
+        const SizedBox(width: 12),
+        option(_PaymentMethod.paypal, Icons.account_balance_wallet, 'PayPal'),
       ],
     );
   }
@@ -449,7 +561,7 @@ class _StorePageState extends State<StorePage> {
             ),
             const SizedBox(width: 12),
             GestureDetector(
-              onTap: isPurchasing ? null : () => _handlePurchase(package.amount),
+              onTap: isPurchasing ? null : () => _handleBuy(package.amount),
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(

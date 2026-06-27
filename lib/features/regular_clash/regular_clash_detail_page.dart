@@ -7,6 +7,7 @@ import '../../core/constants/app_colors.dart';
 import '../../data/models/regular_clash_model.dart';
 import '../../data/services/regular_clash_service.dart';
 import '../../shared/widgets/gift_bottom_sheet.dart';
+import '../../shared/widgets/comment_section_widget.dart';
 
 enum _Phase { idle, challenger, transition, opponent, done }
 
@@ -189,6 +190,14 @@ class _RegularClashDetailPageState extends State<RegularClashDetailPage> {
           _buildVoteBar(clash),
           const SizedBox(height: 20),
           _buildActions(clash),
+          const SizedBox(height: 32),
+          const Align(
+            alignment: Alignment.centerLeft,
+            child: Text('Comments', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+          ),
+          const SizedBox(height: 16),
+          CommentSectionWidget(contentType: 'clash', contentId: clash.id),
+          const SizedBox(height: 40),
         ],
       ),
     );

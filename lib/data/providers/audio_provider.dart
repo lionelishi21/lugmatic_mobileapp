@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
@@ -20,7 +19,6 @@ class AudioProvider extends ChangeNotifier {
   int _currentIndex = -1;
   RepeatMode _repeatMode = RepeatMode.off;
   bool _shuffle = false;
-  final Random _random = Random();
 
   String? _errorMessage;
 
@@ -40,7 +38,7 @@ class AudioProvider extends ChangeNotifier {
   RepeatMode get repeatMode => _repeatMode;
   bool get shuffle => _shuffle;
 
-  void toggleRepeat() {
+  Future<void> toggleRepeat() async {
     switch (_repeatMode) {
       case RepeatMode.off:
         _repeatMode = RepeatMode.all;
@@ -52,11 +50,20 @@ class AudioProvider extends ChangeNotifier {
         _repeatMode = RepeatMode.off;
         break;
     }
+    await _audioPlayer.setLoopMode(switch (_repeatMode) {
+      RepeatMode.off => LoopMode.off,
+      RepeatMode.all => LoopMode.all,
+      RepeatMode.one => LoopMode.one,
+    });
     notifyListeners();
   }
 
-  void toggleShuffle() {
+  Future<void> toggleShuffle() async {
     _shuffle = !_shuffle;
+    await _audioPlayer.setShuffleModeEnabled(_shuffle);
+    if (_shuffle) {
+      await _audioPlayer.shuffle();
+    }
     notifyListeners();
   }
 
@@ -73,14 +80,21 @@ class AudioProvider extends ChangeNotifier {
       notifyListeners();
     });
 
+    // Fires for every track change in the sequence — in-app taps, lock-screen
+    // skip-next/previous, and natural end-of-track advance all flow through here.
+    _audioPlayer.currentIndexStream.listen((index) {
+      if (index == null || _queue.isEmpty || index < 0 || index >= _queue.length) return;
+      if (_currentIndex == index && _currentMusic?.id == _queue[index].id) return;
+      _currentIndex = index;
+      _currentMusic = _queue[index];
+      _musicService.recordPlay(_currentMusic!.id);
+      notifyListeners();
+    });
+
     _audioPlayer.playerStateStream.listen((state) {
       _isPlaying = state.playing;
       _isLoading = state.processingState == ProcessingState.loading ||
           state.processingState == ProcessingState.buffering;
-
-      if (state.processingState == ProcessingState.completed) {
-        _handlePlaybackCompleted();
-      }
       notifyListeners();
     });
 
@@ -93,8 +107,53 @@ class AudioProvider extends ChangeNotifier {
         _errorMessage = "An unknown error occurred";
       }
       debugPrint("Player Error: $e");
-      notifyListeners();
+      // A load/playback error can leave the native player wedged (still
+      // "loading" with no further events), which blocks every subsequent
+      // setAudioSources() call. Force it back to idle so the next track
+      // the user taps gets a clean player instead of inheriting this state.
+      _resetPlayerAfterError();
     });
+  }
+
+  Future<void> _resetPlayerAfterError() async {
+    _isLoading = false;
+    _isPlaying = false;
+    _currentMusic = null;
+    _currentIndex = -1;
+    notifyListeners();
+    try {
+      await _audioPlayer.stop();
+    } catch (e) {
+      debugPrint("Error resetting player after failure: $e");
+    }
+  }
+
+  /// Parse a URL that's already supposed to be valid (ApiConfig.resolveUrl
+  /// already resolves relative paths to full URLs). Try parsing it as-is
+  /// first — Uri.encodeFull on an already-valid URL double-encodes any
+  /// existing "%" escape (e.g. "%2B" -> "%252B"), which 404s. Only fall back
+  /// to encoding if the raw string genuinely isn't parseable (e.g. literal
+  /// unencoded spaces).
+  Uri _safeParseUri(String url) {
+    final trimmed = url.trim();
+    final direct = Uri.tryParse(trimmed);
+    if (direct != null && direct.hasScheme && direct.host.isNotEmpty) {
+      return direct;
+    }
+    return Uri.parse(Uri.encodeFull(trimmed));
+  }
+
+  AudioSource _toAudioSource(MusicModel music) {
+    return AudioSource.uri(
+      _safeParseUri(music.audioUrl),
+      tag: MediaItem(
+        id: music.id,
+        album: music.album.isNotEmpty ? music.album : "Lugmatic",
+        title: music.title,
+        artist: music.artist,
+        artUri: music.imageUrl.isNotEmpty ? _safeParseUri(music.imageUrl) : null,
+      ),
+    );
   }
 
   Future<void> playMusic(MusicModel music, {List<MusicModel>? queue}) async {
@@ -115,52 +174,62 @@ class AudioProvider extends ChangeNotifier {
 
     try {
       _isLoading = true;
-      _currentMusic = music;
       _position = Duration.zero;
       _duration = Duration.zero;
 
       if (queue != null && queue.isNotEmpty) {
-        _queue = queue;
+        _queue = queue.where((m) => m.audioUrl.trim().isNotEmpty).toList();
         _currentIndex = _queue.indexWhere((m) => m.id == music.id);
         if (_currentIndex == -1) {
           // If the song isn't in the provided queue, just insert it and play it.
+          if (music.audioUrl.trim().isEmpty) {
+            throw Exception("Cannot play track: Audio URL is missing.");
+          }
           _queue.insert(0, music);
           _currentIndex = 0;
         }
       } else if (_queue.any((m) => m.id == music.id)) {
         _currentIndex = _queue.indexWhere((m) => m.id == music.id);
       } else {
+        if (music.audioUrl.trim().isEmpty) {
+          throw Exception("Cannot play track: Audio URL is missing.");
+        }
         // Essential fallback: If no queue is provided, make this single track the queue
         // so it doesn't break queue logic downstream.
         _queue = [music];
         _currentIndex = 0;
       }
 
+      _currentMusic = music;
       notifyListeners();
 
-      final encodedUrl = music.audioUrl.trim().replaceAll(' ', '%20');
-
-      final audioSource = AudioSource.uri(
-        Uri.parse(encodedUrl),
-        tag: MediaItem(
-          id: music.id,
-          album: music.album.isNotEmpty ? music.album : "Lugmatic",
-          title: music.title,
-          artist: music.artist,
-          artUri: music.imageUrl.isNotEmpty
-              ? Uri.parse(music.imageUrl.trim().replaceAll(' ', '%20'))
-              : null,
-        ),
+      // Real sequence (not a single swapped-out source) — this is what lets
+      // just_audio_background report hasNext/hasPrevious to the OS, which is
+      // what makes skip-next/previous actually show up in the lock-screen /
+      // notification media controls.
+      await _audioPlayer.setAudioSources(
+        _queue.map(_toAudioSource).toList(),
+        initialIndex: _currentIndex,
+        initialPosition: Duration.zero,
       );
-
-      // Async history trigger so we don't delay playback
+      await _audioPlayer.setShuffleModeEnabled(_shuffle);
+      await _audioPlayer.setLoopMode(switch (_repeatMode) {
+        RepeatMode.off => LoopMode.off,
+        RepeatMode.all => LoopMode.all,
+        RepeatMode.one => LoopMode.one,
+      });
       _musicService.recordPlay(music.id);
-
-      await _audioPlayer.setAudioSource(audioSource);
       _audioPlayer.play();
     } catch (e) {
       _errorMessage = "Failed to load audio";
       debugPrint("Error playing music: $e");
+      _currentMusic = null;
+      _currentIndex = -1;
+      try {
+        await _audioPlayer.stop();
+      } catch (stopError) {
+        debugPrint("Error resetting player after failed load: $stopError");
+      }
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -187,59 +256,23 @@ class AudioProvider extends ChangeNotifier {
     await _audioPlayer.seek(position);
   }
 
-  void next() {
-    if (_queue.isEmpty) return;
-
-    if (_shuffle && _queue.length > 1) {
-      int newIndex;
-      do {
-        newIndex = _random.nextInt(_queue.length);
-      } while (newIndex == _currentIndex);
-      playMusic(_queue[newIndex]);
-    } else if (_currentIndex < _queue.length - 1) {
-      playMusic(_queue[_currentIndex + 1]);
-    } else if (_repeatMode == RepeatMode.all) {
-      playMusic(_queue[0]);
+  Future<void> next() async {
+    if (_audioPlayer.hasNext) {
+      await _audioPlayer.seekToNext();
     }
   }
 
-  void previous() {
-    if (_queue.isEmpty) {
-      seek(Duration.zero);
-      return;
-    }
-
-    // If more than 3 seconds in, restart current track
+  Future<void> previous() async {
+    // If more than 3 seconds in, restart current track instead of skipping back.
     if (_position.inSeconds > 3) {
-      seek(Duration.zero);
+      await seek(Duration.zero);
       return;
     }
 
-    if (_currentIndex > 0) {
-      playMusic(_queue[_currentIndex - 1]);
-    } else if (_repeatMode == RepeatMode.all) {
-      playMusic(_queue[_queue.length - 1]);
+    if (_audioPlayer.hasPrevious) {
+      await _audioPlayer.seekToPrevious();
     } else {
-      seek(Duration.zero);
-    }
-  }
-
-  void _handlePlaybackCompleted() {
-    if (_repeatMode == RepeatMode.one) {
-      seek(Duration.zero).then((_) => resume());
-    } else if (_shuffle && _queue.length > 1) {
-      int newIndex;
-      do {
-        newIndex = _random.nextInt(_queue.length);
-      } while (newIndex == _currentIndex);
-      playMusic(_queue[newIndex]);
-    } else if (_queue.isNotEmpty && _currentIndex < _queue.length - 1) {
-      next();
-    } else if (_repeatMode == RepeatMode.all && _queue.isNotEmpty) {
-      playMusic(_queue[0]);
-    } else {
-      _isPlaying = false;
-      notifyListeners();
+      await seek(Duration.zero);
     }
   }
 

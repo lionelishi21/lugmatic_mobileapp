@@ -4,7 +4,7 @@ description: "A new Flutter project for the Lugmatic Music streaming platform."
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.0+1
+version: 1.0.0+6
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -24,7 +24,7 @@ dependencies:
   just_audio_background: ^0.0.1-beta.13 # For background audio support and media notifications
   video_player: ^2.8.2 # For local and network video playback
   chewie: ^1.8.5 # Video player with UI controls
-  camera: ^0.11.0 # For recording videos like TikTok
+  camera: 0.10.5+9 # For recording videos like TikTok
   audio_video_progress_bar: ^2.0.3 # A ready-to-use progress bar for audio/video
   path_provider: ^2.1.3 # For finding the correct local path to save offline downloads
 
@@ -51,6 +51,7 @@ dependencies:
 
   # In-App Purchases & Monetization
   flutter_stripe: ^9.0.0 # Native Stripe payments
+  webview_flutter: ^4.10.0 # In-app browser for PayPal order approval
   # in_app_purchase: ^3.2.0 # To handle in-app purchases for virtual gifts (temporarily disabled for demo)
 
   # Device & Permissions
@@ -137,3 +138,6 @@ flutter_launcher_icons:
 #       - asset: assets/fonts/SplineSans-Regular.ttf
 #       - asset: assets/fonts/SplineSans-Bold.ttf
 #         weight: 700
+
+dependency_overrides:
+  camera_avfoundation: 0.9.14

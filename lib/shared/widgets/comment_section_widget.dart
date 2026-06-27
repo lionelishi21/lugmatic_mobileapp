@@ -23,6 +23,7 @@ class _CommentSectionWidgetState extends State<CommentSectionWidget> {
   final TextEditingController _commentController = TextEditingController();
   bool _isLoading = false;
   bool _isPosting = false;
+  String? _error;
   List<CommentModel> _comments = [];
 
   @override
@@ -32,8 +33,14 @@ class _CommentSectionWidgetState extends State<CommentSectionWidget> {
   }
 
   Future<void> _fetchComments() async {
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
     try {
+      if (widget.contentId.isEmpty) {
+        throw Exception('Invalid content ID for ${widget.contentType}');
+      }
       final commentService = context.read<CommentService>();
       final comments = await commentService.getComments(widget.contentType, widget.contentId);
       if (mounted) {
@@ -44,10 +51,10 @@ class _CommentSectionWidgetState extends State<CommentSectionWidget> {
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load comments: $e')),
-        );
+        setState(() {
+          _isLoading = false;
+          _error = e.toString();
+        });
       }
     }
   }
@@ -57,6 +64,9 @@ class _CommentSectionWidgetState extends State<CommentSectionWidget> {
     
     setState(() => _isPosting = true);
     try {
+      if (widget.contentId.isEmpty) {
+        throw Exception('Cannot post comment to invalid content');
+      }
       final commentService = context.read<CommentService>();
       final newComment = await commentService.postComment(
         widget.contentType,
@@ -145,7 +155,28 @@ class _CommentSectionWidgetState extends State<CommentSectionWidget> {
                 padding: EdgeInsets.all(40.0),
                 child: CircularProgressIndicator(),
               ))
-            : _comments.isEmpty
+            : _error != null
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(40.0),
+                      child: Column(
+                        children: [
+                          Text(
+                            'Comments unavailable ($_error)',
+                            style: const TextStyle(color: Colors.redAccent),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: _fetchComments,
+                            style: ElevatedButton.styleFrom(backgroundColor: NeumorphicTheme.primaryAccent),
+                            child: const Text('Retry'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                : _comments.isEmpty
                 ? const Center(
                     child: Padding(
                       padding: EdgeInsets.all(40.0),

@@ -52,11 +52,20 @@ class ArtistService {
   }
 
   /// Unfollow an artist.
-  Future<void> unfollowArtist(String artistId) async {
+  Future<void> unfollowArtist(String id) async {
     try {
-      await _apiClient.dio.delete(
-        '${ApiConfig.mobileArtists}/$artistId/like',
-      );
+      await _apiClient.dio.delete('${ApiConfig.mobileArtists}/$id/like');
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// Rate an artist.
+  Future<void> rateArtist(String id, double rating) async {
+    try {
+      await _apiClient.dio.post('${ApiConfig.mobileArtists}/$id/rate', data: {
+        'rating': rating,
+      });
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);
     }

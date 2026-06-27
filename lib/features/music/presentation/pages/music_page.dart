@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import '../../../../data/models/music_model.dart';
 import '../../../../data/providers/audio_provider.dart';
 import '../../../../data/services/music_service.dart';
-import '../../../../core/config/api_config.dart';
 
 class MusicPage extends StatefulWidget {
   const MusicPage({Key? key}) : super(key: key);

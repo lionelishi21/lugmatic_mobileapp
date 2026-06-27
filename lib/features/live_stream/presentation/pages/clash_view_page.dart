@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:lugmatic_flutter/core/config/api_config.dart';
 import 'package:lugmatic_flutter/core/network/api_client.dart';
 import 'package:lugmatic_flutter/data/services/live_stream_service.dart';
 import 'package:lugmatic_flutter/data/services/socket_service.dart';

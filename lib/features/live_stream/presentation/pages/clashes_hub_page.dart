@@ -27,7 +27,6 @@ class _ClashesHubPageState extends State<ClashesHubPage>
 
   static const _kFire = Color(0xFFFF4D00);
   static const _kFireDim = Color(0xFFFF8C00);
-  static const _kGreen = Color(0xFF10B981);
 
   @override
   void initState() {
@@ -420,7 +419,7 @@ class _LiveClashCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 10),
                     Text(
-                      clash.realm?.toUpperCase() ?? 'LYRICAL WAR',
+                      clash.realm.isNotEmpty ? clash.realm.toUpperCase() : 'LYRICAL WAR',
                       style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.5),
                           fontSize: 11,
@@ -751,7 +750,7 @@ class _PastClashCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            clash.realm?.toUpperCase() ?? '',
+            clash.realm.toUpperCase(),
             style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.25),
                 fontSize: 10,

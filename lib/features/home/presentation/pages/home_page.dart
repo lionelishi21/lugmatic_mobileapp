@@ -38,6 +38,8 @@ import 'package:lugmatic_flutter/features/video/presentation/pages/videos_page.d
 import 'package:lugmatic_flutter/features/home/presentation/pages/artist_detail_page.dart';
 import 'package:lugmatic_flutter/features/home/presentation/pages/meet_artist_page.dart';
 import 'package:lugmatic_flutter/features/song/presentation/pages/song_detail_page.dart';
+import 'package:lugmatic_flutter/data/services/artist_service.dart';
+import 'package:lugmatic_flutter/shared/widgets/gift_bottom_sheet.dart';
 import 'package:lugmatic_flutter/data/models/live_clash_model.dart';
 import 'package:lugmatic_flutter/ui/widgets/mini_player.dart';
 import 'package:lugmatic_flutter/data/services/live_stream_service.dart';
@@ -1157,12 +1159,44 @@ class _HomePageState extends State<HomePage> {
                 builder: (_) => ArtistDetailPage(artistId: artist.id, initialData: artist),
               ),
             ),
-            onFollow: () => print('Follow ${artist.name}'),
-            onGift: () => print('Gift ${artist.name}'),
+            onFollow: () => _toggleFollowArtist(index),
+            onGift: () => GiftBottomSheet.show(
+              context,
+              artistId: artist.id,
+              artistName: artist.name,
+            ),
           );
         },
       ),
     );
+  }
+
+  Future<void> _toggleFollowArtist(int index) async {
+    final artist = _featuredArtists[index];
+    final wasFollowing = artist.isFollowing;
+    final artistService = context.read<ArtistService>();
+
+    setState(() {
+      _featuredArtists[index] = artist.copyWith(
+        isFollowing: !wasFollowing,
+        followers: artist.followers + (wasFollowing ? -1 : 1),
+      );
+    });
+
+    try {
+      if (wasFollowing) {
+        await artistService.unfollowArtist(artist.id);
+      } else {
+        await artistService.followArtist(artist.id);
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _featuredArtists[index] = artist);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update following: $e')),
+        );
+      }
+    }
   }
 
   Widget _buildPopularPodcasts() {

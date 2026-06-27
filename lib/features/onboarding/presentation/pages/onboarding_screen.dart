@@ -22,7 +22,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     super.initState();
     _pageCtrl = PageController();
     _fadeCtrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 800));
+        vsync: this, duration: const Duration(milliseconds: 500));
 
     _fadeAnim = CurvedAnimation(parent: _fadeCtrl, curve: Curves.easeIn);
 
@@ -44,154 +44,194 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   void _next() {
     if (_currentPage < OnboardingData.items.length - 1) {
       _pageCtrl.nextPage(
-          duration: const Duration(milliseconds: 500),
-          curve: Curves.easeInOut);
+          duration: const Duration(milliseconds: 450),
+          curve: Curves.easeInOutCubic);
     } else {
       Navigator.pushReplacementNamed(context, '/login');
     }
   }
 
+  void _back() {
+    if (_currentPage > 0) {
+      _pageCtrl.previousPage(
+          duration: const Duration(milliseconds: 450),
+          curve: Curves.easeInOutCubic);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isLastPage = _currentPage == OnboardingData.items.length - 1;
+
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: Stack(
-        children: [
-          // Pages
-          PageView.builder(
-            controller: _pageCtrl,
-            onPageChanged: _onPageChanged,
-            itemCount: OnboardingData.items.length,
-            itemBuilder: (_, i) => OnboardingPage(
-              item: OnboardingData.items[i],
-              animation: _fadeAnim,
-            ),
-          ),
-
-          // Skip button
-          Positioned(
-            top: 0,
-            right: 16,
-            child: SafeArea(
-              child: TextButton(
-                onPressed: () =>
-                    Navigator.pushReplacementNamed(context, '/login'),
-                child: const Text('Skip',
-                    style: TextStyle(
-                        color: AppColors.mutedForeground, fontSize: 16)),
-              ),
-            ),
-          ),
-
-          // Bottom bar
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: SafeArea(
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Dots
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(
-                        OnboardingData.items.length,
-                        (i) => AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          margin: const EdgeInsets.symmetric(horizontal: 4),
-                          width: _currentPage == i ? 28 : 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(4),
-                            color: _currentPage == i
-                                ? AppColors.primaryGreen
-                                : AppColors.surface10,
-                          ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Top bar — wordmark, segmented progress, skip
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        'lugmatic',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.9),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: -0.3,
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 32),
+                      const Spacer(),
+                      TextButton(
+                        onPressed: () =>
+                            Navigator.pushReplacementNamed(context, '/login'),
+                        child: Text('Skip',
+                            style: TextStyle(
+                                color: Colors.white.withOpacity(0.5),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600)),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: List.generate(OnboardingData.items.length, (i) {
+                      final active = i <= _currentPage;
+                      return Expanded(
+                        child: Container(
+                          margin: EdgeInsets.only(
+                              right: i == OnboardingData.items.length - 1 ? 0 : 6),
+                          height: 4,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(2),
+                            color: active
+                                ? AppColors.primaryGreen
+                                : Colors.white.withOpacity(0.12),
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+                ],
+              ),
+            ),
 
-                    // CTA button
+            // Pages — PageView's native horizontal slide is the "Glide" transition
+            Expanded(
+              child: PageView.builder(
+                controller: _pageCtrl,
+                onPageChanged: _onPageChanged,
+                itemCount: OnboardingData.items.length,
+                itemBuilder: (_, i) => OnboardingPage(
+                  item: OnboardingData.items[i],
+                  animation: _fadeAnim,
+                ),
+              ),
+            ),
+
+            // Bottom bar — back chevron + Next/Get Started
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+              child: Row(
+                children: [
+                  if (_currentPage > 0)
                     GestureDetector(
+                      onTap: _back,
+                      child: Container(
+                        width: 52,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white.withOpacity(0.15)),
+                        ),
+                        child: const Icon(Icons.chevron_left_rounded,
+                            color: Colors.white, size: 26),
+                      ),
+                    ),
+                  if (_currentPage > 0) const SizedBox(width: 16),
+                  Expanded(
+                    child: GestureDetector(
                       onTap: _next,
                       child: Container(
-                        height: 60,
+                        height: 56,
                         decoration: BoxDecoration(
-                          color: AppColors.primaryGreen,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.primaryGreen.withOpacity(0.35),
-                              blurRadius: 24,
-                              offset: const Offset(0, 8),
-                            ),
-                          ],
+                          color: isLastPage ? AppColors.primaryGreen : Colors.transparent,
+                          borderRadius: BorderRadius.circular(28),
+                          border: isLastPage
+                              ? null
+                              : Border.all(color: AppColors.primaryGreen.withOpacity(0.5)),
+                          boxShadow: isLastPage
+                              ? [
+                                  BoxShadow(
+                                    color: AppColors.primaryGreen.withOpacity(0.35),
+                                    blurRadius: 24,
+                                    offset: const Offset(0, 8),
+                                  ),
+                                ]
+                              : null,
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              _currentPage == OnboardingData.items.length - 1
-                                  ? 'Get Started'
-                                  : 'Continue',
-                              style: const TextStyle(
-                                color: AppColors.background,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w800,
+                              isLastPage ? 'Get Started' : 'Next',
+                              style: TextStyle(
+                                color: isLastPage ? AppColors.background : Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
-                            const SizedBox(width: 12),
-                            const Icon(Icons.arrow_forward_rounded,
-                                color: AppColors.background, size: 22),
+                            const SizedBox(width: 8),
+                            Icon(Icons.arrow_forward_rounded,
+                                color: isLastPage ? AppColors.background : Colors.white,
+                                size: 20),
                           ],
                         ),
                       ),
                     ),
-                    const SizedBox(height: 24),
-
-                    // Legal
-                    Wrap(
-                      alignment: WrapAlignment.center,
-                      children: [
-                        Text('By continuing, you agree to our ',
-                            style: TextStyle(
-                                color: AppColors.greyLight.withOpacity(0.8),
-                                fontSize: 12)),
-                        GestureDetector(
-                          onTap: () =>
-                              Navigator.pushNamed(context, '/terms'),
-                          child: const Text('Terms',
-                              style: TextStyle(
-                                  color: AppColors.primaryGreen,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold)),
-                        ),
-                        Text(' and ',
-                            style: TextStyle(
-                                color: AppColors.greyLight.withOpacity(0.8),
-                                fontSize: 12)),
-                        GestureDetector(
-                          onTap: () =>
-                              Navigator.pushNamed(context, '/privacy'),
-                          child: const Text('Privacy Policy',
-                              style: TextStyle(
-                                  color: AppColors.primaryGreen,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold)),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-          ),
-        ],
+
+            // Legal
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: Wrap(
+                alignment: WrapAlignment.center,
+                children: [
+                  Text('By continuing, you agree to our ',
+                      style: TextStyle(
+                          color: AppColors.greyLight.withOpacity(0.8),
+                          fontSize: 12)),
+                  GestureDetector(
+                    onTap: () => Navigator.pushNamed(context, '/terms'),
+                    child: const Text('Terms',
+                        style: TextStyle(
+                            color: AppColors.primaryGreen,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold)),
+                  ),
+                  Text(' and ',
+                      style: TextStyle(
+                          color: AppColors.greyLight.withOpacity(0.8),
+                          fontSize: 12)),
+                  GestureDetector(
+                    onTap: () => Navigator.pushNamed(context, '/privacy'),
+                    child: const Text('Privacy Policy',
+                        style: TextStyle(
+                            color: AppColors.primaryGreen,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
