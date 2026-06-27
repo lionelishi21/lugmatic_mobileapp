@@ -187,8 +187,8 @@ class _GenreMusicPageState extends State<GenreMusicPage> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            color.withOpacity(0.8),
-            color.withOpacity(0.2),
+            color.withValues(alpha: 0.8),
+            color.withValues(alpha: 0.2),
             const Color(0xFF0F172A),
           ],
         ),

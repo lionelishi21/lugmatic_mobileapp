@@ -32,7 +32,7 @@ class ArtistCard extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 12, offset: const Offset(0, 6)),
+                  BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 6)),
                 ],
               ),
               child: Stack(
@@ -63,7 +63,7 @@ class ArtistCard extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               '${_formatNumber(artist.followers)} followers',
-              style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 11),
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 11),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
@@ -76,7 +76,7 @@ class ArtistCard extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                     decoration: BoxDecoration(
                       color: artist.isFollowing
-                          ? Colors.white.withOpacity(0.15)
+                          ? Colors.white.withValues(alpha: 0.15)
                           : const Color(0xFF10B981),
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -92,9 +92,9 @@ class ArtistCard extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(5),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFFD700).withOpacity(0.15),
+                      color: const Color(0xFFFFD700).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: const Color(0xFFFFD700).withOpacity(0.4)),
+                      border: Border.all(color: const Color(0xFFFFD700).withValues(alpha: 0.4)),
                     ),
                     child: const Icon(Icons.card_giftcard, color: Color(0xFFFFD700), size: 14),
                   ),

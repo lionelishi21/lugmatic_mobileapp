@@ -345,7 +345,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                         decoration: BoxDecoration(
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF10B981).withOpacity(0.2),
+                              color: const Color(0xFF10B981).withValues(alpha: 0.2),
                               blurRadius: 40,
                               spreadRadius: 10,
                             ),
@@ -371,7 +371,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                         'Your Music Universe',
                         style: TextStyle(
                           fontSize: 16,
-                          color: Colors.white.withOpacity(0.6),
+                          color: Colors.white.withValues(alpha: 0.6),
                           fontWeight: FontWeight.w300,
                           letterSpacing: 2,
                         ),
@@ -394,7 +394,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                         return Text(
                           status,
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.4),
+                            color: Colors.white.withValues(alpha: 0.4),
                             fontSize: 12,
                             fontStyle: FontStyle.italic,
                           ),
@@ -409,7 +409,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
                         valueColor: AlwaysStoppedAnimation<Color>(
-                          const Color(0xFF10B981).withOpacity(0.5),
+                          const Color(0xFF10B981).withValues(alpha: 0.5),
                         ),
                       ),
                     ),

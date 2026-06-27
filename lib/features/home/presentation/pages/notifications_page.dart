@@ -113,7 +113,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.notifications_none, size: 80, color: NeumorphicTheme.textTertiary.withOpacity(0.3)),
+          Icon(Icons.notifications_none, size: 80, color: NeumorphicTheme.textTertiary.withValues(alpha: 0.3)),
           const SizedBox(height: 20),
           const Text(
             'No notifications yet',
@@ -216,7 +216,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         shape: BoxShape.circle,
       ),
       child: Icon(iconData, color: color, size: 20),

@@ -57,7 +57,7 @@ class _GiftHubPageState extends State<GiftHubPage>
           indicatorColor: const Color(0xFFFFD700),
           indicatorWeight: 3,
           labelColor: Colors.white,
-          unselectedLabelColor: Colors.white.withOpacity(0.6),
+          unselectedLabelColor: Colors.white.withValues(alpha: 0.6),
           labelStyle: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,

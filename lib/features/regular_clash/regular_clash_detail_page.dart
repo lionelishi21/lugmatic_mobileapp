@@ -291,7 +291,7 @@ class _RegularClashDetailPageState extends State<RegularClashDetailPage> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.6),
+          color: Colors.black.withValues(alpha: 0.6),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(label, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
@@ -304,7 +304,7 @@ class _RegularClashDetailPageState extends State<RegularClashDetailPage> {
     if (_phase == _Phase.challenger) label = 'Watching: ${clash.challenger.name}';
     if (_phase == _Phase.transition) label = 'Up next: ${clash.opponent.name}';
     if (_phase == _Phase.opponent) label = 'Watching: ${clash.opponent.name}';
-    return Text(label, style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 13));
+    return Text(label, style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 13));
   }
 
   Widget _buildVoteSection(RegularClashModel clash) {
@@ -414,9 +414,9 @@ class _RealmBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.4)),
+        border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
       child: Text(
         realm.toUpperCase(),
@@ -495,7 +495,7 @@ class _ArtistInfo extends StatelessWidget {
           onTap: () => GiftBottomSheet.show(context, artistId: artist.id, artistName: artist.name),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(color: Colors.amber.withOpacity(0.15), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.amber.withOpacity(0.3))),
+            decoration: BoxDecoration(color: Colors.amber.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.amber.withValues(alpha: 0.3))),
             child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -537,10 +537,10 @@ class _VoteButton extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
-          color: canVote ? color.withOpacity(0.15) : AppColors.card,
+          color: canVote ? color.withValues(alpha: 0.15) : AppColors.card,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isWinner ? Colors.amber : (canVote ? color.withOpacity(0.5) : AppColors.border),
+            color: isWinner ? Colors.amber : (canVote ? color.withValues(alpha: 0.5) : AppColors.border),
             width: isWinner ? 2 : 1,
           ),
         ),

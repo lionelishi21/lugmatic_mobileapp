@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/theme/neumorphic_theme.dart';
 import '../../../data/services/artist/upload_service.dart';
+import 'lyrics_timing_screen.dart';
 
 class UploadTrackScreen extends StatefulWidget {
   const UploadTrackScreen({super.key});
@@ -312,6 +313,55 @@ class _UploadTrackScreenState extends State<UploadTrackScreen> {
                   child: const Text('Save Lyrics', style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
               ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    side: const BorderSide(color: AppColors.primary),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  onPressed: () async {
+                    final edited = lyricsController.text;
+                    if (edited.trim().isEmpty || _selectedFile == null) return;
+                    try {
+                      await _uploadService.updateSongLyrics(_createdSongId!, edited);
+                    } catch (e) {
+                      if (ctx.mounted) {
+                        ScaffoldMessenger.of(ctx).showSnackBar(
+                          SnackBar(content: Text('Failed to save lyrics: $e')),
+                        );
+                      }
+                      return;
+                    }
+                    if (ctx.mounted) Navigator.pop(ctx);
+                    if (mounted) {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => LyricsTimingScreen(
+                            songId: _createdSongId!,
+                            lyrics: edited,
+                            audioFile: _selectedFile!,
+                            uploadService: _uploadService,
+                          ),
+                        ),
+                      );
+                      if (mounted) Navigator.pop(context);
+                    }
+                  },
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.mic, size: 18),
+                      SizedBox(width: 8),
+                      Text('Add Karaoke Timing', style: TextStyle(fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
         );
@@ -518,7 +568,7 @@ class _UploadTrackScreenState extends State<UploadTrackScreen> {
                 Expanded(
                   child: Text(
                     hint,
-                    style: TextStyle(color: AppColors.foreground.withOpacity(0.7), fontSize: 14),
+                    style: TextStyle(color: AppColors.foreground.withValues(alpha: 0.7), fontSize: 14),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),

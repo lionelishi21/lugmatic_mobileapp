@@ -164,7 +164,7 @@ class _GiftPopVisualState extends State<_GiftPopVisual> with SingleTickerProvide
               Positioned.fill(
                 child: IgnorePointer(
                   child: Container(
-                    color: cfg.glow.withOpacity((1 - t) * 0.35 * (t < 0.25 ? (t / 0.25) : 1)),
+                    color: cfg.glow.withValues(alpha: (1 - t) * 0.35 * (t < 0.25 ? (t / 0.25) : 1)),
                   ),
                 ),
               ),
@@ -245,8 +245,8 @@ class _GiftPopVisualState extends State<_GiftPopVisual> with SingleTickerProvide
                   : [const Color(0xFF1C2A18), const Color(0xFF16161F)],
         ),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: cfg.glow.withOpacity(0.7), width: 1.5),
-        boxShadow: [BoxShadow(color: cfg.glow.withOpacity(0.5), blurRadius: 40, spreadRadius: 4)],
+        border: Border.all(color: cfg.glow.withValues(alpha: 0.7), width: 1.5),
+        boxShadow: [BoxShadow(color: cfg.glow.withValues(alpha: 0.5), blurRadius: 40, spreadRadius: 4)],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -260,9 +260,9 @@ class _GiftPopVisualState extends State<_GiftPopVisual> with SingleTickerProvide
             width: cfg.badgeSize * 0.55,
             height: cfg.badgeSize * 0.55,
             decoration: BoxDecoration(
-              color: cfg.glow.withOpacity(0.18),
+              color: cfg.glow.withValues(alpha: 0.18),
               shape: BoxShape.circle,
-              boxShadow: [BoxShadow(color: cfg.glow.withOpacity(0.4), blurRadius: 24)],
+              boxShadow: [BoxShadow(color: cfg.glow.withValues(alpha: 0.4), blurRadius: 24)],
             ),
             child: imageUrl != null
                 ? ClipOval(

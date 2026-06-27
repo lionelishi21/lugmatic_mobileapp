@@ -86,7 +86,7 @@ class _BillboardPageState extends State<BillboardPage> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    AppColors.primary.withOpacity(0.3),
+                    AppColors.primary.withValues(alpha: 0.3),
                     const Color(0xFF0F172A),
                   ],
                 ),
@@ -164,10 +164,10 @@ class _BillboardListItem extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.05),
+          color: Colors.white.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isTop3 ? AppColors.primary.withOpacity(0.2) : Colors.white.withOpacity(0.05),
+            color: isTop3 ? AppColors.primary.withValues(alpha: 0.2) : Colors.white.withValues(alpha: 0.05),
           ),
         ),
         child: Row(
@@ -177,7 +177,7 @@ class _BillboardListItem extends StatelessWidget {
               child: Text(
                 rank.toString(),
                 style: TextStyle(
-                  color: isTop3 ? AppColors.primary : Colors.white.withOpacity(0.5),
+                  color: isTop3 ? AppColors.primary : Colors.white.withValues(alpha: 0.5),
                   fontSize: 18,
                   fontWeight: FontWeight.w900,
                 ),
@@ -209,7 +209,7 @@ class _BillboardListItem extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     song.artist,
-                    style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 13),
+                    style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 13),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -220,7 +220,7 @@ class _BillboardListItem extends StatelessWidget {
               Icon(Icons.trending_up, color: AppColors.primary, size: 18),
             const SizedBox(width: 8),
             IconButton(
-              icon: Icon(Icons.play_circle_fill, color: AppColors.primary.withOpacity(0.8), size: 28),
+              icon: Icon(Icons.play_circle_fill, color: AppColors.primary.withValues(alpha: 0.8), size: 28),
               onPressed: () {
                 context.read<AudioProvider>().playMusic(song);
               },

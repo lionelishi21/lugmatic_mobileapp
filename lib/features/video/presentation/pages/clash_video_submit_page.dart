@@ -113,9 +113,9 @@ class _ClashVideoSubmitPageState extends State<ClashVideoSubmitPage> {
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
+                    color: AppColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                    border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
                   ),
                   child: Row(
                     children: [
@@ -147,7 +147,7 @@ class _ClashVideoSubmitPageState extends State<ClashVideoSubmitPage> {
                       foregroundColor: Colors.black,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                      disabledBackgroundColor: AppColors.primary.withOpacity(0.4),
+                      disabledBackgroundColor: AppColors.primary.withValues(alpha: 0.4),
                     ),
                   ),
                 ),

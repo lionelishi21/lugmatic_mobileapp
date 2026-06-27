@@ -86,7 +86,7 @@ class _ContributorTermsScreenState extends State<ContributorTermsScreen> {
                     decoration: BoxDecoration(
                       color: AppColors.card,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.white.withOpacity(0.04)),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.04)),
                     ),
                     child: SingleChildScrollView(
                       physics: const BouncingScrollPhysics(),
@@ -189,10 +189,10 @@ class _ContributorTermsScreenState extends State<ContributorTermsScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
-        color: accepted ? AppColors.primary.withOpacity(0.08) : AppColors.secondary.withOpacity(0.08),
+        color: accepted ? AppColors.primary.withValues(alpha: 0.08) : AppColors.secondary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: accepted ? AppColors.primary.withOpacity(0.3) : AppColors.secondary.withOpacity(0.3),
+          color: accepted ? AppColors.primary.withValues(alpha: 0.3) : AppColors.secondary.withValues(alpha: 0.3),
         ),
       ),
       child: Row(

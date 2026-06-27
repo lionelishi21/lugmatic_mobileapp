@@ -135,7 +135,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                   center: const Alignment(0, -0.5),
                   radius: 1.1,
                   colors: [
-                    AppColors.secondary.withOpacity(0.20),
+                    AppColors.secondary.withValues(alpha: 0.20),
                     Colors.transparent,
                   ],
                 ),
@@ -151,7 +151,7 @@ class _SignUpScreenState extends State<SignUpScreen>
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(colors: [
-                  AppColors.secondaryDim.withOpacity(0.10),
+                  AppColors.secondaryDim.withValues(alpha: 0.10),
                   Colors.transparent,
                 ]),
               ),
@@ -209,7 +209,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                                     color: AppColors.border, width: 1),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.4),
+                                    color: Colors.black.withValues(alpha: 0.4),
                                     blurRadius: 40,
                                     offset: const Offset(0, 20),
                                   ),
@@ -348,7 +348,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                                         boxShadow: [
                                           BoxShadow(
                                             color: AppColors.primary
-                                                .withOpacity(0.35),
+                                                .withValues(alpha: 0.35),
                                             blurRadius: 20,
                                             offset: const Offset(0, 8),
                                           ),
@@ -530,7 +530,7 @@ class _SignUpScreenState extends State<SignUpScreen>
             focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(
-                    color: AppColors.primary.withOpacity(0.5),
+                    color: AppColors.primary.withValues(alpha: 0.5),
                     width: 1.5)),
             errorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -550,7 +550,7 @@ class _SignUpScreenState extends State<SignUpScreen>
         children: [
           Expanded(
               child: Divider(
-                  color: AppColors.border.withOpacity(0.5), height: 1)),
+                  color: AppColors.border.withValues(alpha: 0.5), height: 1)),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 14),
             child: Text(AppStrings.orContinueWith,
@@ -559,7 +559,7 @@ class _SignUpScreenState extends State<SignUpScreen>
           ),
           Expanded(
               child: Divider(
-                  color: AppColors.border.withOpacity(0.5), height: 1)),
+                  color: AppColors.border.withValues(alpha: 0.5), height: 1)),
         ],
       );
 

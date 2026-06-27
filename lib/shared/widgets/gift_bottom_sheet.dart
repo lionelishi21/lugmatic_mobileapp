@@ -196,9 +196,9 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> with SingleTickerProv
         maxChildSize: 0.92,
         builder: (_, scrollController) => Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF1A2332).withOpacity(0.85),
+            color: const Color(0xFF1A2332).withValues(alpha: 0.85),
             borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-            border: Border.all(color: Colors.white.withOpacity(0.1)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
           ),
           child: Column(
           children: [
@@ -208,7 +208,7 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> with SingleTickerProv
               child: Container(
                 width: 40, height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -232,7 +232,7 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> with SingleTickerProv
                       Text(
                         'Support ${widget.artistName}',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.5),
+                          color: Colors.white.withValues(alpha: 0.5),
                           fontSize: 13,
                         ),
                       ),
@@ -242,9 +242,9 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> with SingleTickerProv
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.08),
+                      color: Colors.white.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.white.withOpacity(0.12)),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
                     ),
                     child: Row(
                       children: [
@@ -278,14 +278,14 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> with SingleTickerProv
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.error_outline, color: Colors.redAccent.withOpacity(0.7), size: 40),
+                              Icon(Icons.error_outline, color: Colors.redAccent.withValues(alpha: 0.7), size: 40),
                               const SizedBox(height: 12),
                               Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 32),
                                 child: Text(
                                   'Could not load gifts or balance: $_error',
                                   textAlign: TextAlign.center,
-                                  style: TextStyle(color: Colors.white.withOpacity(0.7)),
+                                  style: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
                                 ),
                               ),
                               const SizedBox(height: 16),
@@ -302,11 +302,11 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> with SingleTickerProv
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.card_giftcard, color: Colors.white.withOpacity(0.2), size: 48),
+                              Icon(Icons.card_giftcard, color: Colors.white.withValues(alpha: 0.2), size: 48),
                               const SizedBox(height: 12),
                               Text(
                                 'No gifts available right now',
-                                style: TextStyle(color: Colors.white.withOpacity(0.5)),
+                                style: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
                               ),
                             ],
                           ),
@@ -362,7 +362,7 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> with SingleTickerProv
                 children: [
                   Text(
                     'Need more coins?  ',
-                    style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 13),
+                    style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 13),
                   ),
                   GestureDetector(
                     onTap: () {
@@ -419,35 +419,35 @@ class _GiftCard extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: isLegendary
               ? [
-                  const Color(0xFFFBBF24).withOpacity(0.2),
-                  const Color(0xFFF59E0B).withOpacity(0.1),
+                  const Color(0xFFFBBF24).withValues(alpha: 0.2),
+                  const Color(0xFFF59E0B).withValues(alpha: 0.1),
                 ]
               : isEpic
                   ? [
-                      const Color(0xFF9333EA).withOpacity(0.25),
-                      const Color(0xFFC026D3).withOpacity(0.1),
+                      const Color(0xFF9333EA).withValues(alpha: 0.25),
+                      const Color(0xFFC026D3).withValues(alpha: 0.1),
                     ]
                   : [
-                      Colors.white.withOpacity(0.08),
-                      Colors.white.withOpacity(0.03),
+                      Colors.white.withValues(alpha: 0.08),
+                      Colors.white.withValues(alpha: 0.03),
                     ],
         ),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: isLegendary
-              ? const Color(0xFFFBBF24).withOpacity(0.4)
+              ? const Color(0xFFFBBF24).withValues(alpha: 0.4)
               : isEpic
-                  ? const Color(0xFF9333EA).withOpacity(0.4)
+                  ? const Color(0xFF9333EA).withValues(alpha: 0.4)
                   : canAfford
-                      ? Colors.white.withOpacity(0.15)
-                      : Colors.white.withOpacity(0.05),
+                      ? Colors.white.withValues(alpha: 0.15)
+                      : Colors.white.withValues(alpha: 0.05),
           width: (isLegendary || isEpic) ? 1.5 : 1.0,
         ),
         boxShadow: (isLegendary || isEpic)
             ? [
                 BoxShadow(
                   color: (isLegendary ? const Color(0xFFFBBF24) : const Color(0xFF9333EA))
-                      .withOpacity(0.2),
+                      .withValues(alpha: 0.2),
                   blurRadius: 12,
                   spreadRadius: 2,
                 )
@@ -461,7 +461,7 @@ class _GiftCard extends StatelessWidget {
           Container(
             width: 56, height: 56,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.08),
+              color: Colors.white.withValues(alpha: 0.08),
               shape: BoxShape.circle,
             ),
             child: imageUrl.isNotEmpty
@@ -517,7 +517,7 @@ class _GiftCard extends StatelessWidget {
               Text(
                 '${gift.price.toStringAsFixed(0)} coins',
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.55),
+                  color: Colors.white.withValues(alpha: 0.55),
                   fontSize: 10,
                   fontWeight: FontWeight.w500,
                 ),
@@ -536,7 +536,7 @@ class _GiftCard extends StatelessWidget {
                         colors: [Color(0xFF10B981), Color(0xFF059669)],
                       )
                     : null,
-                color: canAfford ? null : Colors.white.withOpacity(0.06),
+                color: canAfford ? null : Colors.white.withValues(alpha: 0.06),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Center(
@@ -551,7 +551,7 @@ class _GiftCard extends StatelessWidget {
                     : Text(
                         canAfford ? 'Send' : 'Buy',
                         style: TextStyle(
-                          color: canAfford ? Colors.white : Colors.white.withOpacity(0.4),
+                          color: canAfford ? Colors.white : Colors.white.withValues(alpha: 0.4),
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
                         ),
@@ -695,7 +695,7 @@ class _TopUpDialogState extends State<_TopUpDialog> {
               const SizedBox(height: 8),
               Text(
                 'You need ${widget.requiredAmount} coins for this gift.',
-                style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 13),
+                style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 13),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -709,7 +709,7 @@ class _TopUpDialogState extends State<_TopUpDialog> {
                     onSelected: (_) => setState(() => _usePaypal = false),
                     selectedColor: const Color(0xFF10B981),
                     labelStyle: TextStyle(color: !_usePaypal ? Colors.black : Colors.white60, fontWeight: FontWeight.w700),
-                    backgroundColor: Colors.white.withOpacity(0.05),
+                    backgroundColor: Colors.white.withValues(alpha: 0.05),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -720,7 +720,7 @@ class _TopUpDialogState extends State<_TopUpDialog> {
                     onSelected: (_) => setState(() => _usePaypal = true),
                     selectedColor: const Color(0xFF10B981),
                     labelStyle: TextStyle(color: _usePaypal ? Colors.black : Colors.white60, fontWeight: FontWeight.w700),
-                    backgroundColor: Colors.white.withOpacity(0.05),
+                    backgroundColor: Colors.white.withValues(alpha: 0.05),
                   ),
                 ),
               ],
@@ -736,9 +736,9 @@ class _TopUpDialogState extends State<_TopUpDialog> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.05),
+                      color: Colors.white.withValues(alpha: 0.05),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.white.withOpacity(0.1)),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
                     ),
                     child: Row(
                       children: [
@@ -746,7 +746,7 @@ class _TopUpDialogState extends State<_TopUpDialog> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(pkg['label'], style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                            Text('${pkg['amount']} Coins', style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12)),
+                            Text('${pkg['amount']} Coins', style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 12)),
                           ],
                         ),
                         const Spacer(),
@@ -766,7 +766,7 @@ class _TopUpDialogState extends State<_TopUpDialog> {
             const SizedBox(height: 8),
             TextButton(
               onPressed: _loading ? null : () => Navigator.pop(context),
-              child: Text('Cancel', style: TextStyle(color: Colors.white.withOpacity(0.4))),
+              child: Text('Cancel', style: TextStyle(color: Colors.white.withValues(alpha: 0.4))),
             ),
           ],
         ),

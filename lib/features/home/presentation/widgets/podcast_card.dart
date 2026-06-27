@@ -37,7 +37,7 @@ class PodcastCard extends StatelessWidget {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.3),
+                    color: Colors.black.withValues(alpha: 0.3),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   ),
@@ -54,7 +54,7 @@ class PodcastCard extends StatelessWidget {
                         end: Alignment.bottomCenter,
                         colors: [
                           Colors.transparent,
-                          Colors.black.withOpacity(0.7),
+                          Colors.black.withValues(alpha: 0.7),
                         ],
                       ),
                     ),
@@ -73,7 +73,7 @@ class PodcastCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.3),
+                              color: Colors.black.withValues(alpha: 0.3),
                               blurRadius: 4,
                               offset: const Offset(0, 2),
                             ),
@@ -94,7 +94,7 @@ class PodcastCard extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.7),
+                        color: Colors.black.withValues(alpha: 0.7),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -126,7 +126,7 @@ class PodcastCard extends StatelessWidget {
           Text(
             podcast.host,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.6),
+              color: Colors.white.withValues(alpha: 0.6),
               fontSize: 11,
             ),
             maxLines: 1,
@@ -147,7 +147,7 @@ class PodcastCard extends StatelessWidget {
                 onTap: onLike,
                 child: Icon(
                   podcast.isLiked ? Icons.favorite : Icons.favorite_border,
-                  color: podcast.isLiked ? Colors.red : Colors.white.withOpacity(0.4),
+                  color: podcast.isLiked ? Colors.red : Colors.white.withValues(alpha: 0.4),
                   size: 16,
                 ),
               ),

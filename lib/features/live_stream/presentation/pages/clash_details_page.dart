@@ -150,7 +150,7 @@ class _ClashDetailsPageState extends State<ClashDetailsPage> {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            NeumorphicTheme.primaryAccent.withOpacity(0.2),
+            NeumorphicTheme.primaryAccent.withValues(alpha: 0.2),
             NeumorphicTheme.backgroundColor,
           ],
         ),
@@ -159,7 +159,7 @@ class _ClashDetailsPageState extends State<ClashDetailsPage> {
         child: Icon(
           Icons.emoji_events,
           size: 100,
-          color: NeumorphicTheme.primaryAccent.withOpacity(0.1),
+          color: NeumorphicTheme.primaryAccent.withValues(alpha: 0.1),
         ),
       ),
     );
@@ -228,7 +228,7 @@ class _ClashDetailsPageState extends State<ClashDetailsPage> {
           height: 80,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(color: NeumorphicTheme.primaryAccent.withOpacity(0.3), width: 3),
+            border: Border.all(color: NeumorphicTheme.primaryAccent.withValues(alpha: 0.3), width: 3),
             image: DecorationImage(
               image: NetworkImage(image),
               fit: BoxFit.cover,

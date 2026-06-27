@@ -340,7 +340,7 @@ class _LiveHostScreenState extends State<LiveHostScreen>
                             return Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                               decoration: BoxDecoration(
-                                color: Colors.red.withOpacity(0.8 + (_liveIndicatorController.value * 0.2)),
+                                color: Colors.red.withValues(alpha: 0.8 + (_liveIndicatorController.value * 0.2)),
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: const Text(
@@ -354,7 +354,7 @@ class _LiveHostScreenState extends State<LiveHostScreen>
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.5),
+                            color: Colors.black.withValues(alpha: 0.5),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Row(
@@ -373,7 +373,7 @@ class _LiveHostScreenState extends State<LiveHostScreen>
                     ElevatedButton(
                       onPressed: _isLoading ? null : _endStream,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red.withOpacity(0.8),
+                        backgroundColor: Colors.red.withValues(alpha: 0.8),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                       ),
                       child: const Text('END LIVE'),
@@ -395,7 +395,7 @@ class _LiveHostScreenState extends State<LiveHostScreen>
                     begin: Alignment.bottomCenter,
                     end: Alignment.topCenter,
                     colors: [
-                      Colors.black.withOpacity(0.8),
+                      Colors.black.withValues(alpha: 0.8),
                       Colors.transparent,
                     ],
                   ),
@@ -436,7 +436,7 @@ class _LiveHostScreenState extends State<LiveHostScreen>
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 16),
                               decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.5),
+                                color: Colors.black.withValues(alpha: 0.5),
                                 borderRadius: BorderRadius.circular(25),
                                 border: Border.all(color: Colors.white24),
                               ),
@@ -477,11 +477,11 @@ class _LiveHostScreenState extends State<LiveHostScreen>
                       child: Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.5),
+                          color: Colors.black.withValues(alpha: 0.5),
                           shape: BoxShape.circle,
                           border: Border.all(color: Colors.redAccent, width: 2),
                           boxShadow: [
-                            BoxShadow(color: Colors.redAccent.withOpacity(0.3), blurRadius: 10, spreadRadius: 2),
+                            BoxShadow(color: Colors.redAccent.withValues(alpha: 0.3), blurRadius: 10, spreadRadius: 2),
                           ],
                         ),
                         child: const Icon(Icons.bolt, color: Colors.redAccent, size: 28),

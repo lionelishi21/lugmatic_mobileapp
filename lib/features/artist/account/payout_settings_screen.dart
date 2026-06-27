@@ -210,7 +210,7 @@ class _PayoutSettingsScreenState extends State<PayoutSettingsScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: NeumorphicTheme.neumorphicDecoration(
               borderRadius: BorderRadius.circular(12),
-              color: isSelected ? AppColors.primary.withOpacity(0.12) : AppColors.card,
+              color: isSelected ? AppColors.primary.withValues(alpha: 0.12) : AppColors.card,
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,

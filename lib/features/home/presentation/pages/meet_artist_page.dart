@@ -119,7 +119,7 @@ class _MeetArtistPageState extends State<MeetArtistPage> {
                     children: [
                       const Icon(Icons.wifi_off, color: Colors.white38, size: 48),
                       const SizedBox(height: 12),
-                      Text('Could not load artists', style: TextStyle(color: Colors.white.withOpacity(0.6))),
+                      Text('Could not load artists', style: TextStyle(color: Colors.white.withValues(alpha: 0.6))),
                       const SizedBox(height: 16),
                       ElevatedButton(
                         onPressed: _loadArtists,
@@ -161,9 +161,9 @@ class _MeetArtistPageState extends State<MeetArtistPage> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
       ),
       child: TextField(
         controller: _searchController,
@@ -228,9 +228,9 @@ class _MeetArtistPageState extends State<MeetArtistPage> {
       onTap: () => Navigator.pushNamed(context, '/artist', arguments: {'id': artist.id, 'initialData': artist}),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.05),
+          color: Colors.white.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withOpacity(0.1)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
         ),
         child: Stack(
           children: [
@@ -274,7 +274,7 @@ class _MeetArtistPageState extends State<MeetArtistPage> {
                       const SizedBox(height: 4),
                       Text(
                         '${artist.followers} fans',
-                        style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12),
+                        style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12),
                       ),
                     ],
                   ),
@@ -292,7 +292,7 @@ class _MeetArtistPageState extends State<MeetArtistPage> {
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.error.withOpacity(0.5),
+                        color: AppColors.error.withValues(alpha: 0.5),
                         blurRadius: 8,
                         spreadRadius: 2,
                       )

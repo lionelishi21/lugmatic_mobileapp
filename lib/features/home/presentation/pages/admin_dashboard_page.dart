@@ -154,7 +154,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> with SingleTick
           Icon(icon, color: AppColors.primary, size: 20),
           const SizedBox(height: 8),
           Text(value, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-          Text(label, style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 10)),
+          Text(label, style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 10)),
         ],
       ),
     );
@@ -174,7 +174,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> with SingleTick
         return ListTile(
           contentPadding: EdgeInsets.zero,
           leading: CircleAvatar(
-            backgroundColor: AppColors.primary.withOpacity(0.1),
+            backgroundColor: AppColors.primary.withValues(alpha: 0.1),
             child: Icon(_getActivityIcon(act['type']), color: AppColors.primary, size: 20),
           ),
           title: Text(act['artistName'] ?? 'Unknown', style: const TextStyle(color: Colors.white, fontSize: 14)),

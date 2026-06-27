@@ -91,11 +91,11 @@ class _GenreCard extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [bgColor.withOpacity(0.8), bgColor.withOpacity(0.4)],
+            colors: [bgColor.withValues(alpha: 0.8), bgColor.withValues(alpha: 0.4)],
           ),
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
-            BoxShadow(color: bgColor.withOpacity(0.2), blurRadius: 10, offset: const Offset(0, 4)),
+            BoxShadow(color: bgColor.withValues(alpha: 0.2), blurRadius: 10, offset: const Offset(0, 4)),
           ],
         ),
         child: Stack(
@@ -120,7 +120,7 @@ class _GenreCard extends StatelessWidget {
                   ),
                   Text(
                     '${genre.songCount} songs',
-                    style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12),
+                    style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12),
                   ),
                 ],
               ),

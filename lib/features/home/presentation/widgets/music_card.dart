@@ -30,7 +30,7 @@ class MusicCard extends StatelessWidget {
         boxShadow: [
           if (showGlow)
             BoxShadow(
-              color: AppColors.primary.withOpacity(0.15),
+              color: AppColors.primary.withValues(alpha: 0.15),
               blurRadius: 20,
               spreadRadius: -5,
             ),
@@ -62,7 +62,7 @@ class MusicCard extends StatelessWidget {
                       end: Alignment.bottomCenter,
                       colors: [
                         Colors.transparent,
-                        Colors.black.withOpacity(0.6),
+                        Colors.black.withValues(alpha: 0.6),
                       ],
                     ),
                   ),
@@ -79,7 +79,7 @@ class MusicCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(10),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.primary.withOpacity(0.4),
+                            color: AppColors.primary.withValues(alpha: 0.4),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
@@ -112,7 +112,7 @@ class MusicCard extends StatelessWidget {
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.primary.withOpacity(0.4),
+                            color: AppColors.primary.withValues(alpha: 0.4),
                             blurRadius: 12,
                             offset: const Offset(0, 4),
                           ),
@@ -164,9 +164,9 @@ class MusicCard extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.08),
+                          color: Colors.white.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: Colors.white.withOpacity(0.05)),
+                          border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
                         ),
                         child: Text(
                           music.genre,
@@ -181,14 +181,14 @@ class MusicCard extends StatelessWidget {
                     const Spacer(),
                     Icon(
                       Icons.access_time_rounded,
-                      color: AppColors.mutedForeground.withOpacity(0.6),
+                      color: AppColors.mutedForeground.withValues(alpha: 0.6),
                       size: 12,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       _formatDuration(music.duration),
                       style: TextStyle(
-                        color: AppColors.mutedForeground.withOpacity(0.8),
+                        color: AppColors.mutedForeground.withValues(alpha: 0.8),
                         fontSize: 11,
                         fontWeight: FontWeight.w500,
                       ),
@@ -237,7 +237,7 @@ class MusicCard extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.music_note, color: Colors.white.withOpacity(0.3), size: 40),
+            Icon(Icons.music_note, color: Colors.white.withValues(alpha: 0.3), size: 40),
           ],
         ),
       );

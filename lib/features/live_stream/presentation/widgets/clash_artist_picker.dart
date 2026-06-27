@@ -65,7 +65,7 @@ class _ClashArtistPickerState extends State<ClashArtistPicker> {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: NeumorphicTheme.textTertiary.withOpacity(0.3),
+              color: NeumorphicTheme.textTertiary.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -110,7 +110,7 @@ class _ClashArtistPickerState extends State<ClashArtistPicker> {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
       ),
       child: ListTile(
@@ -137,7 +137,7 @@ class _ClashArtistPickerState extends State<ClashArtistPicker> {
         trailing: ElevatedButton(
           onPressed: () => Navigator.pop(context, stream.host?.id),
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.red.withOpacity(0.8),
+            backgroundColor: Colors.red.withValues(alpha: 0.8),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             padding: const EdgeInsets.symmetric(horizontal: 16),
           ),

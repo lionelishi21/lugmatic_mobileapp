@@ -109,13 +109,13 @@ class _HomePageState extends State<HomePage> {
           MaterialBanner(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             backgroundColor: AppColors.card,
-            dividerColor: AppColors.primary.withOpacity(0.2),
+            dividerColor: AppColors.primary.withValues(alpha: 0.2),
             content: Row(
               children: [
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.12),
+                    color: AppColors.primary.withValues(alpha: 0.12),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(Icons.sports_kabaddi, color: AppColors.primary, size: 22),
@@ -129,7 +129,7 @@ class _HomePageState extends State<HomePage> {
                       const Text('⚔️ Clash Started!',
                           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
                       Text('$challengerName vs $opponentName • $realmLabel',
-                          style: TextStyle(color: Colors.white.withOpacity(0.55), fontSize: 12),
+                          style: TextStyle(color: Colors.white.withValues(alpha: 0.55), fontSize: 12),
                           overflow: TextOverflow.ellipsis),
                     ],
                   ),
@@ -141,7 +141,7 @@ class _HomePageState extends State<HomePage> {
                 onPressed: () {
                   ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
                 },
-                child: Text('Dismiss', style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 12)),
+                child: Text('Dismiss', style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 12)),
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
@@ -454,16 +454,16 @@ class _HomePageState extends State<HomePage> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppColors.primary.withOpacity(0.2),
-            AppColors.secondary.withOpacity(0.15),
-            Colors.black.withOpacity(0.4),
+            AppColors.primary.withValues(alpha: 0.2),
+            AppColors.secondary.withValues(alpha: 0.15),
+            Colors.black.withValues(alpha: 0.4),
           ],
         ),
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: Colors.white.withOpacity(0.08)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.05),
+            color: AppColors.primary.withValues(alpha: 0.05),
             blurRadius: 30,
             spreadRadius: -5,
           ),
@@ -484,7 +484,7 @@ class _HomePageState extends State<HomePage> {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.primary.withOpacity(0.3),
+                      color: AppColors.primary.withValues(alpha: 0.3),
                       blurRadius: 15,
                       offset: const Offset(0, 5),
                     ),
@@ -561,7 +561,7 @@ class _HomePageState extends State<HomePage> {
     return Container(
       height: 52,
       decoration: BoxDecoration(
-        color: isPrimary ? AppColors.white : Colors.white.withOpacity(0.08),
+        color: isPrimary ? AppColors.white : Colors.white.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(14),
       ),
       child: Material(
@@ -597,9 +597,9 @@ class _HomePageState extends State<HomePage> {
       width: 52,
       height: 52,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.08),
+        color: Colors.white.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
       ),
       child: Material(
         color: Colors.transparent,
@@ -700,7 +700,7 @@ class _HomePageState extends State<HomePage> {
               end: Alignment.bottomRight,
               colors: [
                 AppColors.border,
-                Colors.white.withOpacity(0.03),
+                Colors.white.withValues(alpha: 0.03),
               ],
             ),
             borderRadius: BorderRadius.circular(16),
@@ -719,14 +719,14 @@ class _HomePageState extends State<HomePage> {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      color.withOpacity(0.3),
-                      color.withOpacity(0.15),
+                      color.withValues(alpha: 0.3),
+                      color.withValues(alpha: 0.15),
                     ],
                   ),
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: color.withOpacity(0.3),
+                      color: color.withValues(alpha: 0.3),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
@@ -787,10 +787,10 @@ class _HomePageState extends State<HomePage> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.15),
+                  color: AppColors.primary.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: AppColors.primary.withOpacity(0.3),
+                    color: AppColors.primary.withValues(alpha: 0.3),
                     width: 1,
                   ),
                 ),
@@ -856,17 +856,17 @@ class _HomePageState extends State<HomePage> {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
       decoration: BoxDecoration(
-        color: AppColors.muted.withOpacity(0.2),
+        color: AppColors.muted.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.border),
       ),
       child: Column(
         children: [
-          Icon(icon, color: Colors.white.withOpacity(0.2), size: 48),
+          Icon(icon, color: Colors.white.withValues(alpha: 0.2), size: 48),
           const SizedBox(height: 12),
           Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16)),
           const SizedBox(height: 4),
-          Text(subtitle, style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 13), textAlign: TextAlign.center),
+          Text(subtitle, style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 13), textAlign: TextAlign.center),
         ],
       ),
     );
@@ -882,21 +882,21 @@ class _HomePageState extends State<HomePage> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              AppColors.error.withOpacity(0.15),
-              const Color(0xFFDC2626).withOpacity(0.08),
+              AppColors.error.withValues(alpha: 0.15),
+              const Color(0xFFDC2626).withValues(alpha: 0.08),
             ],
           ),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.error.withOpacity(0.25)),
+          border: Border.all(color: AppColors.error.withValues(alpha: 0.25)),
         ),
         child: Row(
           children: [
             Container(
               width: 52, height: 52,
               decoration: BoxDecoration(
-                color: AppColors.error.withOpacity(0.2),
+                color: AppColors.error.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
-                border: Border.all(color: AppColors.error.withOpacity(0.4)),
+                border: Border.all(color: AppColors.error.withValues(alpha: 0.4)),
               ),
               child: const Icon(Icons.live_tv_rounded, color: Color(0xFFEF4444), size: 28),
             ),
@@ -912,7 +912,7 @@ class _HomePageState extends State<HomePage> {
                   const SizedBox(height: 4),
                   Text(
                     'Artists go live here — follow them to get notified',
-                    style: TextStyle(color: Colors.white.withOpacity(0.55), fontSize: 13),
+                    style: TextStyle(color: Colors.white.withValues(alpha: 0.55), fontSize: 13),
                   ),
                 ],
               ),
@@ -923,9 +923,9 @@ class _HomePageState extends State<HomePage> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: AppColors.error.withOpacity(0.15),
+                  color: AppColors.error.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.error.withOpacity(0.4)),
+                  border: Border.all(color: AppColors.error.withValues(alpha: 0.4)),
                 ),
                 child: const Text('Browse', style: TextStyle(color: Color(0xFFEF4444), fontWeight: FontWeight.w700, fontSize: 13)),
               ),
@@ -949,10 +949,10 @@ class _HomePageState extends State<HomePage> {
               width: 160,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
-                color: Colors.white.withOpacity(0.05),
-                border: Border.all(color: AppColors.error.withOpacity(0.4)),
+                color: Colors.white.withValues(alpha: 0.05),
+                border: Border.all(color: AppColors.error.withValues(alpha: 0.4)),
                 image: stream.coverImage.isNotEmpty
-                    ? DecorationImage(image: NetworkImage(stream.coverImage), fit: BoxFit.cover, colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.45), BlendMode.darken))
+                    ? DecorationImage(image: NetworkImage(stream.coverImage), fit: BoxFit.cover, colorFilter: ColorFilter.mode(Colors.black.withValues(alpha: 0.45), BlendMode.darken))
                     : null,
               ),
               child: Padding(
@@ -975,7 +975,7 @@ class _HomePageState extends State<HomePage> {
                     const SizedBox(height: 2),
                     Text(
                       stream.title,
-                      style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 11),
+                      style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 11),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -1061,7 +1061,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                 // Dark overlay for readability
-                Container(color: Colors.black.withOpacity(0.45)),
+                Container(color: Colors.black.withValues(alpha: 0.45)),
                 // Text
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -1099,17 +1099,17 @@ class _HomePageState extends State<HomePage> {
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [AppColors.secondary.withOpacity(0.2), const Color(0xFF7C3AED).withOpacity(0.1)],
+            colors: [AppColors.secondary.withValues(alpha: 0.2), const Color(0xFF7C3AED).withValues(alpha: 0.1)],
           ),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.secondary.withOpacity(0.3)),
+          border: Border.all(color: AppColors.secondary.withValues(alpha: 0.3)),
         ),
         child: Row(
           children: [
             Container(
               width: 48, height: 48,
               decoration: BoxDecoration(
-                color: AppColors.secondary.withOpacity(0.2),
+                color: AppColors.secondary.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.person_search_rounded, color: Color(0xFF8B5CF6), size: 26),
@@ -1301,7 +1301,7 @@ class _HomePageState extends State<HomePage> {
                       image: coverUrl.isNotEmpty
                         ? DecorationImage(image: NetworkImage(coverUrl), fit: BoxFit.cover)
                         : null,
-                      boxShadow: [BoxShadow(color: gradient.first.withOpacity(0.35), blurRadius: 16, offset: const Offset(0, 8))],
+                      boxShadow: [BoxShadow(color: gradient.first.withValues(alpha: 0.35), blurRadius: 16, offset: const Offset(0, 8))],
                     ),
                     padding: const EdgeInsets.all(16),
                     child: Column(
@@ -1309,7 +1309,7 @@ class _HomePageState extends State<HomePage> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         Text(name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 15), maxLines: 1, overflow: TextOverflow.ellipsis),
-                        if (desc.isNotEmpty) Text(desc, style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        if (desc.isNotEmpty) Text(desc, style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
                       ],
                     ),
                   ),
@@ -1355,7 +1355,7 @@ class _HomePageState extends State<HomePage> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                 decoration: BoxDecoration(
-                  color: AppColors.muted.withOpacity(0.2),
+                  color: AppColors.muted.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Row(
@@ -1374,11 +1374,11 @@ class _HomePageState extends State<HomePage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(name, style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis),
-                          if (desc.isNotEmpty) Text(desc, style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
+                          if (desc.isNotEmpty) Text(desc, style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
                         ],
                       ),
                     ),
-                    Icon(Icons.chevron_right, color: Colors.white.withOpacity(0.3)),
+                    Icon(Icons.chevron_right, color: Colors.white.withValues(alpha: 0.3)),
                   ],
                 ),
               ),
@@ -1412,13 +1412,13 @@ class _HomePageState extends State<HomePage> {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppColors.muted.withOpacity(0.2),
+        color: AppColors.muted.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.border),
       ),
       child: Row(
         children: [
-          Icon(icon, color: Colors.white.withOpacity(0.25), size: 40),
+          Icon(icon, color: Colors.white.withValues(alpha: 0.25), size: 40),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -1426,7 +1426,7 @@ class _HomePageState extends State<HomePage> {
               children: [
                 Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 15)),
                 const SizedBox(height: 2),
-                Text(subtitle, style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 13)),
+                Text(subtitle, style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 13)),
               ],
             ),
           ),
@@ -1436,9 +1436,9 @@ class _HomePageState extends State<HomePage> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.15),
+                color: AppColors.primary.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
               ),
               child: Text(actionLabel, style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700, fontSize: 12)),
             ),
@@ -1498,9 +1498,9 @@ class _HomePageState extends State<HomePage> {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    Colors.green.withOpacity(0.8),
-                    Colors.blue.withOpacity(0.8),
-                    Colors.black.withOpacity(0.9),
+                    Colors.green.withValues(alpha: 0.8),
+                    Colors.blue.withValues(alpha: 0.8),
+                    Colors.black.withValues(alpha: 0.9),
                   ],
                 ),
               ),
@@ -1542,7 +1542,7 @@ class _HomePageState extends State<HomePage> {
                       Text(
                         'Now Playing',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),
+                          color: Colors.white.withValues(alpha: 0.8),
                           fontSize: 12,
                         ),
                       ),
@@ -1596,7 +1596,7 @@ class _HomePageState extends State<HomePage> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.6),
+                    color: Colors.black.withValues(alpha: 0.6),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
@@ -1626,7 +1626,7 @@ class _HomePageState extends State<HomePage> {
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
-                  color: Colors.black.withOpacity(0.5),
+                  color: Colors.black.withValues(alpha: 0.5),
                 ),
                 child: const Center(
                   child: Column(
@@ -1691,8 +1691,8 @@ class _HomePageState extends State<HomePage> {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    Colors.black.withOpacity(0.6),
-                    AppColors.primary.withOpacity(0.1),
+                    Colors.black.withValues(alpha: 0.6),
+                    AppColors.primary.withValues(alpha: 0.1),
                   ],
                 ),
                 borderRadius: BorderRadius.circular(20),
@@ -1707,7 +1707,7 @@ class _HomePageState extends State<HomePage> {
                     child: Icon(
                       Icons.emoji_events,
                       size: 100,
-                      color: AppColors.primary.withOpacity(0.05),
+                      color: AppColors.primary.withValues(alpha: 0.05),
                     ),
                   ),
                   
@@ -1721,7 +1721,7 @@ class _HomePageState extends State<HomePage> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
-                                color: AppColors.primary.withOpacity(0.2),
+                                color: AppColors.primary.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: const Text(

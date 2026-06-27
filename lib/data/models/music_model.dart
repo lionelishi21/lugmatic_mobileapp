@@ -1,5 +1,20 @@
 import '../../core/config/api_config.dart';
 
+class LyricLine {
+  final Duration time;
+  final String text;
+
+  LyricLine({required this.time, required this.text});
+
+  factory LyricLine.fromJson(Map<String, dynamic> json) {
+    final seconds = json['time'] is num ? (json['time'] as num).toDouble() : 0.0;
+    return LyricLine(
+      time: Duration(milliseconds: (seconds * 1000).round()),
+      text: json['text']?.toString() ?? '',
+    );
+  }
+}
+
 class MusicModel {
   final String id;
   final String title;
@@ -12,6 +27,7 @@ class MusicModel {
   final Duration duration;
   final String genre;
   final String lyrics;
+  final List<LyricLine>? lyricsLines;
   final bool isLiked;
   final int playCount;
   final DateTime releaseDate;
@@ -32,6 +48,7 @@ class MusicModel {
     required this.duration,
     required this.genre,
     this.lyrics = '',
+    this.lyricsLines,
     this.isLiked = false,
     this.playCount = 0,
     required this.releaseDate,
@@ -93,6 +110,12 @@ class MusicModel {
       duration: Duration(seconds: _parseDurationSeconds(json['duration'])),
       genre: genreName,
       lyrics: json['lyrics'] ?? '',
+      lyricsLines: json['lyricsLines'] is List
+          ? (json['lyricsLines'] as List)
+              .whereType<Map<String, dynamic>>()
+              .map(LyricLine.fromJson)
+              .toList()
+          : null,
       isLiked: json['isLiked'] ?? false,
       playCount: json['playCount'] ?? 0,
       releaseDate: json['releaseDate'] != null

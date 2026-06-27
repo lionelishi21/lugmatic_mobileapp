@@ -118,7 +118,7 @@ class _GoLiveSetupPageState extends State<GoLiveSetupPage> {
                   style: const TextStyle(color: NeumorphicTheme.textPrimary),
                   decoration: InputDecoration(
                     hintText: 'What is your stream about?',
-                    hintStyle: TextStyle(color: NeumorphicTheme.textTertiary.withOpacity(0.5)),
+                    hintStyle: TextStyle(color: NeumorphicTheme.textTertiary.withValues(alpha: 0.5)),
                     filled: true,
                     fillColor: Colors.transparent,
                     border: InputBorder.none,
@@ -180,7 +180,7 @@ class _GoLiveSetupPageState extends State<GoLiveSetupPage> {
                   style: const TextStyle(color: NeumorphicTheme.textPrimary),
                   decoration: InputDecoration(
                     hintText: 'Tell your fans more...',
-                    hintStyle: TextStyle(color: NeumorphicTheme.textTertiary.withOpacity(0.5)),
+                    hintStyle: TextStyle(color: NeumorphicTheme.textTertiary.withValues(alpha: 0.5)),
                     filled: true,
                     fillColor: Colors.transparent,
                     border: InputBorder.none,

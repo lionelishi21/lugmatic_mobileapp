@@ -166,7 +166,7 @@ class _SongDetailPageState extends State<SongDetailPage> {
             icon: Container(
               width: 36, height: 36,
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.5),
+                color: Colors.black.withValues(alpha: 0.5),
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 18),
@@ -197,7 +197,7 @@ class _SongDetailPageState extends State<SongDetailPage> {
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.6),
+                          color: Colors.black.withValues(alpha: 0.6),
                           blurRadius: 40,
                           offset: const Offset(0, 20),
                         ),
@@ -241,7 +241,7 @@ class _SongDetailPageState extends State<SongDetailPage> {
                 Text(
                   song.artist,
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.6),
+                    color: Colors.white.withValues(alpha: 0.6),
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                   ),
@@ -251,7 +251,7 @@ class _SongDetailPageState extends State<SongDetailPage> {
                   Text(
                     song.album,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.4),
+                      color: Colors.white.withValues(alpha: 0.4),
                       fontSize: 13,
                     ),
                   ),
@@ -409,9 +409,9 @@ class _SongDetailPageState extends State<SongDetailPage> {
     ];
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.08)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),
       child: Column(
         children: rows.asMap().entries.map((e) {
@@ -420,12 +420,12 @@ class _SongDetailPageState extends State<SongDetailPage> {
           return Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
-              border: isLast ? null : Border(bottom: BorderSide(color: Colors.white.withOpacity(0.06))),
+              border: isLast ? null : Border(bottom: BorderSide(color: Colors.white.withValues(alpha: 0.06))),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(row['label']!, style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 14)),
+                Text(row['label']!, style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 14)),
                 Text(row['value']!, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600)),
               ],
             ),
@@ -440,15 +440,15 @@ class _SongDetailPageState extends State<SongDetailPage> {
       return Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.05),
+          color: Colors.white.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withOpacity(0.08)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
         ),
         child: Column(
           children: [
-            Icon(Icons.mic_none, color: Colors.white.withOpacity(0.2), size: 48),
+            Icon(Icons.mic_none, color: Colors.white.withValues(alpha: 0.2), size: 48),
             const SizedBox(height: 12),
-            Text('No lyrics available', style: TextStyle(color: Colors.white.withOpacity(0.4))),
+            Text('No lyrics available', style: TextStyle(color: Colors.white.withValues(alpha: 0.4))),
           ],
         ),
       );
@@ -468,9 +468,9 @@ class _SongDetailPageState extends State<SongDetailPage> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.08)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -479,7 +479,7 @@ class _SongDetailPageState extends State<SongDetailPage> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: const Color(0xFF10B981).withOpacity(0.15),
+                color: const Color(0xFF10B981).withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Row(
@@ -503,7 +503,7 @@ class _SongDetailPageState extends State<SongDetailPage> {
           SelectableText(
             displayLyrics,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha: 0.8),
               fontSize: 15,
               height: 1.8,
             ),
@@ -550,7 +550,7 @@ class _SongDetailPageState extends State<SongDetailPage> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.6),
+                color: Colors.black.withValues(alpha: 0.6),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: const Row(
@@ -591,9 +591,9 @@ class _SongRow extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.04),
+          color: Colors.white.withValues(alpha: 0.04),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white.withOpacity(0.06)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
         ),
         child: Row(
           children: [
@@ -602,11 +602,11 @@ class _SongRow extends StatelessWidget {
               child: song.imageUrl.isNotEmpty
                   ? Image.network(song.imageUrl, width: 52, height: 52, fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => Container(
-                        width: 52, height: 52, color: const Color(0xFF10B981).withOpacity(0.2),
+                        width: 52, height: 52, color: const Color(0xFF10B981).withValues(alpha: 0.2),
                         child: const Icon(Icons.music_note, color: Colors.white38),
                       ))
                   : Container(
-                      width: 52, height: 52, color: const Color(0xFF10B981).withOpacity(0.2),
+                      width: 52, height: 52, color: const Color(0xFF10B981).withValues(alpha: 0.2),
                       child: const Icon(Icons.music_note, color: Colors.white38),
                     ),
             ),
@@ -619,11 +619,11 @@ class _SongRow extends StatelessWidget {
                       style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 15)),
                   const SizedBox(height: 3),
                   Text(song.artist, maxLines: 1, overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 13)),
+                      style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 13)),
                 ],
               ),
             ),
-            Icon(Icons.play_circle_outline, color: const Color(0xFF10B981).withOpacity(0.7), size: 28),
+            Icon(Icons.play_circle_outline, color: const Color(0xFF10B981).withValues(alpha: 0.7), size: 28),
           ],
         ),
       ),
@@ -649,13 +649,13 @@ class _Tab extends StatelessWidget {
           gradient: selected
               ? const LinearGradient(colors: [Color(0xFF10B981), Color(0xFF059669)])
               : null,
-          color: selected ? null : Colors.white.withOpacity(0.07),
+          color: selected ? null : Colors.white.withValues(alpha: 0.07),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: selected ? Colors.white : Colors.white.withOpacity(0.6),
+            color: selected ? Colors.white : Colors.white.withValues(alpha: 0.6),
             fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
             fontSize: 14,
           ),
@@ -681,7 +681,7 @@ class _ActionButton extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: LinearGradient(colors: gradient),
           borderRadius: BorderRadius.circular(14),
-          boxShadow: [BoxShadow(color: gradient.first.withOpacity(0.4), blurRadius: 16, offset: const Offset(0, 6))],
+          boxShadow: [BoxShadow(color: gradient.first.withValues(alpha: 0.4), blurRadius: 16, offset: const Offset(0, 6))],
         ),
         child: Center(child: child),
       ),
@@ -703,9 +703,9 @@ class _IconActionButton extends StatelessWidget {
       child: Container(
         width: 50, height: 50,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.07),
+          color: Colors.white.withValues(alpha: 0.07),
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: Colors.white.withOpacity(0.12)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
         ),
         child: Icon(icon, color: color, size: 22),
       ),

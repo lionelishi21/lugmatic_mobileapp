@@ -50,7 +50,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
           style: const TextStyle(color: AppColors.white),
           decoration: InputDecoration(
             hintText: widget.hint,
-            hintStyle: TextStyle(color: AppColors.greyLight.withOpacity(0.6)),
+            hintStyle: TextStyle(color: AppColors.greyLight.withValues(alpha: 0.6)),
             prefixIcon: widget.prefixIcon != null
                 ? Icon(widget.prefixIcon, color: AppColors.greyLight)
                 : null,
@@ -68,14 +68,14 @@ class _CustomTextFieldState extends State<CustomTextField> {
                   )
                 : null,
             filled: true,
-            fillColor: AppColors.greyDark.withOpacity(0.1),
+            fillColor: AppColors.greyDark.withValues(alpha: 0.1),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.greyDark.withOpacity(0.3)),
+              borderSide: BorderSide(color: AppColors.greyDark.withValues(alpha: 0.3)),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.greyDark.withOpacity(0.3)),
+              borderSide: BorderSide(color: AppColors.greyDark.withValues(alpha: 0.3)),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),

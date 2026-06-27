@@ -125,7 +125,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                   const SizedBox(height: 4),
                   Text(
                     widget.video.title,
-                    style: TextStyle(color: Colors.white.withOpacity(0.85), fontSize: 14),
+                    style: TextStyle(color: Colors.white.withValues(alpha: 0.85), fontSize: 14),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),

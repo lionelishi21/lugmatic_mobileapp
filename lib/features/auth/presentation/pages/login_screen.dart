@@ -121,7 +121,7 @@ class _LoginScreenState extends State<LoginScreen>
                   center: Alignment.center,
                   radius: 1.2,
                   colors: [
-                    AppColors.secondary.withOpacity(0.22),
+                    AppColors.secondary.withValues(alpha: 0.22),
                     Colors.transparent,
                   ],
                 ),
@@ -137,7 +137,7 @@ class _LoginScreenState extends State<LoginScreen>
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(colors: [
-                  AppColors.secondary.withOpacity(0.14),
+                  AppColors.secondary.withValues(alpha: 0.14),
                   Colors.transparent,
                 ]),
               ),
@@ -152,7 +152,7 @@ class _LoginScreenState extends State<LoginScreen>
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(colors: [
-                  AppColors.secondaryDim.withOpacity(0.10),
+                  AppColors.secondaryDim.withValues(alpha: 0.10),
                   Colors.transparent,
                 ]),
               ),
@@ -213,7 +213,7 @@ class _LoginScreenState extends State<LoginScreen>
                                   boxShadow: [
                                     BoxShadow(
                                       color: Colors.black
-                                          .withOpacity(0.4),
+                                          .withValues(alpha: 0.4),
                                       blurRadius: 40,
                                       offset: const Offset(0, 20),
                                     ),
@@ -480,7 +480,7 @@ class _LoginScreenState extends State<LoginScreen>
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
         borderSide: BorderSide(
-            color: AppColors.primary.withOpacity(0.5), width: 1.5),
+            color: AppColors.primary.withValues(alpha: 0.5), width: 1.5),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
@@ -505,7 +505,7 @@ class _LoginScreenState extends State<LoginScreen>
         children: [
           Expanded(
               child: Divider(
-                  color: AppColors.border.withOpacity(0.5),
+                  color: AppColors.border.withValues(alpha: 0.5),
                   height: 1)),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 14),
@@ -517,7 +517,7 @@ class _LoginScreenState extends State<LoginScreen>
           ),
           Expanded(
               child: Divider(
-                  color: AppColors.border.withOpacity(0.5),
+                  color: AppColors.border.withValues(alpha: 0.5),
                   height: 1)),
         ],
       );
@@ -545,7 +545,7 @@ class _PrimaryButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
-              color: AppColors.primary.withOpacity(0.35),
+              color: AppColors.primary.withValues(alpha: 0.35),
               blurRadius: 20,
               offset: const Offset(0, 8),
             ),

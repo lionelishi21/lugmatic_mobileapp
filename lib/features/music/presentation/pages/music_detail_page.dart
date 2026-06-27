@@ -322,7 +322,7 @@ class _MusicDetailPageState extends State<MusicDetailPage> {
                       activeTrackColor: NeumorphicTheme.primaryAccent,
                       inactiveTrackColor: NeumorphicTheme.surfaceColor,
                       thumbColor: NeumorphicTheme.primaryAccent,
-                      overlayColor: NeumorphicTheme.primaryAccent.withOpacity(0.3),
+                      overlayColor: NeumorphicTheme.primaryAccent.withValues(alpha: 0.3),
                     ),
                     child: Slider(
                       value: _position.inSeconds.toDouble(),

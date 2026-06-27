@@ -25,7 +25,7 @@ class BillboardListItem extends StatelessWidget {
             ? const Color(0xFFC0C0C0) // Silver
             : rank == 3 
                 ? const Color(0xFFCD7F32) // Bronze
-                : Colors.white.withOpacity(0.5);
+                : Colors.white.withValues(alpha: 0.5);
 
     final stats = music.billboardStats;
     final plays = stats?['plays'] ?? 0;
@@ -40,13 +40,13 @@ class BillboardListItem extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Colors.white.withOpacity(0.05),
-              Colors.white.withOpacity(0.02),
+              Colors.white.withValues(alpha: 0.05),
+              Colors.white.withValues(alpha: 0.02),
             ],
           ),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: Colors.white.withOpacity(0.05),
+            color: Colors.white.withValues(alpha: 0.05),
           ),
         ),
         child: Row(
@@ -64,7 +64,7 @@ class BillboardListItem extends StatelessWidget {
                   shadows: [
                     if (rank <= 3)
                       Shadow(
-                        color: rankColor.withOpacity(0.5),
+                        color: rankColor.withValues(alpha: 0.5),
                         blurRadius: 10,
                       ),
                   ],
@@ -89,7 +89,7 @@ class BillboardListItem extends StatelessWidget {
                         child: Container(
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.5),
+                            color: Colors.black.withValues(alpha: 0.5),
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(

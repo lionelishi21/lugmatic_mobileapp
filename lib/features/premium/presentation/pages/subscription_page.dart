@@ -147,7 +147,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         Text(
           'Unlock the full potential of Lugmatic with Premium.',
           style: TextStyle(
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withValues(alpha: 0.7),
             fontSize: 16,
           ),
         ),
@@ -177,14 +177,14 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           : LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [Colors.white.withOpacity(0.1), Colors.white.withOpacity(0.05)],
+              colors: [Colors.white.withValues(alpha: 0.1), Colors.white.withValues(alpha: 0.05)],
             ),
         border: Border.all(
-          color: plan.isPopular ? Colors.transparent : Colors.white.withOpacity(0.1),
+          color: plan.isPopular ? Colors.transparent : Colors.white.withValues(alpha: 0.1),
         ),
         boxShadow: plan.isPopular ? [
           BoxShadow(
-            color: const Color(0xFF10B981).withOpacity(0.3),
+            color: const Color(0xFF10B981).withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           )
@@ -229,7 +229,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                         ),
                         Text(
                           '/${plan.interval == 'month' ? 'mo' : 'yr'}',
-                          style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 14),
+                          style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 14),
                         ),
                       ],
                     ),
@@ -238,7 +238,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 const SizedBox(height: 12),
                 Text(
                   plan.description,
-                  style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 14),
+                  style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 14),
                 ),
                 const Divider(height: 40, color: Colors.white24),
                 ...plan.features.map((feature) => Padding(
@@ -299,7 +299,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(24),
       ),
       child: Column(
@@ -314,7 +314,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           Text(
             'Our support team is here to help you with any questions about your subscription.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 14),
+            style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 14),
           ),
           const SizedBox(height: 20),
           TextButton(

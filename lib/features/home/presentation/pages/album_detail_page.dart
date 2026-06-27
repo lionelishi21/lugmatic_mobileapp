@@ -125,7 +125,7 @@ class _AlbumDetailPageState extends State<AlbumDetailPage> {
           leading: IconButton(
             icon: Container(
               width: 36, height: 36,
-              decoration: BoxDecoration(color: Colors.black.withOpacity(0.5), shape: BoxShape.circle),
+              decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.5), shape: BoxShape.circle),
               child: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 18),
             ),
             onPressed: () => Navigator.pop(context),
@@ -154,7 +154,7 @@ class _AlbumDetailPageState extends State<AlbumDetailPage> {
                   child: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(20),
-                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.6), blurRadius: 40, offset: const Offset(0, 20))],
+                      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.6), blurRadius: 40, offset: const Offset(0, 20))],
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(20),
@@ -201,17 +201,17 @@ class _AlbumDetailPageState extends State<AlbumDetailPage> {
                       ),
                     ],
                     if (releaseDate != null) ...[
-                      Text('  ·  ', style: TextStyle(color: Colors.white.withOpacity(0.3))),
+                      Text('  ·  ', style: TextStyle(color: Colors.white.withValues(alpha: 0.3))),
                       Text(
                         '${releaseDate.year}',
-                        style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 14),
+                        style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 14),
                       ),
                     ],
                     if (_songs.isNotEmpty) ...[
-                      Text('  ·  ', style: TextStyle(color: Colors.white.withOpacity(0.3))),
+                      Text('  ·  ', style: TextStyle(color: Colors.white.withValues(alpha: 0.3))),
                       Text(
                         '${_songs.length} tracks',
-                        style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 14),
+                        style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 14),
                       ),
                     ],
                   ],
@@ -240,9 +240,9 @@ class _AlbumDetailPageState extends State<AlbumDetailPage> {
                             gradient: _songs.isNotEmpty
                                 ? const LinearGradient(colors: [Color(0xFF10B981), Color(0xFF059669)])
                                 : null,
-                            color: _songs.isEmpty ? Colors.white.withOpacity(0.08) : null,
+                            color: _songs.isEmpty ? Colors.white.withValues(alpha: 0.08) : null,
                             borderRadius: BorderRadius.circular(14),
-                            boxShadow: _songs.isNotEmpty ? [BoxShadow(color: const Color(0xFF10B981).withOpacity(0.4), blurRadius: 16, offset: const Offset(0, 6))] : [],
+                            boxShadow: _songs.isNotEmpty ? [BoxShadow(color: const Color(0xFF10B981).withValues(alpha: 0.4), blurRadius: 16, offset: const Offset(0, 6))] : [],
                           ),
                           child: const Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -266,9 +266,9 @@ class _AlbumDetailPageState extends State<AlbumDetailPage> {
                         child: Container(
                           width: 50, height: 50,
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.07),
+                            color: Colors.white.withValues(alpha: 0.07),
                             borderRadius: BorderRadius.circular(14),
-                            border: Border.all(color: Colors.white.withOpacity(0.12)),
+                            border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
                           ),
                           child: const Icon(Icons.card_giftcard_rounded, color: Color(0xFFFFD700), size: 22),
                         ),
@@ -298,9 +298,9 @@ class _AlbumDetailPageState extends State<AlbumDetailPage> {
                           margin: const EdgeInsets.only(bottom: 4),
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                           decoration: BoxDecoration(
-                            color: isPlaying ? const Color(0xFF10B981).withOpacity(0.15) : Colors.white.withOpacity(0.03),
+                            color: isPlaying ? const Color(0xFF10B981).withValues(alpha: 0.15) : Colors.white.withValues(alpha: 0.03),
                             borderRadius: BorderRadius.circular(12),
-                            border: isPlaying ? Border.all(color: const Color(0xFF10B981).withOpacity(0.5)) : null,
+                            border: isPlaying ? Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.5)) : null,
                           ),
                           child: Row(
                             children: [
@@ -310,7 +310,7 @@ class _AlbumDetailPageState extends State<AlbumDetailPage> {
                                     ? const Icon(Icons.bar_chart, color: Color(0xFF10B981), size: 16)
                                     : Text('${e.key + 1}',
                                         textAlign: TextAlign.center,
-                                        style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 13)),
+                                        style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 13)),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
@@ -321,12 +321,12 @@ class _AlbumDetailPageState extends State<AlbumDetailPage> {
                                         style: TextStyle(color: isPlaying ? const Color(0xFF10B981) : Colors.white, fontSize: 14, fontWeight: FontWeight.w600)),
                                     if (e.value.artist.isNotEmpty)
                                       Text(e.value.artist, maxLines: 1, overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(color: Colors.white.withOpacity(0.45), fontSize: 12)),
+                                          style: TextStyle(color: Colors.white.withValues(alpha: 0.45), fontSize: 12)),
                                   ],
                                 ),
                               ),
                               Text(_fmtDur(e.value.duration),
-                                  style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 12)),
+                                  style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 12)),
                               const SizedBox(width: 8),
                               Icon(isPlaying ? Icons.pause_circle_outline : Icons.play_circle_outline, color: const Color(0xFF10B981), size: 22),
                             ],

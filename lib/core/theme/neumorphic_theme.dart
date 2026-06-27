@@ -41,7 +41,7 @@ class NeumorphicTheme {
       border: Border.all(color: AppColors.border, width: 1),
       boxShadow: [
         BoxShadow(
-          color: Colors.black.withOpacity(0.4),
+          color: Colors.black.withValues(alpha: 0.4),
           blurRadius: 40,
           offset: const Offset(0, 20),
         ),
@@ -61,7 +61,7 @@ class NeumorphicTheme {
       border: Border.all(color: AppColors.border, width: 1),
       boxShadow: [
         BoxShadow(
-          color: Colors.black.withOpacity(isPressed ? 0.2 : 0.4),
+          color: Colors.black.withValues(alpha: isPressed ? 0.2 : 0.4),
           blurRadius: isPressed ? 6 : 16,
           offset: Offset(0, isPressed ? 2 : 8),
         ),
@@ -101,7 +101,7 @@ class NeumorphicTheme {
       borderRadius: borderRadius ?? BorderRadius.circular(14),
       boxShadow: [
         BoxShadow(
-          color: AppColors.primary.withOpacity(0.35),
+          color: AppColors.primary.withValues(alpha: 0.35),
           blurRadius: 20,
           offset: const Offset(0, 8),
         ),
@@ -147,7 +147,7 @@ class NeumorphicTheme {
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
         borderSide: BorderSide(
-            color: AppColors.primary.withOpacity(0.5), width: 1.5),
+            color: AppColors.primary.withValues(alpha: 0.5), width: 1.5),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),

@@ -119,7 +119,7 @@ class _RecordedStreamsPageState extends State<RecordedStreamsPage> {
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
+                        color: Colors.black.withValues(alpha: 0.3),
                         blurRadius: 10,
                         offset: const Offset(0, 5),
                       ),
@@ -131,7 +131,7 @@ class _RecordedStreamsPageState extends State<RecordedStreamsPage> {
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.5),
+                      color: Colors.black.withValues(alpha: 0.5),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(Icons.play_arrow, color: Colors.white, size: 32),
@@ -144,7 +144,7 @@ class _RecordedStreamsPageState extends State<RecordedStreamsPage> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.7),
+                      color: Colors.black.withValues(alpha: 0.7),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -169,7 +169,7 @@ class _RecordedStreamsPageState extends State<RecordedStreamsPage> {
           ),
           Text(
             stream.endTime != null ? DateFormat.yMMMd().format(stream.endTime!) : '',
-            style: TextStyle(color: NeumorphicTheme.textTertiary.withOpacity(0.5), fontSize: 10),
+            style: TextStyle(color: NeumorphicTheme.textTertiary.withValues(alpha: 0.5), fontSize: 10),
           ),
         ],
       ),

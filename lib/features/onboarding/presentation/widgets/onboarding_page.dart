@@ -43,12 +43,12 @@ class OnboardingPage extends StatelessWidget {
         color: AppColors.background,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: AppColors.primaryGreen.withOpacity(0.3),
+          color: AppColors.primaryGreen.withValues(alpha: 0.3),
           width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primaryGreen.withOpacity(0.2),
+            color: AppColors.primaryGreen.withValues(alpha: 0.2),
             blurRadius: 30,
             spreadRadius: 2,
           ),
@@ -66,7 +66,7 @@ class OnboardingPage extends StatelessWidget {
     return Text(
       item.eyebrow,
       style: TextStyle(
-        color: Colors.white.withOpacity(0.5),
+        color: Colors.white.withValues(alpha: 0.5),
         fontSize: 11,
         fontWeight: FontWeight.w700,
         letterSpacing: 2,
@@ -91,7 +91,7 @@ class OnboardingPage extends StatelessWidget {
     return Text(
       item.description,
       style: TextStyle(
-        color: Colors.white.withOpacity(0.6),
+        color: Colors.white.withValues(alpha: 0.6),
         fontSize: 15,
         height: 1.5,
         fontWeight: FontWeight.w400,

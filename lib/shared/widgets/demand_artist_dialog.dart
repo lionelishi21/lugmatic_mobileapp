@@ -148,7 +148,7 @@ class _DemandArtistDialogState extends State<DemandArtistDialog> {
                     child: Text(
                       'View My Requests',
                       style: TextStyle(
-                        color: NeumorphicTheme.primaryAccent.withOpacity(0.8),
+                        color: NeumorphicTheme.primaryAccent.withValues(alpha: 0.8),
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
                       ),

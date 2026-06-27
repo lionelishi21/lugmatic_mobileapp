@@ -239,7 +239,7 @@ class _LiveArtistScreenState extends State<LiveArtistScreen>
                     padding: const EdgeInsets.symmetric(
                         horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(
+                      color: Colors.red.withValues(alpha: 
                           0.8 + (_liveIndicatorController.value * 0.2)),
                       borderRadius: BorderRadius.circular(20),
                     ),
@@ -330,9 +330,9 @@ class _LiveArtistScreenState extends State<LiveArtistScreen>
                               end: Alignment.bottomRight,
                               colors: [
                                 NeumorphicTheme.accentGradientStart
-                                    .withOpacity(0.3),
+                                    .withValues(alpha: 0.3),
                                 NeumorphicTheme.accentGradientEnd
-                                    .withOpacity(0.3),
+                                    .withValues(alpha: 0.3),
                               ],
                             ),
                           ),
@@ -415,7 +415,7 @@ class _LiveArtistScreenState extends State<LiveArtistScreen>
                                 hintText: "Send a message...",
                                 hintStyle: TextStyle(
                                   color: NeumorphicTheme.textTertiary
-                                      .withOpacity(0.5),
+                                      .withValues(alpha: 0.5),
                                 ),
                                 filled: true,
                                 fillColor: NeumorphicTheme.backgroundColor,
@@ -470,9 +470,9 @@ class _LiveArtistScreenState extends State<LiveArtistScreen>
       padding: const EdgeInsets.all(12),
       borderRadius: BorderRadius.circular(12),
       color: isArtist
-          ? NeumorphicTheme.cardColor.withOpacity(0.8)
+          ? NeumorphicTheme.cardColor.withValues(alpha: 0.8)
           : (message.isGift
-              ? const Color(0xFFFFD700).withOpacity(0.15)
+              ? const Color(0xFFFFD700).withValues(alpha: 0.15)
               : NeumorphicTheme.surfaceColor),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

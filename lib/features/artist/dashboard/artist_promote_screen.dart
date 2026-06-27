@@ -40,7 +40,7 @@ class _ArtistPromoteScreenState extends State<ArtistPromoteScreen> {
               spacing: 10,
               children: _regions.map((region) => Chip(
                 label: Text(region, style: const TextStyle(color: Colors.white)),
-                backgroundColor: AppColors.primary.withOpacity(0.2),
+                backgroundColor: AppColors.primary.withValues(alpha: 0.2),
                 side: const BorderSide(color: AppColors.primary),
               )).toList(),
             ),
@@ -103,7 +103,7 @@ class _ArtistPromoteScreenState extends State<ArtistPromoteScreen> {
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(

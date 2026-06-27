@@ -334,10 +334,10 @@ class _MixerPageState extends State<MixerPage> with SingleTickerProviderStateMix
                   margin: const EdgeInsets.symmetric(horizontal: 4),
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   decoration: BoxDecoration(
-                    color: isSel ? _green.withOpacity(0.2) : Colors.white.withOpacity(0.04),
+                    color: isSel ? _green.withValues(alpha: 0.2) : Colors.white.withValues(alpha: 0.04),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: isSel ? _green : Colors.white.withOpacity(0.08),
+                      color: isSel ? _green : Colors.white.withValues(alpha: 0.08),
                     ),
                   ),
                   child: Column(
@@ -354,7 +354,7 @@ class _MixerPageState extends State<MixerPage> with SingleTickerProviderStateMix
                       Text(
                         '${speed}x',
                         style: TextStyle(
-                          color: isSel ? _green.withOpacity(0.8) : Colors.white38,
+                          color: isSel ? _green.withValues(alpha: 0.8) : Colors.white38,
                           fontSize: 9,
                         ),
                       ),
@@ -373,9 +373,9 @@ class _MixerPageState extends State<MixerPage> with SingleTickerProviderStateMix
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.03),
+        color: Colors.white.withValues(alpha: 0.03),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.06)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -550,10 +550,10 @@ class _MixerPageState extends State<MixerPage> with SingleTickerProviderStateMix
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [_green.withOpacity(0.15), _purple.withOpacity(0.15)],
+          colors: [_green.withValues(alpha: 0.15), _purple.withValues(alpha: 0.15)],
         ),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withOpacity(0.06)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
       ),
       child: Stack(
         children: [
@@ -568,7 +568,7 @@ class _MixerPageState extends State<MixerPage> with SingleTickerProviderStateMix
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: _green.withOpacity((0.25 + _bassBoost * 0.25) * _pulseController.value),
+                      color: _green.withValues(alpha: (0.25 + _bassBoost * 0.25) * _pulseController.value),
                       blurRadius: 40 + _echoAmount * 20,
                       spreadRadius: 20 + _bassBoost * 15,
                     ),
@@ -600,9 +600,9 @@ class _MixerPageState extends State<MixerPage> with SingleTickerProviderStateMix
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.5),
+                color: Colors.black.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.red.withOpacity(0.5)),
+                border: Border.all(color: Colors.red.withValues(alpha: 0.5)),
               ),
               child: const Row(
                 mainAxisSize: MainAxisSize.min,
@@ -629,9 +629,9 @@ class _MixerPageState extends State<MixerPage> with SingleTickerProviderStateMix
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.5),
+                color: Colors.black.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.white.withOpacity(0.1)),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
               ),
               child: Text(
                 _isPlaying ? 'STABLE FEED' : 'RADIO STANDBY',
@@ -666,7 +666,7 @@ class _MixerPageState extends State<MixerPage> with SingleTickerProviderStateMix
                       return Container(
                         width: 3,
                         height: finalH,
-                        decoration: BoxDecoration(color: _green.withOpacity(0.7), borderRadius: BorderRadius.circular(2)),
+                        decoration: BoxDecoration(color: _green.withValues(alpha: 0.7), borderRadius: BorderRadius.circular(2)),
                       );
                     },
                   );
@@ -696,9 +696,9 @@ class _MixerPageState extends State<MixerPage> with SingleTickerProviderStateMix
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 decoration: BoxDecoration(
-                  color: selected ? _green.withOpacity(0.25) : Colors.white.withOpacity(0.06),
+                  color: selected ? _green.withValues(alpha: 0.25) : Colors.white.withValues(alpha: 0.06),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: selected ? _green : Colors.white.withOpacity(0.12)),
+                  border: Border.all(color: selected ? _green : Colors.white.withValues(alpha: 0.12)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -730,7 +730,7 @@ class _MixerPageState extends State<MixerPage> with SingleTickerProviderStateMix
               margin: const EdgeInsets.only(right: 8),
               width: 36, height: 36,
               decoration: BoxDecoration(
-                color: sel ? _green : Colors.white.withOpacity(0.06),
+                color: sel ? _green : Colors.white.withValues(alpha: 0.06),
                 shape: BoxShape.circle,
                 border: Border.all(color: sel ? _green : Colors.white12),
               ),
@@ -750,7 +750,7 @@ class _MixerPageState extends State<MixerPage> with SingleTickerProviderStateMix
         onPressed: _isGenerating ? null : _generateMix,
         style: ElevatedButton.styleFrom(
           backgroundColor: _green,
-          disabledBackgroundColor: _green.withOpacity(0.4),
+          disabledBackgroundColor: _green.withValues(alpha: 0.4),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
         child: _isGenerating
@@ -825,9 +825,9 @@ class _MixerPageState extends State<MixerPage> with SingleTickerProviderStateMix
                   margin: const EdgeInsets.symmetric(vertical: 4),
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
-                    color: _purple.withOpacity(0.12),
+                    color: _purple.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: _purple.withOpacity(0.3)),
+                    border: Border.all(color: _purple.withValues(alpha: 0.3)),
                   ),
                   child: Row(
                     children: [
@@ -854,9 +854,9 @@ class _MixerPageState extends State<MixerPage> with SingleTickerProviderStateMix
                   margin: const EdgeInsets.only(bottom: 6),
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: isCurrent ? _green.withOpacity(0.12) : Colors.white.withOpacity(0.03),
+                    color: isCurrent ? _green.withValues(alpha: 0.12) : Colors.white.withValues(alpha: 0.03),
                     borderRadius: BorderRadius.circular(14),
-                    border: isCurrent ? Border.all(color: _green.withOpacity(0.5)) : null,
+                    border: isCurrent ? Border.all(color: _green.withValues(alpha: 0.5)) : null,
                   ),
                   child: Row(
                     children: [
@@ -908,9 +908,9 @@ class _MixerPageState extends State<MixerPage> with SingleTickerProviderStateMix
             margin: const EdgeInsets.only(bottom: 8),
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.04),
+              color: Colors.white.withValues(alpha: 0.04),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: Colors.white.withOpacity(0.08)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
             ),
             child: Row(
               children: [
@@ -946,7 +946,7 @@ class _MixerPageState extends State<MixerPage> with SingleTickerProviderStateMix
       decoration: BoxDecoration(
         color: const Color(0xFF1A2435),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.6), blurRadius: 20, offset: const Offset(0, -5))],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.6), blurRadius: 20, offset: const Offset(0, -5))],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -955,7 +955,7 @@ class _MixerPageState extends State<MixerPage> with SingleTickerProviderStateMix
             Container(
               margin: const EdgeInsets.only(bottom: 10),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(color: _purple.withOpacity(0.2), borderRadius: BorderRadius.circular(8)),
+              decoration: BoxDecoration(color: _purple.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(8)),
               child: const Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [

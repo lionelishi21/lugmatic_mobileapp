@@ -177,7 +177,7 @@ class _NewReleasesPageState extends State<NewReleasesPage> {
                     child: Text(
                       song.artist,
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.6),
+                        color: Colors.white.withValues(alpha: 0.6),
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                         decoration: song.artistId.isNotEmpty ? TextDecoration.underline : null,

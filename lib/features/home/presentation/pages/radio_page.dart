@@ -113,7 +113,7 @@ class _RadioPageState extends State<RadioPage> {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF10B981).withOpacity(0.4),
+              color: const Color(0xFF10B981).withValues(alpha: 0.4),
               blurRadius: 20,
               offset: const Offset(0, 10),
             ),
@@ -137,7 +137,7 @@ class _RadioPageState extends State<RadioPage> {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.3),
+                          color: Colors.white.withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Row(
@@ -186,7 +186,7 @@ class _RadioPageState extends State<RadioPage> {
                   Text(
                     '45.2K listeners • Pop, Rock, Electronic',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha: 0.9),
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),
@@ -275,13 +275,13 @@ class _RadioPageState extends State<RadioPage> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Colors.white.withOpacity(0.08),
-            Colors.white.withOpacity(0.03),
+            Colors.white.withValues(alpha: 0.08),
+            Colors.white.withValues(alpha: 0.03),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.white.withOpacity(0.1),
+          color: Colors.white.withValues(alpha: 0.1),
           width: 1,
         ),
       ),
@@ -303,7 +303,7 @@ class _RadioPageState extends State<RadioPage> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: station['color'].withOpacity(0.2),
+                        color: station['color'].withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
@@ -352,7 +352,7 @@ class _RadioPageState extends State<RadioPage> {
                 Text(
                   station['genre'],
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.6),
+                    color: Colors.white.withValues(alpha: 0.6),
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
@@ -362,14 +362,14 @@ class _RadioPageState extends State<RadioPage> {
                   children: [
                     Icon(
                       Icons.people_outline,
-                      color: Colors.white.withOpacity(0.5),
+                      color: Colors.white.withValues(alpha: 0.5),
                       size: 14,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       station['listeners'],
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.5),
+                        color: Colors.white.withValues(alpha: 0.5),
                         fontSize: 11,
                         fontWeight: FontWeight.w500,
                       ),
@@ -407,13 +407,13 @@ class _RadioPageState extends State<RadioPage> {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  color.withOpacity(0.3),
-                  color.withOpacity(0.1),
+                  color.withValues(alpha: 0.3),
+                  color.withValues(alpha: 0.1),
                 ],
               ),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: color.withOpacity(0.5),
+                color: color.withValues(alpha: 0.5),
                 width: 1,
               ),
             ),

@@ -31,7 +31,7 @@ class MiniPlayer extends StatelessWidget {
             decoration: BoxDecoration(
               color: const Color(0xFF1A1A2E),
               border: Border(
-                top: BorderSide(color: Colors.white.withOpacity(0.08), width: 0.5),
+                top: BorderSide(color: Colors.white.withValues(alpha: 0.08), width: 0.5),
               ),
             ),
             child: Column(
@@ -39,7 +39,7 @@ class MiniPlayer extends StatelessWidget {
                 // Progress bar — thin green line at the very top
                 LinearProgressIndicator(
                   value: progress,
-                  backgroundColor: Colors.white.withOpacity(0.08),
+                  backgroundColor: Colors.white.withValues(alpha: 0.08),
                   valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF10B981)),
                   minHeight: 2,
                 ),
@@ -86,7 +86,7 @@ class MiniPlayer extends StatelessWidget {
                               Text(
                                 music.artist,
                                 style: TextStyle(
-                                  color: Colors.white.withOpacity(0.55),
+                                  color: Colors.white.withValues(alpha: 0.55),
                                   fontSize: 11,
                                   fontWeight: FontWeight.w400,
                                 ),

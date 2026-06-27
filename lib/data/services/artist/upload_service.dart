@@ -107,4 +107,18 @@ class UploadService {
   Future<void> updateSongLyrics(String songId, String lyrics) async {
     await _apiClient.dio.put('/song/update/$songId', data: {'lyrics': lyrics});
   }
+
+  Future<void> updateSongLyricsTiming(String songId, List<Map<String, dynamic>> lyricsLines) async {
+    await _apiClient.dio.put('/song/$songId/lyrics-timing', data: {'lyricsLines': lyricsLines});
+  }
+
+  /// Returns a draft {lyricsLines, source} — not saved server-side. The
+  /// caller reviews/edits then persists via updateSongLyricsTiming.
+  Future<(List<Map<String, dynamic>>, String)> autoGenerateLyricsTiming(String songId) async {
+    final response = await _apiClient.dio.post('/song/$songId/lyrics-timing/auto-generate');
+    final data = (response.data['data'] ?? response.data) as Map<String, dynamic>;
+    final lyricsLines = (data['lyricsLines'] as List).cast<Map<String, dynamic>>();
+    final source = data['source'] as String? ?? 'unknown';
+    return (lyricsLines, source);
+  }
 }

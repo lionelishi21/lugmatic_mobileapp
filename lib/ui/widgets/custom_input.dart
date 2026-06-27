@@ -22,10 +22,10 @@ class CustomInput extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
-            color: const Color(0xFFFFFFFF).withOpacity(0.1),
+            color: const Color(0xFFFFFFFF).withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: const Color(0xFFFFFFFF).withOpacity(0.2),
+              color: const Color(0xFFFFFFFF).withValues(alpha: 0.2),
             ),
           ),
           child: TextField(

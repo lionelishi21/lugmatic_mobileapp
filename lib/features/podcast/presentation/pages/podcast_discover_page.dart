@@ -130,7 +130,7 @@ class _PodcastDiscoverPageState extends State<PodcastDiscoverPage> {
             Text(
               _error!,
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white.withOpacity(0.7)),
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
             ),
             const SizedBox(height: 16),
             ElevatedButton(
@@ -152,7 +152,7 @@ class _PodcastDiscoverPageState extends State<PodcastDiscoverPage> {
         child: Center(
           child: Text(
             'No podcasts found',
-            style: TextStyle(color: Colors.white.withOpacity(0.6)),
+            style: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
           ),
         ),
       );
@@ -203,9 +203,9 @@ class _PodcastDiscoverPageState extends State<PodcastDiscoverPage> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
       ),
       child: TextField(
         controller: _searchController,
@@ -254,10 +254,10 @@ class _PodcastDiscoverPageState extends State<PodcastDiscoverPage> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF8B5CF6) : Colors.white.withOpacity(0.1),
+          color: isSelected ? const Color(0xFF8B5CF6) : Colors.white.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? const Color(0xFF8B5CF6) : Colors.white.withOpacity(0.2),
+            color: isSelected ? const Color(0xFF8B5CF6) : Colors.white.withValues(alpha: 0.2),
           ),
         ),
         child: Text(
@@ -318,8 +318,8 @@ class _PodcastDiscoverPageState extends State<PodcastDiscoverPage> {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        color: Colors.white.withOpacity(0.05),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        color: Colors.white.withValues(alpha: 0.05),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: Material(
         color: Colors.transparent,
@@ -336,7 +336,7 @@ class _PodcastDiscoverPageState extends State<PodcastDiscoverPage> {
                   width: double.infinity,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
-                    color: Colors.white.withOpacity(0.08),
+                    color: Colors.white.withValues(alpha: 0.08),
                     image: podcast.imageUrl.isNotEmpty
                         ? DecorationImage(
                             image: NetworkImage(podcast.imageUrl),
@@ -345,7 +345,7 @@ class _PodcastDiscoverPageState extends State<PodcastDiscoverPage> {
                         : null,
                   ),
                   child: podcast.imageUrl.isEmpty
-                      ? Icon(Icons.podcasts, color: Colors.white.withOpacity(0.4), size: 32)
+                      ? Icon(Icons.podcasts, color: Colors.white.withValues(alpha: 0.4), size: 32)
                       : null,
                 ),
                 const SizedBox(height: 8),
@@ -363,7 +363,7 @@ class _PodcastDiscoverPageState extends State<PodcastDiscoverPage> {
                 Text(
                   podcast.host,
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.7),
+                    color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 12,
                   ),
                   maxLines: 1,
@@ -374,14 +374,14 @@ class _PodcastDiscoverPageState extends State<PodcastDiscoverPage> {
                   children: [
                     Icon(
                       Icons.trending_up,
-                      color: Colors.green.withOpacity(0.7),
+                      color: Colors.green.withValues(alpha: 0.7),
                       size: 12,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       podcast.category,
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.5),
+                        color: Colors.white.withValues(alpha: 0.5),
                         fontSize: 10,
                       ),
                     ),
@@ -400,9 +400,9 @@ class _PodcastDiscoverPageState extends State<PodcastDiscoverPage> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: Row(
         children: [
@@ -411,7 +411,7 @@ class _PodcastDiscoverPageState extends State<PodcastDiscoverPage> {
             height: 60,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
-              color: Colors.white.withOpacity(0.08),
+              color: Colors.white.withValues(alpha: 0.08),
               image: podcast.imageUrl.isNotEmpty
                   ? DecorationImage(
                       image: NetworkImage(podcast.imageUrl),
@@ -420,7 +420,7 @@ class _PodcastDiscoverPageState extends State<PodcastDiscoverPage> {
                   : null,
             ),
             child: podcast.imageUrl.isEmpty
-                ? Icon(Icons.podcasts, color: Colors.white.withOpacity(0.4))
+                ? Icon(Icons.podcasts, color: Colors.white.withValues(alpha: 0.4))
                 : null,
           ),
           const SizedBox(width: 16),
@@ -442,7 +442,7 @@ class _PodcastDiscoverPageState extends State<PodcastDiscoverPage> {
                 Text(
                   podcast.host,
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.7),
+                    color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 14,
                   ),
                   maxLines: 1,
@@ -452,7 +452,7 @@ class _PodcastDiscoverPageState extends State<PodcastDiscoverPage> {
                 Text(
                   '${podcast.category} • ${_formatDuration(podcast.duration)}',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.5),
+                    color: Colors.white.withValues(alpha: 0.5),
                     fontSize: 12,
                   ),
                 ),

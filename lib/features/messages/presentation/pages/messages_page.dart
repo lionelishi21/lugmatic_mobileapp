@@ -46,12 +46,12 @@ class _MessagesPageState extends State<MessagesPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.message_outlined, size: 64, color: Colors.white.withOpacity(0.2)),
+                  Icon(Icons.message_outlined, size: 64, color: Colors.white.withValues(alpha: 0.2)),
                   const SizedBox(height: 16),
-                  Text('No messages yet', style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 18)),
+                  Text('No messages yet', style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 18)),
                   const SizedBox(height: 8),
                   Text('Visit an artist profile to start a chat', 
-                    style: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 14)),
+                    style: TextStyle(color: Colors.white.withValues(alpha: 0.3), fontSize: 14)),
                 ],
               ),
             );
@@ -96,7 +96,7 @@ class _ConversationTile extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 28,
-            backgroundColor: Colors.white.withOpacity(0.1),
+            backgroundColor: Colors.white.withValues(alpha: 0.1),
             backgroundImage: profilePic.isNotEmpty ? NetworkImage(profilePic) : null,
             child: profilePic.isEmpty ? Text(conversation.otherParticipantName[0], 
               style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)) : null,
@@ -121,7 +121,7 @@ class _ConversationTile extends StatelessWidget {
             child: Text(conversation.otherParticipantName, 
               style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
           ),
-          Text(timeStr, style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 12)),
+          Text(timeStr, style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 12)),
         ],
       ),
       subtitle: Padding(
@@ -131,7 +131,7 @@ class _ConversationTile extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
-            color: conversation.unreadCount > 0 ? Colors.white.withOpacity(0.8) : Colors.white.withOpacity(0.4),
+            color: conversation.unreadCount > 0 ? Colors.white.withValues(alpha: 0.8) : Colors.white.withValues(alpha: 0.4),
             fontWeight: conversation.unreadCount > 0 ? FontWeight.w600 : FontWeight.normal,
             fontSize: 14,
           ),

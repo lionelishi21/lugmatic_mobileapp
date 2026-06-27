@@ -163,7 +163,7 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
                   indicatorColor: const Color(0xFF10B981),
                   indicatorWeight: 3,
                   labelColor: Colors.white,
-                  unselectedLabelColor: Colors.white.withOpacity(0.5),
+                  unselectedLabelColor: Colors.white.withValues(alpha: 0.5),
                   labelStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
                   unselectedLabelStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
                   isScrollable: true,
@@ -261,8 +261,8 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          color: Colors.white.withOpacity(0.05),
-          border: Border.all(color: const Color(0xFF10B981).withOpacity(0.3)),
+          color: Colors.white.withValues(alpha: 0.05),
+          border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.3)),
         ),
         child: Row(
           children: [
@@ -313,14 +313,14 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
           ),
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
-            BoxShadow(color: const Color(0xFF10B981).withOpacity(0.3), blurRadius: 20, offset: const Offset(0, 10)),
+            BoxShadow(color: const Color(0xFF10B981).withValues(alpha: 0.3), blurRadius: 20, offset: const Offset(0, 10)),
           ],
         ),
         child: Row(
           children: [
             Container(
               width: 60, height: 60,
-              decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(12)),
+              decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
               child: const Icon(Icons.add, color: Colors.white, size: 32),
             ),
             const SizedBox(width: 16),
@@ -348,10 +348,10 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft, end: Alignment.bottomRight,
-          colors: [Colors.white.withOpacity(0.08), Colors.white.withOpacity(0.03)],
+          colors: [Colors.white.withValues(alpha: 0.08), Colors.white.withValues(alpha: 0.03)],
         ),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1), width: 1),
       ),
       child: ListTile(
         onTap: () {
@@ -360,7 +360,7 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
         leading: Container(
           width: 50, height: 50,
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.1),
+            color: Colors.white.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: playlist.imageUrl.isNotEmpty
@@ -375,9 +375,9 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
               : const Icon(Icons.library_music, color: Colors.white, size: 24),
         ),
         title: Text(playlist.title, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
-        subtitle: Text('${playlist.songs.length} songs', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 14)),
+        subtitle: Text('${playlist.songs.length} songs', style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 14)),
         trailing: IconButton(
-          icon: Icon(Icons.more_vert, color: Colors.white.withOpacity(0.7)),
+          icon: Icon(Icons.more_vert, color: Colors.white.withValues(alpha: 0.7)),
           onPressed: () {},
         ),
       ),
@@ -402,7 +402,7 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
           margin: const EdgeInsets.only(bottom: 8),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            color: Colors.white.withOpacity(0.02),
+            color: Colors.white.withValues(alpha: 0.02),
           ),
           child: ListTile(
             onTap: () {
@@ -413,7 +413,7 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
               width: 50, height: 50,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [const Color(0xFF10B981).withOpacity(0.8), const Color(0xFF059669).withOpacity(0.6)],
+                  colors: [const Color(0xFF10B981).withValues(alpha: 0.8), const Color(0xFF059669).withValues(alpha: 0.6)],
                 ),
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -426,7 +426,7 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
                   : const Icon(Icons.music_note, color: Colors.white, size: 24),
             ),
             title: Text(song.title, style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600)),
-            subtitle: Text(song.artist, style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 13)),
+            subtitle: Text(song.artist, style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 13)),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -435,7 +435,7 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
                   onPressed: () {},
                 ),
                 IconButton(
-                  icon: Icon(Icons.more_vert, color: Colors.white.withOpacity(0.6), size: 20),
+                  icon: Icon(Icons.more_vert, color: Colors.white.withValues(alpha: 0.6), size: 20),
                   onPressed: () {},
                 ),
               ],
@@ -464,10 +464,10 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft, end: Alignment.bottomRight,
-              colors: [Colors.white.withOpacity(0.08), Colors.white.withOpacity(0.03)],
+              colors: [Colors.white.withValues(alpha: 0.08), Colors.white.withValues(alpha: 0.03)],
             ),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.1), width: 1),
           ),
           child: ListTile(
             onTap: () {
@@ -481,9 +481,9 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
               child: artist.imageUrl.isEmpty ? const Icon(Icons.person, color: Colors.white) : null,
             ),
             title: Text(artist.name, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
-            subtitle: Text('${artist.totalSongs} songs', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 14)),
+            subtitle: Text('${artist.totalSongs} songs', style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 14)),
             trailing: IconButton(
-              icon: Icon(Icons.more_vert, color: Colors.white.withOpacity(0.7)),
+              icon: Icon(Icons.more_vert, color: Colors.white.withValues(alpha: 0.7)),
               onPressed: () {},
             ),
           ),
@@ -507,10 +507,10 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft, end: Alignment.bottomRight,
-              colors: [Colors.white.withOpacity(0.08), Colors.white.withOpacity(0.03)],
+              colors: [Colors.white.withValues(alpha: 0.08), Colors.white.withValues(alpha: 0.03)],
             ),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.1), width: 1),
           ),
           child: ListTile(
             onTap: () {
@@ -524,9 +524,9 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
               child: artist.imageUrl.isEmpty ? const Icon(Icons.person, color: Colors.white) : null,
             ),
             title: Text(artist.name, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
-            subtitle: Text('${artist.totalSongs} songs', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 14)),
+            subtitle: Text('${artist.totalSongs} songs', style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 14)),
             trailing: IconButton(
-              icon: Icon(Icons.more_vert, color: Colors.white.withOpacity(0.7)),
+              icon: Icon(Icons.more_vert, color: Colors.white.withValues(alpha: 0.7)),
               onPressed: () {},
             ),
           ),
@@ -569,7 +569,7 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
-                    color: Colors.white.withOpacity(0.05),
+                    color: Colors.white.withValues(alpha: 0.05),
                     image: coverArt.isNotEmpty
                         ? DecorationImage(
                             image: NetworkImage(ApiConfig.resolveUrl(coverArt)),
@@ -591,7 +591,7 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
               ),
               Text(
                 artist,
-                style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 13),
+                style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 13),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -608,9 +608,9 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: Colors.white.withOpacity(0.3), size: 64),
+          Icon(icon, color: Colors.white.withValues(alpha: 0.3), size: 64),
           const SizedBox(height: 16),
-          Text(message, style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 16)),
+          Text(message, style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 16)),
         ],
       ),
     );
@@ -624,14 +624,14 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.error_outline, color: Colors.redAccent.withOpacity(0.7), size: 48),
+          Icon(Icons.error_outline, color: Colors.redAccent.withValues(alpha: 0.7), size: 48),
           const SizedBox(height: 16),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32),
             child: Text(
               'Could not load this — $error',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 14),
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 14),
             ),
           ),
           const SizedBox(height: 16),
@@ -664,7 +664,7 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
           margin: const EdgeInsets.only(bottom: 8),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            color: Colors.white.withOpacity(0.04),
+            color: Colors.white.withValues(alpha: 0.04),
           ),
           child: ListTile(
             onTap: () {
@@ -689,7 +689,7 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: (isPrimary ? const Color(0xFF10B981) : Colors.blueAccent).withOpacity(0.2),
+                      color: (isPrimary ? const Color(0xFF10B981) : Colors.blueAccent).withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
@@ -705,7 +705,7 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
             ),
             subtitle: Text(
               '${song.artist}${song.share != null ? " • ${song.share!.round()}% share" : ""}',
-              style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12),
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 12),
             ),
             trailing: const Icon(Icons.play_circle_outline, color: Color(0xFF10B981)),
           ),

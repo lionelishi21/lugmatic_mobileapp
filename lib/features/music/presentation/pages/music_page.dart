@@ -65,11 +65,11 @@ class _MusicPageState extends State<MusicPage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.error_outline, color: Colors.white.withOpacity(0.4), size: 48),
+                      Icon(Icons.error_outline, color: Colors.white.withValues(alpha: 0.4), size: 48),
                       const SizedBox(height: 12),
                       Text(
                         'Failed to load songs',
-                        style: TextStyle(color: Colors.white.withOpacity(0.6)),
+                        style: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
                       ),
                       const SizedBox(height: 12),
                       TextButton(
@@ -86,7 +86,7 @@ class _MusicPageState extends State<MusicPage> {
                   ? Center(
                       child: Text(
                         'No songs available',
-                        style: TextStyle(color: Colors.white.withOpacity(0.5)),
+                        style: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
                       ),
                     )
                   : ListView.separated(
@@ -109,8 +109,8 @@ class _MusicPageState extends State<MusicPage> {
 
         return Material(
           color: isCurrentSong
-              ? Colors.white.withOpacity(0.06)
-              : Colors.white.withOpacity(0.02),
+              ? Colors.white.withValues(alpha: 0.06)
+              : Colors.white.withValues(alpha: 0.02),
           borderRadius: BorderRadius.circular(12),
           child: InkWell(
             borderRadius: BorderRadius.circular(12),
@@ -158,7 +158,7 @@ class _MusicPageState extends State<MusicPage> {
                         Text(
                           song.artist.isNotEmpty ? song.artist : 'Unknown Artist',
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.55),
+                            color: Colors.white.withValues(alpha: 0.55),
                             fontSize: 13,
                           ),
                           maxLines: 1,
@@ -183,7 +183,7 @@ class _MusicPageState extends State<MusicPage> {
                       isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
                       color: isCurrentSong
                           ? const Color(0xFF10B981)
-                          : Colors.white.withOpacity(0.5),
+                          : Colors.white.withValues(alpha: 0.5),
                       size: 28,
                     ),
                 ],

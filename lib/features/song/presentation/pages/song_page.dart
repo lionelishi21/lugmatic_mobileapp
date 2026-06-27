@@ -232,7 +232,7 @@ class _SongPageState extends State<SongPage> with TickerProviderStateMixin {
           if (_isLoading)
             Positioned.fill(
               child: Container(
-                color: Colors.black.withOpacity(0.6),
+                color: Colors.black.withValues(alpha: 0.6),
                 child: Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -246,7 +246,7 @@ class _SongPageState extends State<SongPage> with TickerProviderStateMixin {
                           borderRadius: BorderRadius.circular(24),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.5),
+                              color: Colors.black.withValues(alpha: 0.5),
                               blurRadius: 20,
                             ),
                           ],
@@ -359,7 +359,7 @@ class _SongPageState extends State<SongPage> with TickerProviderStateMixin {
         child: Icon(
           Icons.music_note_rounded,
           size: 100,
-          color: NeumorphicTheme.primaryAccent.withOpacity(0.5),
+          color: NeumorphicTheme.primaryAccent.withValues(alpha: 0.5),
         ),
       ),
     );
@@ -419,7 +419,7 @@ class _SongPageState extends State<SongPage> with TickerProviderStateMixin {
               activeTrackColor: NeumorphicTheme.primaryAccent,
               inactiveTrackColor: NeumorphicTheme.backgroundColor,
               thumbColor: NeumorphicTheme.primaryAccent,
-              overlayColor: NeumorphicTheme.primaryAccent.withOpacity(0.3),
+              overlayColor: NeumorphicTheme.primaryAccent.withValues(alpha: 0.3),
             ),
             child: Slider(
               value: _position.inSeconds.toDouble(),
@@ -675,8 +675,8 @@ class _SongPageState extends State<SongPage> with TickerProviderStateMixin {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                NeumorphicTheme.primaryAccent.withOpacity(0.3),
-                NeumorphicTheme.primaryAccent.withOpacity(0.1),
+                NeumorphicTheme.primaryAccent.withValues(alpha: 0.3),
+                NeumorphicTheme.primaryAccent.withValues(alpha: 0.1),
               ],
             ),
             borderRadius: BorderRadius.circular(10),

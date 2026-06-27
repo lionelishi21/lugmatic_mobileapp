@@ -146,7 +146,7 @@ class _TrendingSongsPageState extends State<TrendingSongsPage> {
               child: Text(
                 rank.toString(),
                 style: TextStyle(
-                  color: rank <= 3 ? AppColors.primary : Colors.white.withOpacity(0.5),
+                  color: rank <= 3 ? AppColors.primary : Colors.white.withValues(alpha: 0.5),
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
                 ),
@@ -189,7 +189,7 @@ class _TrendingSongsPageState extends State<TrendingSongsPage> {
                     child: Text(
                       song.artist,
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.6),
+                        color: Colors.white.withValues(alpha: 0.6),
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                         decoration: song.artistId.isNotEmpty ? TextDecoration.underline : null,
@@ -204,7 +204,7 @@ class _TrendingSongsPageState extends State<TrendingSongsPage> {
             IconButton(
               icon: Icon(
                 Icons.more_vert_rounded,
-                color: Colors.white.withOpacity(0.5),
+                color: Colors.white.withValues(alpha: 0.5),
               ),
               onPressed: () {
                 // Show options menu

@@ -50,7 +50,7 @@ class _PodcastHubPageState extends State<PodcastHubPage>
           indicatorColor: const Color(0xFF8B5CF6),
           indicatorWeight: 3,
           labelColor: Colors.white,
-          unselectedLabelColor: Colors.white.withOpacity(0.6),
+          unselectedLabelColor: Colors.white.withValues(alpha: 0.6),
           labelStyle: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,

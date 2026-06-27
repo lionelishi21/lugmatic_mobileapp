@@ -186,7 +186,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                const Color(0xFF10B981).withOpacity(0.8),
+                const Color(0xFF10B981).withValues(alpha: 0.8),
                 const Color(0xFF111827),
               ],
             ),
@@ -219,7 +219,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -269,7 +269,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
     return Text(
       widget.playlist.subtitle,
       style: TextStyle(
-        color: Colors.white.withOpacity(0.8),
+        color: Colors.white.withValues(alpha: 0.8),
         fontSize: 16,
         fontWeight: FontWeight.w500,
       ),
@@ -289,7 +289,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
         Text(
           '${_songs.length} songs',
           style: TextStyle(
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withValues(alpha: 0.7),
             fontSize: 14,
           ),
         ),
@@ -297,7 +297,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
         Text(
           '${_formatDuration(totalDuration)}',
           style: TextStyle(
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withValues(alpha: 0.7),
             fontSize: 14,
           ),
         ),
@@ -321,7 +321,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.5),
+                    color: Colors.black.withValues(alpha: 0.5),
                     blurRadius: 40,
                     offset: const Offset(0, 20),
                   ),
@@ -348,7 +348,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
           Text(
             _playlist!.subtitle,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.6),
+              color: Colors.white.withValues(alpha: 0.6),
               fontSize: 16,
               fontWeight: FontWeight.w500,
             ),
@@ -368,7 +368,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
         if (_playlist!.ownerName != null) ...[
           CircleAvatar(
             radius: 12,
-            backgroundColor: const Color(0xFF10B981).withOpacity(0.2),
+            backgroundColor: const Color(0xFF10B981).withValues(alpha: 0.2),
             child: Text(
               _playlist!.ownerName![0].toUpperCase(),
               style: const TextStyle(color: Color(0xFF10B981), fontSize: 10, fontWeight: FontWeight.bold),
@@ -383,7 +383,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
         ],
         Text(
           '${_playlist!.songs.length} songs',
-          style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 14),
+          style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 14),
         ),
         _buildDot(),
         Text(
@@ -405,7 +405,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
       width: 4,
       height: 4,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
+        color: Colors.white.withValues(alpha: 0.2),
         shape: BoxShape.circle,
       ),
     );
@@ -426,7 +426,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF10B981).withOpacity(0.3),
+                    color: const Color(0xFF10B981).withValues(alpha: 0.3),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                   ),
@@ -455,13 +455,13 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
           const SizedBox(width: 16),
           _buildCircleAction(
             _isShuffled ? Icons.shuffle : Icons.shuffle,
-            _isShuffled ? const Color(0xFF10B981) : Colors.white.withOpacity(0.8),
+            _isShuffled ? const Color(0xFF10B981) : Colors.white.withValues(alpha: 0.8),
             () => setState(() => _isShuffled = !_isShuffled),
           ),
           const SizedBox(width: 12),
           _buildCircleAction(
             _isLiked ? Icons.favorite : Icons.favorite_border,
-            _isLiked ? Colors.red : Colors.white.withOpacity(0.8),
+            _isLiked ? Colors.red : Colors.white.withValues(alpha: 0.8),
             () => setState(() => _isLiked = !_isLiked),
           ),
         ],
@@ -488,7 +488,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
               PopupMenuButton<String>(
                 icon: Icon(
                   Icons.sort,
-                  color: Colors.white.withOpacity(0.7),
+                  color: Colors.white.withValues(alpha: 0.7),
                 ),
                 onSelected: (value) => print('Sort by: $value'),
                 itemBuilder: (context) => [
@@ -513,7 +513,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
               IconButton(
                 icon: Icon(
                   Icons.filter_list,
-                  color: Colors.white.withOpacity(0.7),
+                  color: Colors.white.withValues(alpha: 0.7),
                 ),
                 onPressed: () => _showFilterDialog(),
               ),
@@ -531,7 +531,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
           padding: const EdgeInsets.symmetric(vertical: 40),
           child: Text(
             'No songs in this playlist',
-            style: TextStyle(color: Colors.white.withOpacity(0.5)),
+            style: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
           ),
         ),
       );
@@ -557,8 +557,8 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
           margin: const EdgeInsets.only(bottom: 8),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            color: isPlaying ? const Color(0xFF10B981).withOpacity(0.15) : Colors.white.withOpacity(0.02),
-            border: isPlaying ? Border.all(color: const Color(0xFF10B981).withOpacity(0.5)) : null,
+            color: isPlaying ? const Color(0xFF10B981).withValues(alpha: 0.15) : Colors.white.withValues(alpha: 0.02),
+            border: isPlaying ? Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.5)) : null,
           ),
           child: Material(
             color: Colors.transparent,
@@ -576,7 +576,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                           : Text(
                               '$trackNumber',
                               style: TextStyle(
-                                color: Colors.white.withOpacity(0.5),
+                                color: Colors.white.withValues(alpha: 0.5),
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -617,7 +617,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                 child: Text(
                                   song.artist,
                                   style: TextStyle(
-                                    color: Colors.white.withOpacity(0.7),
+                                    color: Colors.white.withValues(alpha: 0.7),
                                     fontSize: 14,
                                   ),
                                   maxLines: 1,
@@ -642,7 +642,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                     Text(
                       _formatDuration(song.duration),
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.5),
+                        color: Colors.white.withValues(alpha: 0.5),
                         fontSize: 14,
                       ),
                     ),
@@ -650,7 +650,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                     PopupMenuButton<String>(
                       icon: Icon(
                         Icons.more_vert,
-                        color: Colors.white.withOpacity(0.5),
+                        color: Colors.white.withValues(alpha: 0.5),
                         size: 20,
                       ),
                       onSelected: (value) => _handleSongAction(value, song),
@@ -768,9 +768,9 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -787,7 +787,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
           Text(
             _playlist!.description ?? 'A curated collection of ${_playlist!.subtitle.toLowerCase()} music.',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withValues(alpha: 0.7),
               fontSize: 14,
               height: 1.5,
             ),
@@ -797,14 +797,14 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
             children: [
               Icon(
                 Icons.calendar_today,
-                color: Colors.white.withOpacity(0.5),
+                color: Colors.white.withValues(alpha: 0.5),
                 size: 16,
               ),
               const SizedBox(width: 8),
               Text(
                 'Updated recently',
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.5),
+                  color: Colors.white.withValues(alpha: 0.5),
                   fontSize: 12,
                 ),
               ),
@@ -1028,9 +1028,9 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
       width: 56,
       height: 56,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withValues(alpha: 0.05),
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: Material(
         color: Colors.transparent,

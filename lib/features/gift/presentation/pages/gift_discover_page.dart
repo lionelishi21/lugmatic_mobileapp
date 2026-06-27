@@ -96,7 +96,7 @@ class _GiftDiscoverPageState extends State<GiftDiscoverPage> {
                                 _error!,
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                    color: Colors.white.withOpacity(0.7)),
+                                    color: Colors.white.withValues(alpha: 0.7)),
                               ),
                               const SizedBox(height: 16),
                               ElevatedButton(
@@ -168,9 +168,9 @@ class _GiftDiscoverPageState extends State<GiftDiscoverPage> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
       ),
       child: TextField(
         controller: _searchController,
@@ -229,13 +229,13 @@ class _GiftDiscoverPageState extends State<GiftDiscoverPage> {
                         _selectedCategory = category;
                       });
                     },
-                    backgroundColor: Colors.white.withOpacity(0.1),
+                    backgroundColor: Colors.white.withValues(alpha: 0.1),
                     selectedColor: const Color(0xFFFFD700),
                     checkmarkColor: Colors.black,
                     side: BorderSide(
                       color: isSelected 
                           ? const Color(0xFFFFD700)
-                          : Colors.white.withOpacity(0.2),
+                          : Colors.white.withValues(alpha: 0.2),
                     ),
                   ),
                 );
@@ -307,11 +307,11 @@ class _GiftDiscoverPageState extends State<GiftDiscoverPage> {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withValues(alpha: 0.05),
         border: Border.all(
           color: isPopular 
-              ? const Color(0xFFFFD700).withOpacity(0.3)
-              : Colors.white.withOpacity(0.1),
+              ? const Color(0xFFFFD700).withValues(alpha: 0.3)
+              : Colors.white.withValues(alpha: 0.1),
         ),
       ),
       child: Material(
@@ -403,7 +403,7 @@ class _GiftDiscoverPageState extends State<GiftDiscoverPage> {
                   Text(
                     gift.category,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.5),
+                      color: Colors.white.withValues(alpha: 0.5),
                       fontSize: 10,
                     ),
                   ),

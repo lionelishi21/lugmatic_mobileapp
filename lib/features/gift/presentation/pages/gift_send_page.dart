@@ -244,12 +244,12 @@ class _GiftSendPageState extends State<GiftSendPage> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            const Color(0xFFFFD700).withOpacity(0.2),
-            const Color(0xFFFFD700).withOpacity(0.1),
+            const Color(0xFFFFD700).withValues(alpha: 0.2),
+            const Color(0xFFFFD700).withValues(alpha: 0.1),
           ],
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFFFD700).withOpacity(0.3)),
+        border: Border.all(color: const Color(0xFFFFD700).withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -306,7 +306,7 @@ class _GiftSendPageState extends State<GiftSendPage> {
                       Text(
                         _selectedArtist!.genres.isNotEmpty ? _selectedArtist!.genres.first : 'Artist',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.7),
+                          color: Colors.white.withValues(alpha: 0.7),
                           fontSize: 14,
                         ),
                       ),
@@ -348,9 +348,9 @@ class _GiftSendPageState extends State<GiftSendPage> {
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: Row(
         children: [
@@ -382,7 +382,7 @@ class _GiftSendPageState extends State<GiftSendPage> {
                 Text(
                   _selectedGift!.description,
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.7),
+                    color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 14,
                   ),
                 ),
@@ -392,7 +392,7 @@ class _GiftSendPageState extends State<GiftSendPage> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFFD700).withOpacity(0.2),
+                        color: const Color(0xFFFFD700).withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -409,7 +409,7 @@ class _GiftSendPageState extends State<GiftSendPage> {
                         margin: const EdgeInsets.only(left: 8),
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: Colors.red.withOpacity(0.2),
+                          color: Colors.red.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: const Text(
@@ -490,12 +490,12 @@ class _GiftSendPageState extends State<GiftSendPage> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         color: isSelected 
-            ? const Color(0xFFFFD700).withOpacity(0.2)
-            : Colors.white.withOpacity(0.05),
+            ? const Color(0xFFFFD700).withValues(alpha: 0.2)
+            : Colors.white.withValues(alpha: 0.05),
         border: Border.all(
           color: isSelected 
               ? const Color(0xFFFFD700)
-              : Colors.white.withOpacity(0.1),
+              : Colors.white.withValues(alpha: 0.1),
           width: isSelected ? 2 : 1,
         ),
       ),
@@ -575,7 +575,7 @@ class _GiftSendPageState extends State<GiftSendPage> {
           border: Border.all(
             color: _selectedArtist?.id == artist.id 
                 ? const Color(0xFFFFD700)
-                : Colors.white.withOpacity(0.1),
+                : Colors.white.withValues(alpha: 0.1),
             width: _selectedArtist?.id == artist.id ? 2 : 1,
           ),
         ),
@@ -615,9 +615,9 @@ class _GiftSendPageState extends State<GiftSendPage> {
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -759,7 +759,7 @@ class _GiftSendPageState extends State<GiftSendPage> {
                 return ActionChip(
                   label: Text('$amount 🪙'),
                   onPressed: () => _handlePurchase(amount),
-                  backgroundColor: const Color(0xFFFFD700).withOpacity(0.1),
+                  backgroundColor: const Color(0xFFFFD700).withValues(alpha: 0.1),
                   labelStyle: const TextStyle(color: Color(0xFFFFD700)),
                 );
               }).toList(),

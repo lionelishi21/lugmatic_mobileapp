@@ -138,12 +138,12 @@ class _StreamPageState extends State<StreamPage> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Colors.red.withOpacity(0.2),
-            Colors.red.withOpacity(0.1),
+            Colors.red.withValues(alpha: 0.2),
+            Colors.red.withValues(alpha: 0.1),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.red.withOpacity(0.3)),
+        border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
@@ -180,12 +180,12 @@ class _StreamPageState extends State<StreamPage> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            const Color(0xFF10B981).withOpacity(0.2),
-            const Color(0xFF10B981).withOpacity(0.1),
+            const Color(0xFF10B981).withValues(alpha: 0.2),
+            const Color(0xFF10B981).withValues(alpha: 0.1),
           ],
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF10B981).withOpacity(0.3)),
+        border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -231,7 +231,7 @@ class _StreamPageState extends State<StreamPage> {
                     Text(
                       '${_liveStreams[0].category} • ${_liveStreams[0].currentViewers} listening',
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.7),
+                        color: Colors.white.withValues(alpha: 0.7),
                         fontSize: 14,
                       ),
                     ),
@@ -345,9 +345,9 @@ class _StreamPageState extends State<StreamPage> {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withValues(alpha: 0.05),
         border: Border.all(
-          color: isLive ? Colors.red.withOpacity(0.3) : Colors.white.withOpacity(0.1),
+          color: isLive ? Colors.red.withValues(alpha: 0.3) : Colors.white.withValues(alpha: 0.1),
         ),
       ),
       child: Material(
@@ -411,7 +411,7 @@ class _StreamPageState extends State<StreamPage> {
                 Text(
                   stream.host?.name ?? 'Unknown',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.7),
+                    color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 12,
                   ),
                   maxLines: 1,
@@ -421,7 +421,7 @@ class _StreamPageState extends State<StreamPage> {
                 Text(
                   stream.category,
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.5),
+                    color: Colors.white.withValues(alpha: 0.5),
                     fontSize: 10,
                   ),
                 ),
@@ -438,9 +438,9 @@ class _StreamPageState extends State<StreamPage> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: Row(
         children: [
@@ -474,7 +474,7 @@ class _StreamPageState extends State<StreamPage> {
                 Text(
                   stream.host?.name ?? 'Unknown',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.7),
+                    color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 14,
                   ),
                 ),
@@ -482,7 +482,7 @@ class _StreamPageState extends State<StreamPage> {
                 Text(
                   '${stream.category} • ${_formatDuration(Duration(minutes: stream.duration))}',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.5),
+                    color: Colors.white.withValues(alpha: 0.5),
                     fontSize: 12,
                   ),
                 ),

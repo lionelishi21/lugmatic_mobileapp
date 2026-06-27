@@ -85,7 +85,7 @@ class _PodcastStreamPageState extends State<PodcastStreamPage> {
             Text(
               _error!,
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white.withOpacity(0.7)),
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
             ),
             const SizedBox(height: 16),
             ElevatedButton(
@@ -107,7 +107,7 @@ class _PodcastStreamPageState extends State<PodcastStreamPage> {
         child: Center(
           child: Text(
             'No podcasts available yet',
-            style: TextStyle(color: Colors.white.withOpacity(0.6)),
+            style: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
           ),
         ),
       );
@@ -192,8 +192,8 @@ class _PodcastStreamPageState extends State<PodcastStreamPage> {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        color: Colors.white.withOpacity(0.05),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        color: Colors.white.withValues(alpha: 0.05),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: Material(
         color: Colors.transparent,
@@ -210,7 +210,7 @@ class _PodcastStreamPageState extends State<PodcastStreamPage> {
                   width: double.infinity,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
-                    color: Colors.white.withOpacity(0.08),
+                    color: Colors.white.withValues(alpha: 0.08),
                     image: podcast.imageUrl.isNotEmpty
                         ? DecorationImage(
                             image: NetworkImage(podcast.imageUrl),
@@ -219,7 +219,7 @@ class _PodcastStreamPageState extends State<PodcastStreamPage> {
                         : null,
                   ),
                   child: podcast.imageUrl.isEmpty
-                      ? Icon(Icons.podcasts, color: Colors.white.withOpacity(0.4), size: 32)
+                      ? Icon(Icons.podcasts, color: Colors.white.withValues(alpha: 0.4), size: 32)
                       : null,
                 ),
                 const SizedBox(height: 8),
@@ -237,7 +237,7 @@ class _PodcastStreamPageState extends State<PodcastStreamPage> {
                 Text(
                   podcast.host,
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.7),
+                    color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 12,
                   ),
                   maxLines: 1,
@@ -247,7 +247,7 @@ class _PodcastStreamPageState extends State<PodcastStreamPage> {
                 Text(
                   podcast.category,
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.5),
+                    color: Colors.white.withValues(alpha: 0.5),
                     fontSize: 10,
                   ),
                 ),
@@ -256,14 +256,14 @@ class _PodcastStreamPageState extends State<PodcastStreamPage> {
                   children: [
                     Icon(
                       Icons.play_circle_outline,
-                      color: Colors.white.withOpacity(0.5),
+                      color: Colors.white.withValues(alpha: 0.5),
                       size: 12,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       '${_formatNumber(podcast.playCount)} plays',
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.5),
+                        color: Colors.white.withValues(alpha: 0.5),
                         fontSize: 10,
                       ),
                     ),

@@ -10,6 +10,7 @@ import 'package:video_player/video_player.dart';
 import 'neumorphic_button.dart';
 import '../../shared/widgets/gift_bottom_sheet.dart';
 import '../../shared/widgets/playlist_selection_bottom_sheet.dart';
+import 'karaoke_lyrics_view.dart';
 
 class PlayerScreen extends StatefulWidget {
   final MusicModel music;
@@ -25,6 +26,7 @@ class PlayerScreen extends StatefulWidget {
 
 class _PlayerScreenState extends State<PlayerScreen> with SingleTickerProviderStateMixin {
   bool _isFavorited = false;
+  bool _karaokeMode = true;
   VideoPlayerController? _videoController;
   String? _lastVideoUrl;
   late AnimationController _bgAnimController;
@@ -160,9 +162,9 @@ class _PlayerScreenState extends State<PlayerScreen> with SingleTickerProviderSt
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        Colors.black.withOpacity(0.55),
-                        Colors.black.withOpacity(0.75),
-                        Colors.black.withOpacity(0.92),
+                        Colors.black.withValues(alpha: 0.55),
+                        Colors.black.withValues(alpha: 0.75),
+                        Colors.black.withValues(alpha: 0.92),
                       ],
                     ),
                   ),
@@ -176,7 +178,12 @@ class _PlayerScreenState extends State<PlayerScreen> with SingleTickerProviderSt
                 appBar: AppBar(
                   backgroundColor: Colors.transparent,
                   elevation: 0,
-                  leading: Center(
+                  toolbarHeight: 64,
+                  leading: Padding(
+                    // Extra clearance below the status bar/notch on top of the
+                    // outer SafeArea — Center() alone wasn't enough breathing
+                    // room on some Android devices.
+                    padding: const EdgeInsets.only(top: 10),
                     child: NeumorphicButton(
                       width: 44,
                       height: 44,
@@ -192,9 +199,12 @@ class _PlayerScreenState extends State<PlayerScreen> with SingleTickerProviderSt
                   ),
                   centerTitle: true,
                   actions: [
-                    IconButton(
-                      onPressed: () => _shareSong(currentMusic),
-                      icon: const Icon(Icons.share_outlined, color: NeumorphicTheme.textPrimary),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: IconButton(
+                        onPressed: () => _shareSong(currentMusic),
+                        icon: const Icon(Icons.share_outlined, color: NeumorphicTheme.textPrimary),
+                      ),
                     ),
                     const SizedBox(width: 8),
                   ],
@@ -215,7 +225,7 @@ class _PlayerScreenState extends State<PlayerScreen> with SingleTickerProviderSt
                                 borderRadius: BorderRadius.circular(30),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.5),
+                                    color: Colors.black.withValues(alpha: 0.5),
                                     blurRadius: 30,
                                     offset: const Offset(0, 20),
                                   ),
@@ -249,7 +259,7 @@ class _PlayerScreenState extends State<PlayerScreen> with SingleTickerProviderSt
                               const SizedBox(height: 8),
                               Text(
                                 currentMusic.artist,
-                                style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 18),
+                                style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 18),
                                 textAlign: TextAlign.center,
                               ),
                             ],
@@ -267,9 +277,9 @@ class _PlayerScreenState extends State<PlayerScreen> with SingleTickerProviderSt
                                       child: Container(
                                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                                         decoration: BoxDecoration(
-                                          color: Colors.red.withOpacity(0.1),
+                                          color: Colors.red.withValues(alpha: 0.1),
                                           borderRadius: BorderRadius.circular(8),
-                                          border: Border.all(color: Colors.red.withOpacity(0.3)),
+                                          border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
                                         ),
                                         child: Row(
                                           mainAxisSize: MainAxisSize.min,
@@ -313,9 +323,9 @@ class _PlayerScreenState extends State<PlayerScreen> with SingleTickerProviderSt
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(_formatDuration(audioProvider.position),
-                                        style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12)),
+                                        style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 12)),
                                     Text(_formatDuration(audioProvider.duration),
-                                        style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12)),
+                                        style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 12)),
                                   ],
                                 ),
                               ),
@@ -442,9 +452,9 @@ class _PlayerScreenState extends State<PlayerScreen> with SingleTickerProviderSt
                               width: double.infinity,
                               padding: const EdgeInsets.all(24),
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.05),
+                                color: Colors.white.withValues(alpha: 0.05),
                                 borderRadius: BorderRadius.circular(24),
-                                border: Border.all(color: Colors.white.withOpacity(0.1)),
+                                border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -456,24 +466,70 @@ class _PlayerScreenState extends State<PlayerScreen> with SingleTickerProviderSt
                                       Text(
                                         'LYRICS',
                                         style: TextStyle(
-                                          color: Colors.white.withOpacity(0.9),
+                                          color: Colors.white.withValues(alpha: 0.9),
                                           fontSize: 14,
                                           fontWeight: FontWeight.w900,
                                           letterSpacing: 1.5,
                                         ),
                                       ),
+                                      if (currentMusic.lyricsLines != null &&
+                                          currentMusic.lyricsLines!.isNotEmpty) ...[
+                                        const Spacer(),
+                                        GestureDetector(
+                                          onTap: () => setState(() => _karaokeMode = !_karaokeMode),
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                            decoration: BoxDecoration(
+                                              color: _karaokeMode
+                                                  ? const Color(0xFF10B981).withValues(alpha: 0.2)
+                                                  : Colors.white.withValues(alpha: 0.08),
+                                              borderRadius: BorderRadius.circular(20),
+                                              border: Border.all(
+                                                color: _karaokeMode
+                                                    ? const Color(0xFF10B981).withValues(alpha: 0.6)
+                                                    : Colors.white.withValues(alpha: 0.15),
+                                              ),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Icon(
+                                                  Icons.mic_external_on,
+                                                  size: 14,
+                                                  color: _karaokeMode ? const Color(0xFF10B981) : Colors.white60,
+                                                ),
+                                                const SizedBox(width: 6),
+                                                Text(
+                                                  'KARAOKE',
+                                                  style: TextStyle(
+                                                    fontSize: 11,
+                                                    fontWeight: FontWeight.w800,
+                                                    letterSpacing: 1,
+                                                    color: _karaokeMode ? const Color(0xFF10B981) : Colors.white60,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ],
                                   ),
                                   const SizedBox(height: 20),
-                                  Text(
-                                    currentMusic.lyrics,
-                                    style: TextStyle(
-                                      color: Colors.white.withOpacity(0.8),
-                                      fontSize: 18,
-                                      height: 1.8,
-                                      fontWeight: FontWeight.w500,
+                                  if (_karaokeMode &&
+                                      currentMusic.lyricsLines != null &&
+                                      currentMusic.lyricsLines!.isNotEmpty)
+                                    KaraokeLyricsView(lines: currentMusic.lyricsLines!)
+                                  else
+                                    Text(
+                                      currentMusic.lyrics,
+                                      style: TextStyle(
+                                        color: Colors.white.withValues(alpha: 0.8),
+                                        fontSize: 18,
+                                        height: 1.8,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
-                                  ),
                                 ],
                               ),
                             ),
@@ -481,7 +537,7 @@ class _PlayerScreenState extends State<PlayerScreen> with SingleTickerProviderSt
                              Center(
                                child: Text(
                                  'Lyrics not available for this track',
-                                 style: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 13),
+                                 style: TextStyle(color: Colors.white.withValues(alpha: 0.3), fontSize: 13),
                                ),
                              ),
                           ],
@@ -498,7 +554,7 @@ class _PlayerScreenState extends State<PlayerScreen> with SingleTickerProviderSt
                               child: Text(
                                 'Up Next',
                                 style: TextStyle(
-                                  color: Colors.white.withOpacity(0.9),
+                                  color: Colors.white.withValues(alpha: 0.9),
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -514,12 +570,12 @@ class _PlayerScreenState extends State<PlayerScreen> with SingleTickerProviderSt
                                 margin: const EdgeInsets.only(bottom: 12),
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  color: isNext ? const Color(0xFF10B981).withOpacity(0.1) : Colors.white.withOpacity(0.05),
+                                  color: isNext ? const Color(0xFF10B981).withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.05),
                                   borderRadius: BorderRadius.circular(12),
-                                  border: isNext ? Border.all(color: const Color(0xFF10B981).withOpacity(0.5), width: 1.5) : null,
+                                  border: isNext ? Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.5), width: 1.5) : null,
                                   boxShadow: isNext ? [
                                     BoxShadow(
-                                      color: const Color(0xFF10B981).withOpacity(0.2),
+                                      color: const Color(0xFF10B981).withValues(alpha: 0.2),
                                       blurRadius: 8,
                                       spreadRadius: 1,
                                     )
@@ -580,7 +636,7 @@ class _PlayerScreenState extends State<PlayerScreen> with SingleTickerProviderSt
                                           const SizedBox(height: 4),
                                           Text(
                                             song.artist,
-                                            style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 13),
+                                            style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 13),
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                           ),
@@ -596,7 +652,7 @@ class _PlayerScreenState extends State<PlayerScreen> with SingleTickerProviderSt
                                 padding: const EdgeInsets.only(top: 8.0),
                                 child: Text(
                                   '+ ${audioProvider.queue.length - audioProvider.currentIndex - 4} more',
-                                  style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 13),
+                                  style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 13),
                                 ),
                               ),
                                 ],
@@ -618,7 +674,7 @@ class _PlayerScreenState extends State<PlayerScreen> with SingleTickerProviderSt
                   if (!audioProvider.isLoading) return const SizedBox();
                   return Positioned.fill(
                     child: Container(
-                      color: Colors.black.withOpacity(0.6),
+                      color: Colors.black.withValues(alpha: 0.6),
                       child: Center(
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
@@ -632,7 +688,7 @@ class _PlayerScreenState extends State<PlayerScreen> with SingleTickerProviderSt
                                 borderRadius: BorderRadius.circular(24),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.5),
+                                    color: Colors.black.withValues(alpha: 0.5),
                                     blurRadius: 20,
                                   ),
                                 ],

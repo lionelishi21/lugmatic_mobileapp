@@ -123,7 +123,7 @@ class _RegularClashTabContentState extends State<RegularClashTabContent>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.sports_kabaddi, size: 64, color: Colors.white.withOpacity(0.1)),
+            Icon(Icons.sports_kabaddi, size: 64, color: Colors.white.withValues(alpha: 0.1)),
             const SizedBox(height: 12),
             const Text('No clashes here yet', style: TextStyle(color: Colors.white38)),
           ],
@@ -175,7 +175,7 @@ class _FilterTabs extends StatelessWidget {
               margin: const EdgeInsets.only(right: 8),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
               decoration: BoxDecoration(
-                color: selected ? AppColors.primary.withOpacity(0.2) : AppColors.card,
+                color: selected ? AppColors.primary.withValues(alpha: 0.2) : AppColors.card,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: selected ? AppColors.primary : AppColors.border),
               ),
@@ -227,10 +227,10 @@ class _PoolBanner extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [AppColors.primary.withOpacity(0.15), AppColors.secondary.withOpacity(0.1)],
+          colors: [AppColors.primary.withValues(alpha: 0.15), AppColors.secondary.withValues(alpha: 0.1)],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
@@ -251,7 +251,7 @@ class _PoolBanner extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.2),
+              color: AppColors.primary.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
@@ -306,7 +306,7 @@ class MatchupCard extends StatelessWidget {
           color: AppColors.card,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isVoting ? AppColors.primary.withOpacity(0.4) : AppColors.border,
+            color: isVoting ? AppColors.primary.withValues(alpha: 0.4) : AppColors.border,
           ),
         ),
         child: Column(
@@ -320,7 +320,7 @@ class MatchupCard extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: isVoting ? AppColors.primary.withOpacity(0.2) : AppColors.muted,
+                        color: isVoting ? AppColors.primary.withValues(alpha: 0.2) : AppColors.muted,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
@@ -362,7 +362,7 @@ class MatchupCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: _realmColor.withOpacity(0.15),
+                    color: _realmColor.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(

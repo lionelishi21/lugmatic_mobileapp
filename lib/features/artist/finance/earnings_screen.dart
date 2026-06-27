@@ -91,13 +91,13 @@ class _EarningsScreenState extends State<EarningsScreen> {
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [AppColors.primary, AppColors.primary.withOpacity(0.7)],
+          colors: [AppColors.primary, AppColors.primary.withValues(alpha: 0.7)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
-          BoxShadow(color: AppColors.primary.withOpacity(0.3), blurRadius: 20, offset: const Offset(0, 10)),
+          BoxShadow(color: AppColors.primary.withValues(alpha: 0.3), blurRadius: 20, offset: const Offset(0, 10)),
         ],
       ),
       child: Column(
@@ -150,7 +150,7 @@ class _EarningsScreenState extends State<EarningsScreen> {
               color: AppColors.primary,
               barWidth: 4,
               dotData: const FlDotData(show: false),
-              belowBarData: BarAreaData(show: true, color: AppColors.primary.withOpacity(0.1)),
+              belowBarData: BarAreaData(show: true, color: AppColors.primary.withValues(alpha: 0.1)),
             ),
           ],
         ),
@@ -176,7 +176,7 @@ class _EarningsScreenState extends State<EarningsScreen> {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: (isGift ? AppColors.secondary : AppColors.primary).withOpacity(0.1),
+              color: (isGift ? AppColors.secondary : AppColors.primary).withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(isGift ? FontAwesomeIcons.gift : Icons.music_note, color: isGift ? AppColors.secondary : AppColors.primary, size: 16),
@@ -205,7 +205,7 @@ class _EarningsScreenState extends State<EarningsScreen> {
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
       decoration: BoxDecoration(
         color: AppColors.background,
-        border: Border(top: BorderSide(color: Colors.white.withOpacity(0.05))),
+        border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.05))),
       ),
       child: SizedBox(
         width: double.infinity,

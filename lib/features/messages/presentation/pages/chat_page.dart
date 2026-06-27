@@ -58,7 +58,7 @@ class _ChatPageState extends State<ChatPage> {
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1E293B).withOpacity(0.5),
+        backgroundColor: const Color(0xFF1E293B).withValues(alpha: 0.5),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
@@ -113,7 +113,7 @@ class _ChatPageState extends State<ChatPage> {
       padding: EdgeInsets.fromLTRB(16, 8, 16, MediaQuery.of(context).padding.bottom + 12),
       decoration: BoxDecoration(
         color: const Color(0xFF1E293B),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, -2))],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 10, offset: const Offset(0, -2))],
       ),
       child: Row(
         children: [
@@ -121,7 +121,7 @@ class _ChatPageState extends State<ChatPage> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.05),
+                color: Colors.white.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(24),
               ),
               child: TextField(
@@ -129,7 +129,7 @@ class _ChatPageState extends State<ChatPage> {
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
                   hintText: 'Type a message...',
-                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
+                  hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
                   border: InputBorder.none,
                 ),
                 onSubmitted: (_) => _sendMessage(),
@@ -162,7 +162,7 @@ class _MessageBubble extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
         decoration: BoxDecoration(
-          color: fromMe ? const Color(0xFF10B981) : Colors.white.withOpacity(0.1),
+          color: fromMe ? const Color(0xFF10B981) : Colors.white.withValues(alpha: 0.1),
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(20),
             topRight: const Radius.circular(20),
@@ -181,7 +181,7 @@ class _MessageBubble extends StatelessWidget {
             Text(
               DateFormat.jm().format(message.createdAt),
               style: TextStyle(
-                color: (fromMe ? Colors.black : Colors.white).withOpacity(0.4),
+                color: (fromMe ? Colors.black : Colors.white).withValues(alpha: 0.4),
                 fontSize: 10,
               ),
             ),

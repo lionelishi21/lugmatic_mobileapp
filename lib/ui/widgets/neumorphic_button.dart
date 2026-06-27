@@ -105,7 +105,7 @@ class _SoftGlassButtonState extends State<SoftGlassButton>
     if (!widget.enabled) {
       return [
         BoxShadow(
-          color: const Color(0xFF000000).withOpacity(0.1),
+          color: const Color(0xFF000000).withValues(alpha: 0.1),
           offset: const Offset(2, 2),
           blurRadius: 4,
         ),
@@ -116,21 +116,21 @@ class _SoftGlassButtonState extends State<SoftGlassButton>
     return [
       // Soft outer shadow (main depth)
       BoxShadow(
-        color: const Color(0xFF000000).withOpacity(0.4 * intensity),
+        color: const Color(0xFF000000).withValues(alpha: 0.4 * intensity),
         offset: Offset(8 * intensity, 8 * intensity),
         blurRadius: 16 * intensity,
         spreadRadius: -2,
       ),
       // Inner highlight
       BoxShadow(
-        color: const Color(0xFFFFFFFF).withOpacity(0.1 * intensity),
+        color: const Color(0xFFFFFFFF).withValues(alpha: 0.1 * intensity),
         offset: Offset(-4 * intensity, -4 * intensity),
         blurRadius: 12 * intensity,
         spreadRadius: -1,
       ),
       // Ambient shadow
       BoxShadow(
-        color: const Color(0xFF000000).withOpacity(0.2 * intensity),
+        color: const Color(0xFF000000).withValues(alpha: 0.2 * intensity),
         offset: Offset(0, 4 * intensity),
         blurRadius: 20 * intensity,
         spreadRadius: -4,
@@ -176,12 +176,12 @@ class _SoftGlassButtonState extends State<SoftGlassButton>
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                             colors: [
-                              widget.baseColor.withOpacity(0.8),
-                              widget.baseColor.withOpacity(0.6),
+                              widget.baseColor.withValues(alpha: 0.8),
+                              widget.baseColor.withValues(alpha: 0.6),
                             ],
                           ),
                           border: Border.all(
-                            color: widget.glassColor.withOpacity(
+                            color: widget.glassColor.withValues(alpha: 
                               _isHovered ? 0.3 : 0.2,
                             ),
                             width: 1,
@@ -197,8 +197,8 @@ class _SoftGlassButtonState extends State<SoftGlassButton>
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                   colors: [
-                                    widget.glassColor.withOpacity(0.15),
-                                    widget.glassColor.withOpacity(0.05),
+                                    widget.glassColor.withValues(alpha: 0.15),
+                                    widget.glassColor.withValues(alpha: 0.05),
                                   ],
                                 ),
                                 borderRadius: BorderRadius.circular(widget.borderRadius),
@@ -212,7 +212,7 @@ class _SoftGlassButtonState extends State<SoftGlassButton>
                                     center: Alignment.center,
                                     radius: 1.0,
                                     colors: [
-                                      const Color(0xFFFFFFFF).withOpacity(
+                                      const Color(0xFFFFFFFF).withValues(alpha: 
                                         0.1 * _glowAnimation.value,
                                       ),
                                       const Color(0x00FFFFFF),

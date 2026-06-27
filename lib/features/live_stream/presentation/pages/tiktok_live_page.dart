@@ -416,7 +416,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: NeumorphicTheme.textTertiary.withOpacity(0.3),
+                    color: NeumorphicTheme.textTertiary.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -584,9 +584,9 @@ class _TikTokLivePageState extends State<TikTokLivePage>
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Colors.green.withOpacity(0.8),
-            Colors.blue.withOpacity(0.8),
-            Colors.black.withOpacity(0.9),
+            Colors.green.withValues(alpha: 0.8),
+            Colors.blue.withValues(alpha: 0.8),
+            Colors.black.withValues(alpha: 0.9),
           ],
         ),
       ),
@@ -642,7 +642,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
             Text(
               stream.title,
               style: TextStyle(
-                color: Colors.white.withOpacity(0.8),
+                color: Colors.white.withValues(alpha: 0.8),
                 fontSize: 16,
               ),
             ),
@@ -707,7 +707,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.5),
+                    color: Colors.black.withValues(alpha: 0.5),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
@@ -729,7 +729,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
                         padding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: Colors.red.withOpacity(
+                          color: Colors.red.withValues(alpha: 
                               0.8 + (_liveIndicatorController.value * 0.2)),
                           borderRadius: BorderRadius.circular(20),
                         ),
@@ -763,7 +763,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
                     padding: const EdgeInsets.symmetric(
                         horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.5),
+                      color: Colors.black.withValues(alpha: 0.5),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Row(
@@ -828,7 +828,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
                   ? Container(
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.red.withOpacity(0.8),
+                        color: Colors.red.withValues(alpha: 0.8),
                       ),
                       child: const Icon(
                         Icons.check,
@@ -863,7 +863,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.5),
+                    color: Colors.black.withValues(alpha: 0.5),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
@@ -895,7 +895,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.5),
+                    color: Colors.black.withValues(alpha: 0.5),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
@@ -933,7 +933,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
             child: Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.5),
+                color: Colors.black.withValues(alpha: 0.5),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -973,7 +973,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.5),
+                    color: Colors.black.withValues(alpha: 0.5),
                     shape: BoxShape.circle,
                     border: Border.all(
                       color: const Color(0xFFFFD700),
@@ -1009,10 +1009,10 @@ class _TikTokLivePageState extends State<TikTokLivePage>
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.5),
+                    color: Colors.black.withValues(alpha: 0.5),
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: NeumorphicTheme.primaryAccent.withOpacity(0.5),
+                      color: NeumorphicTheme.primaryAccent.withValues(alpha: 0.5),
                       width: 1,
                     ),
                   ),
@@ -1046,7 +1046,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.5),
+                      color: Colors.black.withValues(alpha: 0.5),
                       shape: BoxShape.circle,
                       border: Border.all(
                         color: Colors.red,
@@ -1092,7 +1092,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
             end: Alignment.bottomCenter,
             colors: [
               Colors.transparent,
-              Colors.black.withOpacity(0.8),
+              Colors.black.withValues(alpha: 0.8),
             ],
           ),
         ),
@@ -1123,7 +1123,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
             Text(
               currentStream.title,
               style: TextStyle(
-                color: Colors.white.withOpacity(0.8),
+                color: Colors.white.withValues(alpha: 0.8),
                 fontSize: 14,
               ),
             ),
@@ -1136,7 +1136,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.15),
+                    color: Colors.white.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -1215,7 +1215,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
               width: 24,
               height: 24,
               decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.5),
+                color: Colors.blue.withValues(alpha: 0.5),
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.info, color: Colors.white, size: 14),
@@ -1273,11 +1273,11 @@ class _TikTokLivePageState extends State<TikTokLivePage>
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
                   hintText: 'Add a comment...',
-                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                  hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(25),
                     borderSide:
-                        BorderSide(color: Colors.white.withOpacity(0.3)),
+                        BorderSide(color: Colors.white.withValues(alpha: 0.3)),
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 20,

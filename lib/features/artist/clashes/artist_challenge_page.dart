@@ -189,9 +189,9 @@ class _ArtistChallengePageState extends State<ArtistChallengePage> {
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              gradient: LinearGradient(colors: [AppColors.primary.withOpacity(0.15), AppColors.secondary.withOpacity(0.1)]),
+              gradient: LinearGradient(colors: [AppColors.primary.withValues(alpha: 0.15), AppColors.secondary.withValues(alpha: 0.1)]),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+              border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
             ),
             child: Row(
               children: [
@@ -283,7 +283,7 @@ class _ArtistChallengePageState extends State<ArtistChallengePage> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
                   decoration: BoxDecoration(
-                    color: isSelected ? AppColors.primary.withOpacity(0.2) : AppColors.card,
+                    color: isSelected ? AppColors.primary.withValues(alpha: 0.2) : AppColors.card,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(color: isSelected ? AppColors.primary : AppColors.border),
                   ),
@@ -315,7 +315,7 @@ class _ArtistChallengePageState extends State<ArtistChallengePage> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
                     decoration: BoxDecoration(
-                      color: isSelected ? AppColors.primary.withOpacity(0.2) : AppColors.card,
+                      color: isSelected ? AppColors.primary.withValues(alpha: 0.2) : AppColors.card,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(color: isSelected ? AppColors.primary : AppColors.border),
                     ),
@@ -366,7 +366,7 @@ class _ArtistChallengePageState extends State<ArtistChallengePage> {
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.black,
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                disabledBackgroundColor: AppColors.primary.withOpacity(0.4),
+                disabledBackgroundColor: AppColors.primary.withValues(alpha: 0.4),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               ),
             ),
@@ -389,9 +389,9 @@ class _SelectedArtistChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.primary.withOpacity(0.1),
+        color: AppColors.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primary.withOpacity(0.4)),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.4)),
       ),
       child: Row(
         children: [

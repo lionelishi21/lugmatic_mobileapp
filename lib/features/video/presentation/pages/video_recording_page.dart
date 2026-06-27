@@ -158,9 +158,9 @@ class _VideoRecordingPageState extends State<VideoRecordingPage> {
                   margin: const EdgeInsets.only(top: 60),
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF86E560).withOpacity(0.2),
+                    color: const Color(0xFF86E560).withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: const Color(0xFF86E560).withOpacity(0.5)),
+                    border: Border.all(color: const Color(0xFF86E560).withValues(alpha: 0.5)),
                   ),
                   child: const Text(
                     '⚡ Clash Mode — 60s max',
@@ -185,7 +185,7 @@ class _VideoRecordingPageState extends State<VideoRecordingPage> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: Colors.red.withOpacity(0.8),
+                        color: Colors.red.withValues(alpha: 0.8),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(

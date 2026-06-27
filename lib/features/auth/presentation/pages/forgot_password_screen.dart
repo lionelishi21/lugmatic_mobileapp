@@ -119,7 +119,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     Text(
                       "Remember your password? ",
                       style: TextStyle(
-                        color: AppColors.greyLight.withOpacity(0.8),
+                        color: AppColors.greyLight.withValues(alpha: 0.8),
                         fontSize: 16,
                       ),
                     ),

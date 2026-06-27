@@ -332,7 +332,7 @@ class _GenreChips extends StatelessWidget {
               duration: const Duration(milliseconds: 200),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
               decoration: BoxDecoration(
-                color: sel ? AppColors.primary : Colors.white.withOpacity(0.12),
+                color: sel ? AppColors.primary : Colors.white.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(18),
                 border: Border.all(
                   color: sel ? AppColors.primary : Colors.white24,
@@ -444,7 +444,7 @@ class _FeedCardState extends State<_FeedCard> with SingleTickerProviderStateMixi
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
-                color: isSong ? AppColors.primary.withOpacity(0.85) : Colors.deepOrangeAccent.withOpacity(0.85),
+                color: isSong ? AppColors.primary.withValues(alpha: 0.85) : Colors.deepOrangeAccent.withValues(alpha: 0.85),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -553,7 +553,7 @@ class _VinylDisc extends StatelessWidget {
                   border: Border.all(color: Colors.white10, width: 2),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.primary.withOpacity(0.3),
+                      color: AppColors.primary.withValues(alpha: 0.3),
                       blurRadius: 30,
                       spreadRadius: 5,
                     ),
@@ -646,9 +646,9 @@ class _BottomOverlay extends StatelessWidget {
                     margin: const EdgeInsets.only(bottom: 6),
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.2),
+                      color: AppColors.primary.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: AppColors.primary.withOpacity(0.4)),
+                      border: Border.all(color: AppColors.primary.withValues(alpha: 0.4)),
                     ),
                     child: Text(
                       item.song!.genre,
@@ -682,7 +682,7 @@ class _BottomOverlay extends StatelessWidget {
                       height: h.abs(),
                       margin: const EdgeInsets.symmetric(horizontal: 1),
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.6),
+                        color: AppColors.primary.withValues(alpha: 0.6),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     );

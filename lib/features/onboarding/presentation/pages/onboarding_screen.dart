@@ -78,7 +78,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                       Text(
                         'lugmatic',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.9),
+                          color: Colors.white.withValues(alpha: 0.9),
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
                           letterSpacing: -0.3,
@@ -90,7 +90,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                             Navigator.pushReplacementNamed(context, '/login'),
                         child: Text('Skip',
                             style: TextStyle(
-                                color: Colors.white.withOpacity(0.5),
+                                color: Colors.white.withValues(alpha: 0.5),
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600)),
                       ),
@@ -109,7 +109,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                             borderRadius: BorderRadius.circular(2),
                             color: active
                                 ? AppColors.primaryGreen
-                                : Colors.white.withOpacity(0.12),
+                                : Colors.white.withValues(alpha: 0.12),
                           ),
                         ),
                       );
@@ -145,7 +145,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                         height: 52,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white.withOpacity(0.15)),
+                          border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
                         ),
                         child: const Icon(Icons.chevron_left_rounded,
                             color: Colors.white, size: 26),
@@ -162,11 +162,11 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                           borderRadius: BorderRadius.circular(28),
                           border: isLastPage
                               ? null
-                              : Border.all(color: AppColors.primaryGreen.withOpacity(0.5)),
+                              : Border.all(color: AppColors.primaryGreen.withValues(alpha: 0.5)),
                           boxShadow: isLastPage
                               ? [
                                   BoxShadow(
-                                    color: AppColors.primaryGreen.withOpacity(0.35),
+                                    color: AppColors.primaryGreen.withValues(alpha: 0.35),
                                     blurRadius: 24,
                                     offset: const Offset(0, 8),
                                   ),
@@ -205,7 +205,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 children: [
                   Text('By continuing, you agree to our ',
                       style: TextStyle(
-                          color: AppColors.greyLight.withOpacity(0.8),
+                          color: AppColors.greyLight.withValues(alpha: 0.8),
                           fontSize: 12)),
                   GestureDetector(
                     onTap: () => Navigator.pushNamed(context, '/terms'),
@@ -217,7 +217,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                   ),
                   Text(' and ',
                       style: TextStyle(
-                          color: AppColors.greyLight.withOpacity(0.8),
+                          color: AppColors.greyLight.withValues(alpha: 0.8),
                           fontSize: 12)),
                   GestureDetector(
                     onTap: () => Navigator.pushNamed(context, '/privacy'),

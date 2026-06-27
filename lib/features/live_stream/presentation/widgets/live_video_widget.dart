@@ -253,11 +253,11 @@ class _LiveVideoWidgetState extends State<LiveVideoWidget>
         height: 48,
         decoration: BoxDecoration(
           color: isActive
-              ? Colors.white.withOpacity(0.2)
-              : Colors.red.withOpacity(0.8),
+              ? Colors.white.withValues(alpha: 0.2)
+              : Colors.red.withValues(alpha: 0.8),
           shape: BoxShape.circle,
           border: Border.all(
-            color: Colors.white.withOpacity(0.3),
+            color: Colors.white.withValues(alpha: 0.3),
             width: 1,
           ),
         ),
@@ -292,9 +292,9 @@ class _LiveVideoWidgetState extends State<LiveVideoWidget>
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Colors.green.withOpacity(0.8),
-            Colors.blue.withOpacity(0.8),
-            Colors.black.withOpacity(0.9),
+            Colors.green.withValues(alpha: 0.8),
+            Colors.blue.withValues(alpha: 0.8),
+            Colors.black.withValues(alpha: 0.9),
           ],
         ),
       ),
@@ -311,7 +311,7 @@ class _LiveVideoWidgetState extends State<LiveVideoWidget>
                     width: 100,
                     height: 100,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
+                      color: Colors.white.withValues(alpha: 0.15),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
@@ -336,7 +336,7 @@ class _LiveVideoWidgetState extends State<LiveVideoWidget>
             Text(
               _isConnected ? 'Connected' : 'Connecting...',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.7),
+                color: Colors.white.withValues(alpha: 0.7),
                 fontSize: 14,
               ),
             ),
@@ -368,7 +368,7 @@ class _LiveVideoWidgetState extends State<LiveVideoWidget>
               padding: const EdgeInsets.symmetric(horizontal: 32),
               child: Text(
                 _error ?? 'Unknown error',
-                style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12),
+                style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12),
                 textAlign: TextAlign.center,
               ),
             ),

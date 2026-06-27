@@ -169,7 +169,7 @@ class _CreatePlaylistScreenState extends State<CreatePlaylistScreen> {
                     decoration: InputDecoration(
                       hintText: "My Awesome Playlist",
                       hintStyle: TextStyle(
-                        color: NeumorphicTheme.textTertiary.withOpacity(0.5),
+                        color: NeumorphicTheme.textTertiary.withValues(alpha: 0.5),
                       ),
                       filled: true,
                       fillColor: NeumorphicTheme.backgroundColor,
@@ -208,7 +208,7 @@ class _CreatePlaylistScreenState extends State<CreatePlaylistScreen> {
                     decoration: InputDecoration(
                       hintText: "Describe your playlist...",
                       hintStyle: TextStyle(
-                        color: NeumorphicTheme.textTertiary.withOpacity(0.5),
+                        color: NeumorphicTheme.textTertiary.withValues(alpha: 0.5),
                       ),
                       filled: true,
                       fillColor: NeumorphicTheme.backgroundColor,

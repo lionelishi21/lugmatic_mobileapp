@@ -125,7 +125,7 @@ class _CommentSectionWidgetState extends State<CommentSectionWidget> {
                     style: const TextStyle(color: NeumorphicTheme.textPrimary),
                     decoration: InputDecoration(
                       hintText: 'Add a comment...',
-                      hintStyle: TextStyle(color: NeumorphicTheme.textTertiary.withOpacity(0.5)),
+                      hintStyle: TextStyle(color: NeumorphicTheme.textTertiary.withValues(alpha: 0.5)),
                       border: InputBorder.none,
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                     ),

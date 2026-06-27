@@ -40,12 +40,12 @@ class PageIndicator extends StatelessWidget {
                 ],
               )
             : null,
-        color: isActive ? null : AppColors.greyDark.withOpacity(0.4),
+        color: isActive ? null : AppColors.greyDark.withValues(alpha: 0.4),
         borderRadius: BorderRadius.circular(5),
         boxShadow: isActive
             ? [
                 BoxShadow(
-                  color: AppColors.primaryGreen.withOpacity(0.4),
+                  color: AppColors.primaryGreen.withValues(alpha: 0.4),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),

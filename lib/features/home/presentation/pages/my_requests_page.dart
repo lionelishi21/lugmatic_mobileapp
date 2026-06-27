@@ -72,7 +72,7 @@ class _MyRequestsPageState extends State<MyRequestsPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.person_add_disabled, size: 64, color: Colors.white.withOpacity(0.1)),
+          Icon(Icons.person_add_disabled, size: 64, color: Colors.white.withValues(alpha: 0.1)),
           const SizedBox(height: 16),
           const Text('You haven\'t requested any artists yet.', style: TextStyle(color: Colors.white54)),
         ],
@@ -94,15 +94,15 @@ class _RequestListItem extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(color: statusColor.withOpacity(0.1), shape: BoxShape.circle),
+            decoration: BoxDecoration(color: statusColor.withValues(alpha: 0.1), shape: BoxShape.circle),
             child: Icon(Icons.person_add, color: statusColor, size: 24),
           ),
           const SizedBox(width: 16),
@@ -112,13 +112,13 @@ class _RequestListItem extends StatelessWidget {
               children: [
                 Text(request.artistName, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
                 if (request.genre != null)
-                  Text(request.genre!, style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 13)),
+                  Text(request.genre!, style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 13)),
               ],
             ),
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(color: statusColor.withOpacity(0.15), borderRadius: BorderRadius.circular(10)),
+            decoration: BoxDecoration(color: statusColor.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(10)),
             child: Text(
               request.status.toUpperCase(),
               style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.bold),

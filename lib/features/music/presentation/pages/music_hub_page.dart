@@ -50,7 +50,7 @@ class _MusicHubPageState extends State<MusicHubPage>
           indicatorColor: const Color(0xFF10B981),
           indicatorWeight: 3,
           labelColor: Colors.white,
-          unselectedLabelColor: Colors.white.withOpacity(0.6),
+          unselectedLabelColor: Colors.white.withValues(alpha: 0.6),
           labelStyle: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,

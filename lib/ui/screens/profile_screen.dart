@@ -127,7 +127,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       icon: const Icon(Icons.person, color: Colors.white, size: 18),
                       label: const Text('View Profile', style: TextStyle(color: Colors.white, fontSize: 13)),
                       style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: Colors.white.withOpacity(0.3)),
+                        side: BorderSide(color: Colors.white.withValues(alpha: 0.3)),
                         padding: const EdgeInsets.symmetric(vertical: 10),
                       ),
                     ),
@@ -141,7 +141,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       icon: const Icon(Icons.live_tv, color: Colors.white, size: 18),
                       label: const Text('GO LIVE', style: TextStyle(color: Colors.white, fontSize: 13)),
                       style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: Colors.redAccent.withOpacity(0.5)),
+                        side: BorderSide(color: Colors.redAccent.withValues(alpha: 0.5)),
                         padding: const EdgeInsets.symmetric(vertical: 10),
                       ),
                     ),

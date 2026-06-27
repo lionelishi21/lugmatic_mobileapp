@@ -181,13 +181,13 @@ class _BrowsePageState extends State<BrowsePage> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Colors.white.withOpacity(0.08),
-              Colors.white.withOpacity(0.03),
+              Colors.white.withValues(alpha: 0.08),
+              Colors.white.withValues(alpha: 0.03),
             ],
           ),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: Colors.white.withOpacity(0.1),
+            color: Colors.white.withValues(alpha: 0.1),
             width: 1,
           ),
         ),
@@ -198,16 +198,16 @@ class _BrowsePageState extends State<BrowsePage> {
           decoration: InputDecoration(
             hintText: 'Search for songs, artists, albums...',
             hintStyle: TextStyle(
-              color: Colors.white.withOpacity(0.5),
+              color: Colors.white.withValues(alpha: 0.5),
               fontSize: 15,
             ),
             prefixIcon: Icon(
               Icons.search,
-              color: Colors.white.withOpacity(0.6),
+              color: Colors.white.withValues(alpha: 0.6),
             ),
             suffixIcon: _searchQuery.isNotEmpty
                 ? IconButton(
-                    icon: Icon(Icons.clear, color: Colors.white.withOpacity(0.6)),
+                    icon: Icon(Icons.clear, color: Colors.white.withValues(alpha: 0.6)),
                     onPressed: () {
                       _searchController.clear();
                       _performSearch('');
@@ -267,7 +267,7 @@ class _BrowsePageState extends State<BrowsePage> {
                     child: a.imageUrl.isEmpty ? const Icon(Icons.person) : null,
                   ),
                   title: Text(a.name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-                  subtitle: Text(a.genres.join(', '), style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 13)),
+                  subtitle: Text(a.genres.join(', '), style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 13)),
                 ))),
             const SizedBox(height: 24),
           ],
@@ -294,7 +294,7 @@ class _BrowsePageState extends State<BrowsePage> {
                     height: 48,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
-                      color: const Color(0xFF10B981).withOpacity(0.2),
+                      color: const Color(0xFF10B981).withValues(alpha: 0.2),
                     ),
                     child: s.imageUrl.isNotEmpty
                         ? ClipRRect(
@@ -305,7 +305,7 @@ class _BrowsePageState extends State<BrowsePage> {
                         : const Icon(Icons.music_note, color: Colors.white),
                   ),
                   title: Text(s.title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-                  subtitle: Text(s.artist, style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 13)),
+                  subtitle: Text(s.artist, style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 13)),
                   trailing: const Icon(Icons.play_circle_outline, color: Color(0xFF10B981)),
                 ))),
           ],
@@ -315,7 +315,7 @@ class _BrowsePageState extends State<BrowsePage> {
               child: Center(
                 child: Text(
                   'No results for "$_searchQuery"',
-                  style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 16),
+                  style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 16),
                 ),
               ),
             ),
@@ -350,12 +350,12 @@ class _BrowsePageState extends State<BrowsePage> {
                         colors: [Color(0xFF10B981), Color(0xFF059669)],
                       )
                     : null,
-                color: isSelected ? null : Colors.white.withOpacity(0.08),
+                color: isSelected ? null : Colors.white.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(
                   color: isSelected
                       ? Colors.transparent
-                      : Colors.white.withOpacity(0.1),
+                      : Colors.white.withValues(alpha: 0.1),
                   width: 1,
                 ),
               ),
@@ -363,7 +363,7 @@ class _BrowsePageState extends State<BrowsePage> {
                 child: Text(
                   categories[index],
                   style: TextStyle(
-                    color: isSelected ? Colors.white : Colors.white.withOpacity(0.7),
+                    color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.7),
                     fontSize: 14,
                     fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                   ),
@@ -439,14 +439,14 @@ class _BrowsePageState extends State<BrowsePage> {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      color.withOpacity(0.8),
-                      color.withOpacity(0.5),
+                      color.withValues(alpha: 0.8),
+                      color.withValues(alpha: 0.5),
                     ],
                   ),
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: color.withOpacity(0.3),
+                      color: color.withValues(alpha: 0.3),
                       blurRadius: 12,
                       offset: const Offset(0, 6),
                     ),
@@ -540,13 +540,13 @@ class _BrowsePageState extends State<BrowsePage> {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      Colors.white.withOpacity(0.08),
-                      Colors.white.withOpacity(0.03),
+                      Colors.white.withValues(alpha: 0.08),
+                      Colors.white.withValues(alpha: 0.03),
                     ],
                   ),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.1),
+                    color: Colors.white.withValues(alpha: 0.1),
                     width: 1,
                   ),
                 ),
@@ -557,7 +557,7 @@ class _BrowsePageState extends State<BrowsePage> {
                       height: 60,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(8),
-                        color: const Color(0xFF10B981).withOpacity(0.2),
+                        color: const Color(0xFF10B981).withValues(alpha: 0.2),
                       ),
                       child: song.imageUrl.isNotEmpty
                           ? ClipRRect(
@@ -585,7 +585,7 @@ class _BrowsePageState extends State<BrowsePage> {
                           Text(
                             song.artist,
                             style: TextStyle(
-                              color: Colors.white.withOpacity(0.6),
+                              color: Colors.white.withValues(alpha: 0.6),
                               fontSize: 14,
                             ),
                           ),

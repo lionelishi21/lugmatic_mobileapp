@@ -178,7 +178,7 @@ class _ArtistClashesScreenState extends State<ArtistClashesScreen>
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: RadialGradient(colors: [
-                    AppColors.primary.withOpacity(0.08 + _pulseCtrl.value * 0.06),
+                    AppColors.primary.withValues(alpha: 0.08 + _pulseCtrl.value * 0.06),
                     Colors.transparent,
                   ]),
                 ),
@@ -358,14 +358,14 @@ class _StatChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [
           Text(value, style: TextStyle(color: color, fontSize: 16, fontWeight: FontWeight.w900)),
-          Text(label, style: TextStyle(color: color.withOpacity(0.7), fontSize: 10)),
+          Text(label, style: TextStyle(color: color.withValues(alpha: 0.7), fontSize: 10)),
         ],
       ),
     );
@@ -385,12 +385,12 @@ class _RecordBanner extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [AppColors.primary.withOpacity(0.15), Colors.transparent],
+          colors: [AppColors.primary.withValues(alpha: 0.15), Colors.transparent],
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
@@ -455,7 +455,7 @@ class _EmptyState extends StatelessWidget {
               width: 80, height: 80,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.05),
+                color: Colors.white.withValues(alpha: 0.05),
               ),
               child: Icon(icon, size: 40, color: Colors.white24),
             ),
@@ -553,14 +553,14 @@ class _IncomingCardState extends State<_IncomingCard> with SingleTickerProviderS
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              rc.withOpacity(0.15 + math.sin(_shimmerCtrl.value * math.pi) * 0.05),
+              rc.withValues(alpha: 0.15 + math.sin(_shimmerCtrl.value * math.pi) * 0.05),
               const Color(0xFF1A1A2E),
             ],
           ),
-          border: Border.all(color: rc.withOpacity(0.4), width: 1.5),
+          border: Border.all(color: rc.withValues(alpha: 0.4), width: 1.5),
           boxShadow: [
             BoxShadow(
-              color: rc.withOpacity(0.2 + math.sin(_shimmerCtrl.value * math.pi) * 0.1),
+              color: rc.withValues(alpha: 0.2 + math.sin(_shimmerCtrl.value * math.pi) * 0.1),
               blurRadius: 16,
               spreadRadius: 1,
             ),
@@ -593,7 +593,7 @@ class _IncomingCardState extends State<_IncomingCard> with SingleTickerProviderS
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: _realmColor(clash.realm).withOpacity(0.2),
+                              color: _realmColor(clash.realm).withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
@@ -606,7 +606,7 @@ class _IncomingCardState extends State<_IncomingCard> with SingleTickerProviderS
                       const SizedBox(height: 2),
                       Text(
                         'is challenging you to a clash!',
-                        style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12),
+                        style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12),
                       ),
                     ],
                   ),
@@ -619,7 +619,7 @@ class _IncomingCardState extends State<_IncomingCard> with SingleTickerProviderS
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.05),
+                  color: Colors.white.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(color: Colors.white12),
                 ),
@@ -704,7 +704,7 @@ class _ActiveCard extends StatelessWidget {
           color: const Color(0xFF141420),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isVoting ? rc.withOpacity(0.5) : Colors.white12,
+            color: isVoting ? rc.withValues(alpha: 0.5) : Colors.white12,
             width: isVoting ? 1.5 : 1,
           ),
         ),
@@ -714,7 +714,7 @@ class _ActiveCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [rc.withOpacity(0.15), Colors.transparent],
+                  colors: [rc.withValues(alpha: 0.15), Colors.transparent],
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
                 ),
@@ -728,7 +728,7 @@ class _ActiveCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: isVoting ? rc.withOpacity(0.2) : Colors.white10,
+                      color: isVoting ? rc.withValues(alpha: 0.2) : Colors.white10,
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
@@ -764,7 +764,7 @@ class _ActiveCard extends StatelessWidget {
                                       style: TextStyle(color: rc, fontSize: 11, fontWeight: FontWeight.bold)),
                                   Text('$total votes', style: const TextStyle(color: Colors.white38, fontSize: 10)),
                                   Text('${((1 - cPct) * 100).round()}%',
-                                      style: TextStyle(color: Colors.deepOrangeAccent.withOpacity(0.8), fontSize: 11, fontWeight: FontWeight.bold)),
+                                      style: TextStyle(color: Colors.deepOrangeAccent.withValues(alpha: 0.8), fontSize: 11, fontWeight: FontWeight.bold)),
                                 ],
                               ),
                             ],
@@ -838,7 +838,7 @@ class _BattleBar extends StatelessWidget {
         height: 6,
         child: Stack(
           children: [
-            Container(color: Colors.deepOrangeAccent.withOpacity(0.4)),
+            Container(color: Colors.deepOrangeAccent.withValues(alpha: 0.4)),
             FractionallySizedBox(
               widthFactor: cPct,
               child: Container(color: color),
@@ -862,9 +862,9 @@ class _SlotBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: submitted ? color.withOpacity(0.12) : Colors.white.withOpacity(0.04),
+        color: submitted ? color.withValues(alpha: 0.12) : Colors.white.withValues(alpha: 0.04),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: submitted ? color.withOpacity(0.35) : Colors.white12),
+        border: Border.all(color: submitted ? color.withValues(alpha: 0.35) : Colors.white12),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -926,14 +926,14 @@ class _PastCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: const Color(0xFF111118),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withOpacity(0.07)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.07)),
         ),
         child: Column(
           children: [
             Row(
               children: [
                 Text('${_realmEmoji(clash.realm)} ${clash.realm}',
-                    style: TextStyle(color: rc.withOpacity(0.7), fontSize: 11)),
+                    style: TextStyle(color: rc.withValues(alpha: 0.7), fontSize: 11)),
                 const Spacer(),
                 Icon(outcomeIcon, size: 14, color: outcomeColor),
                 const SizedBox(width: 4),
@@ -955,10 +955,10 @@ class _PastCard extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text('${clash.challengerVotes}v',
-                                    style: TextStyle(color: rc.withOpacity(0.8), fontSize: 10)),
+                                    style: TextStyle(color: rc.withValues(alpha: 0.8), fontSize: 10)),
                                 Text('$total total', style: const TextStyle(color: Colors.white38, fontSize: 10)),
                                 Text('${clash.opponentVotes}v',
-                                    style: TextStyle(color: Colors.deepOrangeAccent.withOpacity(0.7), fontSize: 10)),
+                                    style: TextStyle(color: Colors.deepOrangeAccent.withValues(alpha: 0.7), fontSize: 10)),
                               ],
                             ),
                           ],
@@ -1005,7 +1005,7 @@ class _AvatarRing extends StatelessWidget {
       padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: ringColor.withOpacity(0.6), width: 2),
+        border: Border.all(color: ringColor.withValues(alpha: 0.6), width: 2),
       ),
       child: CircleAvatar(
         radius: radius,

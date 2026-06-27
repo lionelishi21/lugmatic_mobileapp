@@ -183,9 +183,9 @@ class _ContributorPayoutScreenState extends State<ContributorPayoutScreen> {
               margin: const EdgeInsets.symmetric(horizontal: 6),
               padding: const EdgeInsets.symmetric(vertical: 14),
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.secondary.withOpacity(0.12) : AppColors.card,
+                color: isSelected ? AppColors.secondary.withValues(alpha: 0.12) : AppColors.card,
                 border: Border.all(
-                  color: isSelected ? AppColors.secondary : Colors.white.withOpacity(0.04),
+                  color: isSelected ? AppColors.secondary : Colors.white.withValues(alpha: 0.04),
                   width: 1,
                 ),
                 borderRadius: BorderRadius.circular(16),
@@ -281,7 +281,7 @@ class _ContributorPayoutScreenState extends State<ContributorPayoutScreen> {
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.04)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.04)),
       ),
       child: TextField(
         controller: controller,
@@ -309,7 +309,7 @@ class _ContributorPayoutScreenState extends State<ContributorPayoutScreen> {
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.04)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.04)),
       ),
       child: DropdownButtonFormField<String>(
         value: items.contains(value) ? value : items.first,

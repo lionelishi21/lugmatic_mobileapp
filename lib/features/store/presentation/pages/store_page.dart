@@ -313,9 +313,9 @@ class _StorePageState extends State<StorePage> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: const Color(0xFF10B981).withOpacity(0.1),
+            color: const Color(0xFF10B981).withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFF10B981).withOpacity(0.2)),
+            border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.2)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -347,7 +347,7 @@ class _StorePageState extends State<StorePage> {
         Text(
           'Buy coins and send gifts directly to your favorite artists. 100% goes to them.',
           style: TextStyle(
-            color: Colors.white.withOpacity(0.6),
+            color: Colors.white.withValues(alpha: 0.6),
             fontSize: 14,
           ),
         ),
@@ -365,10 +365,10 @@ class _StorePageState extends State<StorePage> {
             duration: const Duration(milliseconds: 150),
             padding: const EdgeInsets.symmetric(vertical: 12),
             decoration: BoxDecoration(
-              color: selected ? const Color(0xFF10B981).withOpacity(0.12) : Colors.white.withOpacity(0.04),
+              color: selected ? const Color(0xFF10B981).withValues(alpha: 0.12) : Colors.white.withValues(alpha: 0.04),
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                color: selected ? const Color(0xFF10B981) : Colors.white.withOpacity(0.08),
+                color: selected ? const Color(0xFF10B981) : Colors.white.withValues(alpha: 0.08),
                 width: selected ? 1.5 : 1,
               ),
             ),
@@ -410,12 +410,12 @@ class _StorePageState extends State<StorePage> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            const Color(0xFF10B981).withOpacity(0.15),
+            const Color(0xFF10B981).withValues(alpha: 0.15),
             Colors.transparent,
           ],
         ),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFF10B981).withOpacity(0.2)),
+        border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.2)),
       ),
       child: Stack(
         children: [
@@ -425,7 +425,7 @@ class _StorePageState extends State<StorePage> {
             child: Icon(
               Icons.monetization_on,
               size: 100,
-              color: const Color(0xFF10B981).withOpacity(0.05),
+              color: const Color(0xFF10B981).withValues(alpha: 0.05),
             ),
           ),
           Column(
@@ -434,7 +434,7 @@ class _StorePageState extends State<StorePage> {
               Text(
                 'YOUR BALANCE',
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.5),
+                  color: Colors.white.withValues(alpha: 0.5),
                   fontSize: 10,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 2,
@@ -466,7 +466,7 @@ class _StorePageState extends State<StorePage> {
               Text(
                 'coins available',
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.4),
+                  color: Colors.white.withValues(alpha: 0.4),
                   fontSize: 12,
                 ),
               ),
@@ -486,14 +486,14 @@ class _StorePageState extends State<StorePage> {
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
           color: package.popular 
-            ? const Color(0xFF10B981).withOpacity(0.4) 
-            : Colors.white.withOpacity(0.05),
+            ? const Color(0xFF10B981).withValues(alpha: 0.4) 
+            : Colors.white.withValues(alpha: 0.05),
           width: package.popular ? 2 : 1,
         ),
         boxShadow: package.popular 
           ? [
               BoxShadow(
-                color: const Color(0xFF10B981).withOpacity(0.1),
+                color: const Color(0xFF10B981).withValues(alpha: 0.1),
                 blurRadius: 20,
                 spreadRadius: 0,
               )
@@ -508,7 +508,7 @@ class _StorePageState extends State<StorePage> {
               width: 56,
               height: 56,
               decoration: BoxDecoration(
-                color: package.baseColor.withOpacity(0.1),
+                color: package.baseColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Icon(package.icon, color: package.baseColor, size: 28),
@@ -552,7 +552,7 @@ class _StorePageState extends State<StorePage> {
                   Text(
                     '${package.amount.toLocaleString()} coins • ${package.price}',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.5),
+                      color: Colors.white.withValues(alpha: 0.5),
                       fontSize: 12,
                     ),
                   ),
@@ -565,7 +565,7 @@ class _StorePageState extends State<StorePage> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
-                  color: package.popular ? const Color(0xFF10B981) : Colors.white.withOpacity(0.05),
+                  color: package.popular ? const Color(0xFF10B981) : Colors.white.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: isPurchasing

@@ -33,7 +33,7 @@ class BrandGradientFallback extends StatelessWidget {
       child: Center(
         child: Icon(
           Icons.music_note,
-          color: Colors.white.withOpacity(0.8),
+          color: Colors.white.withValues(alpha: 0.8),
           size: iconSize,
         ),
       ),

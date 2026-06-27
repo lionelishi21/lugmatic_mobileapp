@@ -110,7 +110,7 @@ class _ContributorDashboardScreenState extends State<ContributorDashboardScreen>
                                     decoration: BoxDecoration(
                                       color: AppColors.card,
                                       borderRadius: BorderRadius.circular(20),
-                                      border: Border.all(color: Colors.white.withOpacity(0.08)),
+                                      border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
                                     ),
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
@@ -120,7 +120,7 @@ class _ContributorDashboardScreenState extends State<ContributorDashboardScreen>
                                         Text(
                                           'Fan Mode',
                                           style: TextStyle(
-                                            color: AppColors.mutedForeground.withOpacity(0.9),
+                                            color: AppColors.mutedForeground.withValues(alpha: 0.9),
                                             fontSize: 11,
                                             fontWeight: FontWeight.bold,
                                           ),
@@ -214,7 +214,7 @@ class _ContributorDashboardScreenState extends State<ContributorDashboardScreen>
                             decoration: BoxDecoration(
                               color: AppColors.card,
                               borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: Colors.white.withOpacity(0.04)),
+                              border: Border.all(color: Colors.white.withValues(alpha: 0.04)),
                             ),
                             child: const Column(
                               children: [
@@ -255,7 +255,7 @@ class _ContributorDashboardScreenState extends State<ContributorDashboardScreen>
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: AppColors.secondary.withOpacity(0.3),
+            color: AppColors.secondary.withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -279,7 +279,7 @@ class _ContributorDashboardScreenState extends State<ContributorDashboardScreen>
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.15),
+                  color: Colors.white.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Row(
@@ -327,14 +327,14 @@ class _ContributorDashboardScreenState extends State<ContributorDashboardScreen>
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.04)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.04)),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: AppColors.secondary.withOpacity(0.1),
+              color: AppColors.secondary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, color: AppColors.secondary, size: 16),
@@ -374,7 +374,7 @@ class _ContributorDashboardScreenState extends State<ContributorDashboardScreen>
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.04)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.04)),
       ),
       child: Row(
         children: [
@@ -418,7 +418,7 @@ class _ContributorDashboardScreenState extends State<ContributorDashboardScreen>
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
-                        color: AppColors.secondary.withOpacity(0.12),
+                        color: AppColors.secondary.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
