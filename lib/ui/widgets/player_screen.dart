@@ -27,6 +27,7 @@ class PlayerScreen extends StatefulWidget {
 class _PlayerScreenState extends State<PlayerScreen> with SingleTickerProviderStateMixin {
   bool _isFavorited = false;
   bool _karaokeMode = true;
+  bool _lyricsExpanded = true;
   VideoPlayerController? _videoController;
   String? _lastVideoUrl;
   late AnimationController _bgAnimController;
@@ -181,9 +182,9 @@ class _PlayerScreenState extends State<PlayerScreen> with SingleTickerProviderSt
                   toolbarHeight: 64,
                   leading: Padding(
                     // Extra clearance below the status bar/notch on top of the
-                    // outer SafeArea — Center() alone wasn't enough breathing
-                    // room on some Android devices.
-                    padding: const EdgeInsets.only(top: 10),
+                    // outer SafeArea — still reported as too tight on some
+                    // devices at 10px, bumped for a clearly visible gap.
+                    padding: const EdgeInsets.only(top: 20),
                     child: NeumorphicButton(
                       width: 44,
                       height: 44,
@@ -200,7 +201,7 @@ class _PlayerScreenState extends State<PlayerScreen> with SingleTickerProviderSt
                   centerTitle: true,
                   actions: [
                     Padding(
-                      padding: const EdgeInsets.only(top: 10),
+                      padding: const EdgeInsets.only(top: 20),
                       child: IconButton(
                         onPressed: () => _shareSong(currentMusic),
                         icon: const Icon(Icons.share_outlined, color: NeumorphicTheme.textPrimary),
@@ -459,77 +460,103 @@ class _PlayerScreenState extends State<PlayerScreen> with SingleTickerProviderSt
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.lyrics_outlined, color: Color(0xFF10B981), size: 20),
-                                      const SizedBox(width: 10),
-                                      Text(
-                                        'LYRICS',
-                                        style: TextStyle(
-                                          color: Colors.white.withValues(alpha: 0.9),
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w900,
-                                          letterSpacing: 1.5,
+                                  InkWell(
+                                    onTap: () => setState(() => _lyricsExpanded = !_lyricsExpanded),
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: Row(
+                                      children: [
+                                        const Icon(Icons.lyrics_outlined, color: Color(0xFF10B981), size: 20),
+                                        const SizedBox(width: 10),
+                                        Text(
+                                          'LYRICS',
+                                          style: TextStyle(
+                                            color: Colors.white.withValues(alpha: 0.9),
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w900,
+                                            letterSpacing: 1.5,
+                                          ),
                                         ),
-                                      ),
-                                      if (currentMusic.lyricsLines != null &&
-                                          currentMusic.lyricsLines!.isNotEmpty) ...[
-                                        const Spacer(),
-                                        GestureDetector(
-                                          onTap: () => setState(() => _karaokeMode = !_karaokeMode),
-                                          child: Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                            decoration: BoxDecoration(
-                                              color: _karaokeMode
-                                                  ? const Color(0xFF10B981).withValues(alpha: 0.2)
-                                                  : Colors.white.withValues(alpha: 0.08),
-                                              borderRadius: BorderRadius.circular(20),
-                                              border: Border.all(
+                                        if (currentMusic.lyricsLines != null &&
+                                            currentMusic.lyricsLines!.isNotEmpty) ...[
+                                          const Spacer(),
+                                          GestureDetector(
+                                            onTap: () => setState(() => _karaokeMode = !_karaokeMode),
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                              decoration: BoxDecoration(
                                                 color: _karaokeMode
-                                                    ? const Color(0xFF10B981).withValues(alpha: 0.6)
-                                                    : Colors.white.withValues(alpha: 0.15),
-                                              ),
-                                            ),
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Icon(
-                                                  Icons.mic_external_on,
-                                                  size: 14,
-                                                  color: _karaokeMode ? const Color(0xFF10B981) : Colors.white60,
+                                                    ? const Color(0xFF10B981).withValues(alpha: 0.2)
+                                                    : Colors.white.withValues(alpha: 0.08),
+                                                borderRadius: BorderRadius.circular(20),
+                                                border: Border.all(
+                                                  color: _karaokeMode
+                                                      ? const Color(0xFF10B981).withValues(alpha: 0.6)
+                                                      : Colors.white.withValues(alpha: 0.15),
                                                 ),
-                                                const SizedBox(width: 6),
-                                                Text(
-                                                  'KARAOKE',
-                                                  style: TextStyle(
-                                                    fontSize: 11,
-                                                    fontWeight: FontWeight.w800,
-                                                    letterSpacing: 1,
+                                              ),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Icon(
+                                                    Icons.mic_external_on,
+                                                    size: 14,
                                                     color: _karaokeMode ? const Color(0xFF10B981) : Colors.white60,
                                                   ),
-                                                ),
-                                              ],
+                                                  const SizedBox(width: 6),
+                                                  Text(
+                                                    'KARAOKE',
+                                                    style: TextStyle(
+                                                      fontSize: 11,
+                                                      fontWeight: FontWeight.w800,
+                                                      letterSpacing: 1,
+                                                      color: _karaokeMode ? const Color(0xFF10B981) : Colors.white60,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
                                             ),
+                                          ),
+                                        ] else
+                                          const Spacer(),
+                                        const SizedBox(width: 8),
+                                        AnimatedRotation(
+                                          turns: _lyricsExpanded ? 0.5 : 0,
+                                          duration: const Duration(milliseconds: 250),
+                                          child: Icon(
+                                            Icons.keyboard_arrow_down,
+                                            color: Colors.white.withValues(alpha: 0.6),
                                           ),
                                         ),
                                       ],
-                                    ],
-                                  ),
-                                  const SizedBox(height: 20),
-                                  if (_karaokeMode &&
-                                      currentMusic.lyricsLines != null &&
-                                      currentMusic.lyricsLines!.isNotEmpty)
-                                    KaraokeLyricsView(lines: currentMusic.lyricsLines!)
-                                  else
-                                    Text(
-                                      currentMusic.lyrics,
-                                      style: TextStyle(
-                                        color: Colors.white.withValues(alpha: 0.8),
-                                        fontSize: 18,
-                                        height: 1.8,
-                                        fontWeight: FontWeight.w500,
-                                      ),
                                     ),
+                                  ),
+                                  AnimatedSize(
+                                    duration: const Duration(milliseconds: 250),
+                                    curve: Curves.easeInOut,
+                                    alignment: Alignment.topCenter,
+                                    child: !_lyricsExpanded
+                                        ? const SizedBox(width: double.infinity)
+                                        : Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              const SizedBox(height: 20),
+                                              if (_karaokeMode &&
+                                                  currentMusic.lyricsLines != null &&
+                                                  currentMusic.lyricsLines!.isNotEmpty)
+                                                KaraokeLyricsView(lines: currentMusic.lyricsLines!)
+                                              else
+                                                Text(
+                                                  currentMusic.lyrics,
+                                                  style: TextStyle(
+                                                    color: Colors.white.withValues(alpha: 0.8),
+                                                    fontSize: 18,
+                                                    height: 1.8,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                            ],
+                                          ),
+                                  ),
                                 ],
                               ),
                             ),

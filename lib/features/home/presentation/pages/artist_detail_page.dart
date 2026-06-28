@@ -42,6 +42,9 @@ class _ArtistDetailPageState extends State<ArtistDetailPage> {
   void initState() {
     super.initState();
     _artist = widget.initialData;
+    // Best-known state until _loadData() resolves — also the fallback if it
+    // fails, instead of silently regressing the button to "Follow".
+    _isFollowing = widget.initialData?.isFollowing ?? false;
     _loadData();
   }
 
@@ -92,7 +95,27 @@ class _ArtistDetailPageState extends State<ArtistDetailPage> {
         });
       }
     } catch (e) {
+      // Don't let a hiccup in songs/albums/videos wipe out the follow state
+      // we already know from widget.initialData — only _loading changes.
       if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  /// Re-fetches just the follow state from the canonical source, used after
+  /// a successful toggle so the button reflects the backend, not just the
+  /// optimistic local flip.
+  Future<void> _refreshFollowState() async {
+    final apiClient = context.read<ApiClient>();
+    try {
+      final res = await apiClient.dio.get('${ApiConfig.mobileArtists}/${widget.artistId}');
+      final body = res.data;
+      final data = body['data'] ?? body;
+      final isFollowing = data['isFollowing'] as bool?;
+      if (mounted && isFollowing != null) {
+        setState(() => _isFollowing = isFollowing);
+      }
+    } catch (_) {
+      // Keep the optimistic value — a failed refresh shouldn't flip the button.
     }
   }
 
@@ -106,6 +129,7 @@ class _ArtistDetailPageState extends State<ArtistDetailPage> {
       } else {
         await artistService.followArtist(widget.artistId);
       }
+      await _refreshFollowState();
     } catch (e) {
       if (mounted) {
         setState(() => _isFollowing = oldState);
@@ -230,6 +254,10 @@ class _ArtistDetailPageState extends State<ArtistDetailPage> {
                 ? Image.network(
                     artist.imageUrl,
                     fit: BoxFit.cover,
+                    // Most artist photos are portrait headshots — centering the
+                    // crop (BoxFit.cover's default) cuts off the top of the
+                    // head/face on a wide, short banner. Bias toward the top.
+                    alignment: Alignment.topCenter,
                     errorBuilder: (_, __, ___) => const BrandGradientFallback(iconSize: 64, borderRadius: BorderRadius.zero),
                   )
                 : const BrandGradientFallback(iconSize: 64, borderRadius: BorderRadius.zero),
@@ -318,7 +346,7 @@ class _ArtistDetailPageState extends State<ArtistDetailPage> {
             ),
             child: ClipOval(
               child: artist.imageUrl.isNotEmpty
-                  ? Image.network(artist.imageUrl, fit: BoxFit.cover,
+                  ? Image.network(artist.imageUrl, fit: BoxFit.cover, alignment: Alignment.topCenter,
                       errorBuilder: (_, __, ___) => const BrandGradientFallback(iconSize: 32, borderRadius: BorderRadius.zero))
                   : const BrandGradientFallback(iconSize: 32, borderRadius: BorderRadius.zero),
             ),
