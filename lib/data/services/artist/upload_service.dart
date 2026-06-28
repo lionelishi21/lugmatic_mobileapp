@@ -104,8 +104,11 @@ class UploadService {
     return data['lyrics'] as String? ?? '';
   }
 
+  /// Standalone lyrics save — not routed through /song/update, which blocks
+  /// artists from saving anything once a song is approved/pending (the
+  /// "must be rejected" moderation gate). Lyrics don't affect moderation.
   Future<void> updateSongLyrics(String songId, String lyrics) async {
-    await _apiClient.dio.put('/song/update/$songId', data: {'lyrics': lyrics});
+    await _apiClient.dio.put('/song/$songId/lyrics', data: {'lyrics': lyrics});
   }
 
   Future<void> updateSongLyricsTiming(String songId, List<Map<String, dynamic>> lyricsLines) async {
