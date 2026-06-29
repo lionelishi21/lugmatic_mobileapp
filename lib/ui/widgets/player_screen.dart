@@ -24,13 +24,16 @@ class PlayerScreen extends StatefulWidget {
   State<PlayerScreen> createState() => _PlayerScreenState();
 }
 
-class _PlayerScreenState extends State<PlayerScreen> with SingleTickerProviderStateMixin {
+class _PlayerScreenState extends State<PlayerScreen> with TickerProviderStateMixin {
   bool _isFavorited = false;
   bool _karaokeMode = true;
   bool _lyricsExpanded = true;
   VideoPlayerController? _videoController;
   String? _lastVideoUrl;
   late AnimationController _bgAnimController;
+  late AnimationController _entranceController;
+  late Animation<double> _artEntrance;
+  late Animation<double> _detailsEntrance;
 
   @override
   void initState() {
@@ -44,6 +47,22 @@ class _PlayerScreenState extends State<PlayerScreen> with SingleTickerProviderSt
       vsync: this,
       duration: const Duration(seconds: 18),
     )..repeat(reverse: true);
+
+    // One-shot entrance: album art leads, title/controls follow slightly
+    // behind — fires once when the sheet first opens, not on every track
+    // change (those are handled by the existing AnimatedSwitcher instead).
+    _entranceController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 550),
+    );
+    _artEntrance = CurvedAnimation(parent: _entranceController, curve: Curves.easeOutCubic);
+    _detailsEntrance = CurvedAnimation(
+      parent: _entranceController,
+      curve: const Interval(0.25, 1.0, curve: Curves.easeOutCubic),
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _entranceController.forward();
+    });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -112,6 +131,7 @@ class _PlayerScreenState extends State<PlayerScreen> with SingleTickerProviderSt
     } catch (_) {}
     _videoController?.dispose();
     _bgAnimController.dispose();
+    _entranceController.dispose();
     super.dispose();
   }
 
@@ -218,28 +238,34 @@ class _PlayerScreenState extends State<PlayerScreen> with SingleTickerProviderSt
                         children: [
                           const SizedBox(height: 10),
                           // Album Art
-                          Center(
-                            child: Container(
-                              width: MediaQuery.of(context).size.width * 0.75,
-                              height: MediaQuery.of(context).size.width * 0.75,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(30),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.5),
-                                    blurRadius: 30,
-                                    offset: const Offset(0, 20),
+                          FadeTransition(
+                            opacity: _artEntrance,
+                            child: ScaleTransition(
+                              scale: Tween<double>(begin: 0.85, end: 1.0).animate(_artEntrance),
+                              child: Center(
+                                child: Container(
+                                  width: MediaQuery.of(context).size.width * 0.75,
+                                  height: MediaQuery.of(context).size.width * 0.75,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(30),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(alpha: 0.5),
+                                        blurRadius: 30,
+                                        offset: const Offset(0, 20),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(30),
-                                child: Image.network(
-                                  currentMusic.imageUrl,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) => Container(
-                                    color: Colors.grey[900],
-                                    child: const Icon(Icons.music_note, size: 100, color: Colors.white24),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(30),
+                                    child: Image.network(
+                                      currentMusic.imageUrl,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) => Container(
+                                        color: Colors.grey[900],
+                                        child: const Icon(Icons.music_note, size: 100, color: Colors.white24),
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -248,22 +274,32 @@ class _PlayerScreenState extends State<PlayerScreen> with SingleTickerProviderSt
                           const SizedBox(height: 40),
 
                           // Song Details
-                          Column(
-                            children: [
-                              Text(
-                                currentMusic.title,
-                                style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold),
-                                textAlign: TextAlign.center,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                          AnimatedBuilder(
+                            animation: _detailsEntrance,
+                            builder: (context, child) => FadeTransition(
+                              opacity: _detailsEntrance,
+                              child: Transform.translate(
+                                offset: Offset(0, 16 * (1 - _detailsEntrance.value)),
+                                child: child,
                               ),
-                              const SizedBox(height: 8),
-                              Text(
-                                currentMusic.artist,
-                                style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 18),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
+                            ),
+                            child: Column(
+                              children: [
+                                Text(
+                                  currentMusic.title,
+                                  style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold),
+                                  textAlign: TextAlign.center,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  currentMusic.artist,
+                                  style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 18),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
                           ),
                           const SizedBox(height: 40),
 
@@ -431,6 +467,12 @@ class _PlayerScreenState extends State<PlayerScreen> with SingleTickerProviderSt
                               ),
                               IconButton(
                                 onPressed: () {
+                                  if (currentMusic.artistId.trim().isEmpty) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('Artist info unavailable for this track')),
+                                    );
+                                    return;
+                                  }
                                   showModalBottomSheet(
                                     context: context,
                                     isScrollControlled: true,

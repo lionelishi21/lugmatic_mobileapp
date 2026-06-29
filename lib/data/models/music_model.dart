@@ -67,8 +67,20 @@ class MusicModel {
       artistName = json['artist']['name'] ?? '';
       artistId = json['artist']['_id'] ?? json['artist']['id'] ?? '';
       isVerified = json['artist']['isVerified'] ?? false;
-    } else {
+    } else if (json['artistId'] != null) {
+      // Some leaner endpoints (e.g. mobile search) send `artist` as the
+      // display name string alongside a separate flat `artistId` field
+      // rather than a populated object.
+      artistId = json['artistId'].toString();
       artistName = json['artist']?.toString() ?? '';
+    } else if (json['artist'] is String) {
+      // Unpopulated Mongo reference with no flat artistId fallback — just
+      // the raw ObjectId, not an expanded {_id, name} object. Previously
+      // this string was wrongly used as the artist's display name and
+      // artistId was left blank, which made gift-sending from this track
+      // send an empty artistId and silently 400.
+      artistId = json['artist'];
+      artistName = json['artistName']?.toString() ?? '';
     }
 
     // Handle populated album (object with name) or plain string
