@@ -60,14 +60,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             // Avatar
             Center(
-              child: CircleAvatar(
-                radius: 50,
-                backgroundImage: user.profilePicture != null && user.profilePicture!.isNotEmpty
-                    ? NetworkImage(user.profilePicture!)
-                    : null,
-                child: user.profilePicture == null || user.profilePicture!.isEmpty
-                    ? const Icon(Icons.person, size: 50)
-                    : null,
+              child: Container(
+                width: 100,
+                height: 100,
+                decoration: const BoxDecoration(shape: BoxShape.circle, color: Colors.white10),
+                // CircleAvatar's backgroundImage always centers its crop,
+                // cutting off the top of the head/face on a portrait photo.
+                // Image.network lets us bias the crop upward instead.
+                child: ClipOval(
+                  child: user.profilePicture != null && user.profilePicture!.isNotEmpty
+                      ? Image.network(
+                          user.profilePicture!,
+                          fit: BoxFit.cover,
+                          alignment: Alignment.topCenter,
+                          errorBuilder: (_, __, ___) => const Icon(Icons.person, size: 50),
+                        )
+                      : const Icon(Icons.person, size: 50),
+                ),
               ),
             ),
             const SizedBox(height: 16),

@@ -222,11 +222,32 @@ class AudioProvider extends ChangeNotifier {
       // just_audio_background report hasNext/hasPrevious to the OS, which is
       // what makes skip-next/previous actually show up in the lock-screen /
       // notification media controls.
-      await _audioPlayer.setAudioSources(
-        _queue.map(_toAudioSource).toList(),
-        initialIndex: _currentIndex,
-        initialPosition: Duration.zero,
-      );
+      //
+      // The very first request into a freshly opened screen can hit a cold
+      // TLS/DNS connection to the media host and time out even though the
+      // URL itself is perfectly valid — the same tap immediately after
+      // (warm connection) succeeds. One silent retry absorbs that instead
+      // of showing "Failed to load audio" for something that isn't broken.
+      Object? loadError;
+      for (var attempt = 0; attempt < 2; attempt++) {
+        try {
+          await _audioPlayer.setAudioSources(
+            _queue.map(_toAudioSource).toList(),
+            initialIndex: _currentIndex,
+            initialPosition: Duration.zero,
+          );
+          loadError = null;
+          break;
+        } catch (e) {
+          loadError = e;
+          if (attempt == 0) {
+            debugPrint("First setAudioSources attempt failed, retrying: $e");
+            await Future.delayed(const Duration(milliseconds: 500));
+          }
+        }
+      }
+      if (loadError != null) throw loadError;
+
       await _audioPlayer.setShuffleModeEnabled(_shuffle);
       await _audioPlayer.setLoopMode(switch (_repeatMode) {
         RepeatMode.off => LoopMode.off,

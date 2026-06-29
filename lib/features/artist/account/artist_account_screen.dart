@@ -37,15 +37,29 @@ class ArtistAccountScreen extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      CircleAvatar(
-                        radius: 32,
-                        backgroundColor: AppColors.primary.withValues(alpha: 0.2),
-                        backgroundImage: user?.profilePicture != null
-                            ? NetworkImage(user!.profilePicture!)
-                            : null,
-                        child: user?.profilePicture == null
-                            ? const Icon(Icons.person, color: AppColors.primary, size: 32)
-                            : null,
+                      Container(
+                        width: 64,
+                        height: 64,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppColors.primary.withValues(alpha: 0.2),
+                        ),
+                        // CircleAvatar's backgroundImage always centers its crop,
+                        // which cuts off the top of the head/face on a portrait
+                        // headshot. Image.network lets us bias the crop upward,
+                        // matching the same fix already applied to the public
+                        // artist detail page.
+                        child: ClipOval(
+                          child: user?.profilePicture != null
+                              ? Image.network(
+                                  user!.profilePicture!,
+                                  fit: BoxFit.cover,
+                                  alignment: Alignment.topCenter,
+                                  errorBuilder: (_, __, ___) =>
+                                      const Icon(Icons.person, color: AppColors.primary, size: 32),
+                                )
+                              : const Icon(Icons.person, color: AppColors.primary, size: 32),
+                        ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
