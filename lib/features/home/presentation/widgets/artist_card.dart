@@ -66,6 +66,16 @@ class ArtistCard extends StatelessWidget {
               style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 11),
               textAlign: TextAlign.center,
             ),
+            if (artist.genres.isNotEmpty) ...[
+              const SizedBox(height: 2),
+              Text(
+                artist.genres.take(2).join(' • '),
+                style: TextStyle(color: const Color(0xFF10B981).withValues(alpha: 0.8), fontSize: 10, fontWeight: FontWeight.w600),
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
             const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,

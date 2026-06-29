@@ -276,6 +276,16 @@ class _MeetArtistPageState extends State<MeetArtistPage> {
                         '${artist.followers} fans',
                         style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12),
                       ),
+                      if (artist.genres.isNotEmpty) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          artist.genres.take(2).join(' • '),
+                          style: TextStyle(color: AppColors.primary.withValues(alpha: 0.8), fontSize: 11, fontWeight: FontWeight.w600),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
                     ],
                   ),
                 ),

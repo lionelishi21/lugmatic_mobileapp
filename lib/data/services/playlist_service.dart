@@ -33,6 +33,22 @@ class PlaylistService {
     }
   }
 
+  Future<PlaylistModel> updatePlaylist({
+    required String playlistId,
+    required String name,
+    String? description,
+  }) async {
+    try {
+      final response = await apiClient.dio.put('/playlist/my/update/$playlistId', data: {
+        'name': name,
+        'description': description ?? '',
+      });
+      return PlaylistModel.fromJson(response.data['data']);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<PlaylistModel> copyPlaylist(String playlistId) async {
     try {
       final response = await apiClient.dio.post('/playlist/my/$playlistId/copy');

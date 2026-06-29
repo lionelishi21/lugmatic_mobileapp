@@ -797,9 +797,17 @@ class _PlayerScreenState extends State<PlayerScreen> with TickerProviderStateMix
 
   Future<void> _toggleFavorite(MusicModel music) async {
     final musicService = context.read<MusicService>();
+    final newValue = !_isFavorited;
     try {
-      await musicService.toggleFavorite(music.id, !_isFavorited);
-      setState(() => _isFavorited = !_isFavorited);
+      await musicService.toggleFavorite(music.id, newValue);
+      // Update the provider's cached model, not just local state — the
+      // _onAudioProviderChanged listener fires on every position tick and
+      // was reverting this same local flip because it never saw the
+      // provider's copy change.
+      if (mounted) {
+        context.read<AudioProvider>().updateCurrentMusicLikedState(music.id, newValue);
+        setState(() => _isFavorited = newValue);
+      }
     } catch (e) {
       debugPrint("Favorite toggle error: $e");
     }

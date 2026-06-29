@@ -28,7 +28,11 @@ class MusicModel {
   final String genre;
   final String lyrics;
   final List<LyricLine>? lyricsLines;
-  final bool isLiked;
+  // Not `final` — AudioProvider mutates this in place on its cached
+  // _currentMusic/_queue entries after a like/unlike call so every listener
+  // (including the Now Playing screen's own resync logic) sees a consistent
+  // value instead of fighting over two separate sources of truth.
+  bool isLiked;
   final int playCount;
   final DateTime releaseDate;
   final bool isArtistVerified;

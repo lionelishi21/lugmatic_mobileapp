@@ -96,6 +96,110 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
     }
   }
 
+  void _showEditPlaylistDialog() {
+    final playlist = _playlist;
+    if (playlist == null) return;
+    final nameController = TextEditingController(text: playlist.title);
+    final descController = TextEditingController(text: playlist.description ?? '');
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: const Color(0xFF1F2937),
+        title: const Text('Edit Playlist', style: TextStyle(color: Colors.white)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              autofocus: true,
+              style: const TextStyle(color: Colors.white),
+              decoration: const InputDecoration(labelText: 'Name', labelStyle: TextStyle(color: Colors.white60)),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: descController,
+              maxLines: 2,
+              style: const TextStyle(color: Colors.white),
+              decoration: const InputDecoration(labelText: 'Description', labelStyle: TextStyle(color: Colors.white60)),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel', style: TextStyle(color: Colors.white60)),
+          ),
+          TextButton(
+            onPressed: () async {
+              final newName = nameController.text.trim();
+              if (newName.isEmpty) return;
+              Navigator.pop(dialogContext);
+              try {
+                final updated = await _playlistService.updatePlaylist(
+                  playlistId: playlist.id,
+                  name: newName,
+                  description: descController.text.trim(),
+                );
+                if (mounted) {
+                  setState(() => _playlist = updated);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Playlist updated'), backgroundColor: Color(0xFF10B981)),
+                  );
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Failed to update playlist: $e'), backgroundColor: Colors.red),
+                  );
+                }
+              }
+            },
+            child: const Text('Save', style: TextStyle(color: Color(0xFF10B981))),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmDeletePlaylist() {
+    final playlist = _playlist;
+    if (playlist == null) return;
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: const Color(0xFF1F2937),
+        title: const Text('Delete Playlist?', style: TextStyle(color: Colors.white)),
+        content: Text(
+          'This will permanently delete "${playlist.title}". This cannot be undone.',
+          style: const TextStyle(color: Colors.white60),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel', style: TextStyle(color: Colors.white60)),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(dialogContext);
+              try {
+                await _playlistService.deletePlaylist(playlist.id);
+                if (mounted) Navigator.pop(context);
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Failed to delete playlist: $e'), backgroundColor: Colors.red),
+                  );
+                }
+              }
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -949,7 +1053,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
               title: const Text('Edit Playlist', style: TextStyle(color: Colors.white)),
               onTap: () {
                 Navigator.pop(context);
-                print('Edit playlist');
+                _showEditPlaylistDialog();
               },
             ),
             ListTile(
@@ -973,7 +1077,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
               title: const Text('Delete Playlist', style: TextStyle(color: Colors.red)),
               onTap: () {
                 Navigator.pop(context);
-                print('Delete playlist');
+                _confirmDeletePlaylist();
               },
             ),
           ],

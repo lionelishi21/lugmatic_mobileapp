@@ -96,6 +96,26 @@ class MusicCard extends StatelessWidget {
                       ),
                     ),
                   ),
+                // NEW badge for recently released tracks
+                if (DateTime.now().difference(music.releaseDate).inDays <= 14)
+                  Positioned(
+                    top: 10,
+                    right: 10,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(colors: [Color(0xFFFF3B30), Color(0xFFFF6B5B)]),
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: [
+                          BoxShadow(color: const Color(0xFFFF3B30).withValues(alpha: 0.4), blurRadius: 8, offset: const Offset(0, 2)),
+                        ],
+                      ),
+                      child: const Text(
+                        'NEW',
+                        style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 0.5),
+                      ),
+                    ),
+                  ),
                 // Play button overlay
                 Positioned(
                   bottom: 12,
