@@ -6,8 +6,6 @@ import '../../../../data/models/music_model.dart';
 import '../../../../data/models/artist_model.dart';
 import '../../../../data/models/playlist_model.dart';
 import '../../../../data/providers/audio_provider.dart';
-import '../../../../data/providers/auth_provider.dart';
-import '../../../../data/services/music_service.dart';
 
 class LibraryPage extends StatefulWidget {
   const LibraryPage({Key? key}) : super(key: key);
@@ -25,7 +23,6 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
   List<Map<String, dynamic>> _albums = [];
   List<ArtistModel> _artists = [];
   List<MusicModel> _history = [];
-  List<MusicModel> _artistSongs = [];
 
   // Each tab's fetch is independent — one section failing (auth hiccup, bad
   // response shape, etc.) must not blank out every other tab. Previously all
@@ -36,15 +33,11 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
   String? _albumsError;
   String? _artistsError;
   String? _historyError;
-  String? _artistSongsError;
-  bool _isArtist = false;
 
   @override
   void initState() {
     super.initState();
-    final auth = context.read<AuthProvider>();
-    _isArtist = auth.user?.isArtist ?? false;
-    _tabController = TabController(length: _isArtist ? 6 : 5, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadData());
   }
 
@@ -67,7 +60,6 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
       _loadAlbums(api),
       _loadFollowing(api),
       _loadHistory(api),
-      if (_isArtist) _loadArtistCatalog(api),
     ]);
 
     if (mounted) setState(() => _isLoading = false);
@@ -138,15 +130,6 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
     }
   }
 
-  Future<void> _loadArtistCatalog(ApiClient api) async {
-    try {
-      final songs = await MusicService(apiClient: api).getArtistCatalog();
-      if (mounted) setState(() { _artistSongs = songs; _artistSongsError = null; });
-    } catch (e) {
-      if (mounted) setState(() => _artistSongsError = e.toString());
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -173,7 +156,6 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
                     const Tab(text: 'Albums'),
                     const Tab(text: 'Following'),
                     const Tab(text: 'History'),
-                    if (_isArtist) const Tab(text: 'Artist Music'),
                   ],
                 ),
               ),
@@ -206,7 +188,6 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
                     error: _historyError,
                     onRetry: () => _loadHistory(context.read<ApiClient>()),
                   ), // History
-                  if (_isArtist) _buildArtistSongsTab(),
                 ],
               ),
       ),
@@ -645,74 +626,6 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
     );
   }
 
-  Widget _buildArtistSongsTab() {
-    if (_artistSongsError != null) {
-      return Center(child: _buildErrorState(_artistSongsError!, () => _loadArtistCatalog(context.read<ApiClient>())));
-    }
-    if (_artistSongs.isEmpty) {
-      return Center(child: _buildEmptyState('No music in your artist catalog yet', Icons.library_music));
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: _artistSongs.length,
-      itemBuilder: (context, index) {
-        final song = _artistSongs[index];
-        final isPrimary = song.role?.toLowerCase() == 'primary';
-        
-        return Container(
-          margin: const EdgeInsets.only(bottom: 8),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            color: Colors.white.withValues(alpha: 0.04),
-          ),
-          child: ListTile(
-            onTap: () {
-              final audioProvider = context.read<AudioProvider>();
-              audioProvider.playMusic(song, queue: _artistSongs);
-            },
-            leading: Container(
-              width: 50, height: 50,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                image: song.imageUrl.isNotEmpty ? DecorationImage(
-                  image: NetworkImage(song.imageUrl),
-                  fit: BoxFit.cover,
-                ) : null,
-              ),
-              child: song.imageUrl.isEmpty ? const Icon(Icons.music_note, color: Colors.white24) : null,
-            ),
-            title: Row(
-              children: [
-                Expanded(child: Text(song.title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
-                if (song.role != null)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: (isPrimary ? const Color(0xFF10B981) : Colors.blueAccent).withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      song.role!.toUpperCase(),
-                      style: TextStyle(
-                        color: isPrimary ? const Color(0xFF10B981) : Colors.blueAccent,
-                        fontSize: 8,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-            subtitle: Text(
-              '${song.artist}${song.share != null ? " • ${song.share!.round()}% share" : ""}',
-              style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 12),
-            ),
-            trailing: const Icon(Icons.play_circle_outline, color: Color(0xFF10B981)),
-          ),
-        );
-      },
-    );
-  }
 }
 
 class _StickyTabBarDelegate extends SliverPersistentHeaderDelegate {

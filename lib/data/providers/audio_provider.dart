@@ -156,6 +156,21 @@ class AudioProvider extends ChangeNotifier {
     );
   }
 
+  /// One malformed audioUrl in a long list (e.g. a paginated genre/category
+  /// feed) must not take down the whole queue load — setAudioSources()
+  /// builds AudioSources for every item up front, so a single bad entry
+  /// throwing during URI parsing previously surfaced as "Failed to load
+  /// audio" even for the track the user actually tapped, which was fine.
+  bool _hasParseableAudioUrl(MusicModel music) {
+    if (music.audioUrl.trim().isEmpty) return false;
+    try {
+      _safeParseUri(music.audioUrl);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   Future<void> playMusic(MusicModel music, {List<MusicModel>? queue}) async {
     _errorMessage = null;
 
@@ -178,12 +193,12 @@ class AudioProvider extends ChangeNotifier {
       _duration = Duration.zero;
 
       if (queue != null && queue.isNotEmpty) {
-        _queue = queue.where((m) => m.audioUrl.trim().isNotEmpty).toList();
+        _queue = queue.where(_hasParseableAudioUrl).toList();
         _currentIndex = _queue.indexWhere((m) => m.id == music.id);
         if (_currentIndex == -1) {
           // If the song isn't in the provided queue, just insert it and play it.
-          if (music.audioUrl.trim().isEmpty) {
-            throw Exception("Cannot play track: Audio URL is missing.");
+          if (!_hasParseableAudioUrl(music)) {
+            throw Exception("Cannot play track: Audio URL is missing or invalid.");
           }
           _queue.insert(0, music);
           _currentIndex = 0;
@@ -191,8 +206,8 @@ class AudioProvider extends ChangeNotifier {
       } else if (_queue.any((m) => m.id == music.id)) {
         _currentIndex = _queue.indexWhere((m) => m.id == music.id);
       } else {
-        if (music.audioUrl.trim().isEmpty) {
-          throw Exception("Cannot play track: Audio URL is missing.");
+        if (!_hasParseableAudioUrl(music)) {
+          throw Exception("Cannot play track: Audio URL is missing or invalid.");
         }
         // Essential fallback: If no queue is provided, make this single track the queue
         // so it doesn't break queue logic downstream.
