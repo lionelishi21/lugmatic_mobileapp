@@ -31,6 +31,8 @@ class _PlayerScreenState extends State<PlayerScreen> with TickerProviderStateMix
   bool _lyricsExpanded = true;
   VideoPlayerController? _videoController;
   String? _lastVideoUrl;
+  final ScrollController _scrollController = ScrollController();
+  final GlobalKey _commentsSectionKey = GlobalKey();
   late AnimationController _bgAnimController;
   late AnimationController _entranceController;
   late Animation<double> _artEntrance;
@@ -133,7 +135,18 @@ class _PlayerScreenState extends State<PlayerScreen> with TickerProviderStateMix
     _videoController?.dispose();
     _bgAnimController.dispose();
     _entranceController.dispose();
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _scrollToComments() {
+    final ctx = _commentsSectionKey.currentContext;
+    if (ctx == null) return;
+    Scrollable.ensureVisible(
+      ctx,
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeOutCubic,
+    );
   }
 
   String _formatDuration(Duration duration) {
@@ -249,6 +262,7 @@ class _PlayerScreenState extends State<PlayerScreen> with TickerProviderStateMix
                 ),
                 body: SafeArea(
                   child: SingleChildScrollView(
+                    controller: _scrollController,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
                       child: Column(
@@ -503,14 +517,7 @@ class _PlayerScreenState extends State<PlayerScreen> with TickerProviderStateMix
                                 icon: const Icon(Icons.card_giftcard, color: Colors.white60),
                               ),
                               IconButton(
-                                onPressed: () {
-                                  showModalBottomSheet(
-                                    context: context,
-                                    isScrollControlled: true,
-                                    backgroundColor: Colors.transparent,
-                                    builder: (context) => _CommentsBottomSheet(songId: currentMusic.id),
-                                  );
-                                },
+                                onPressed: _scrollToComments,
                                 icon: const Icon(Icons.chat_bubble_outline, color: Colors.white60),
                               ),
                             ],
@@ -756,6 +763,34 @@ class _PlayerScreenState extends State<PlayerScreen> with TickerProviderStateMix
                               );
                             },
                           ),
+                          const SizedBox(height: 40),
+
+                          // Comments Section — inline so it's part of the
+                          // normal scroll flow like Lyrics/Up Next, instead
+                          // of hidden behind a small icon-triggered sheet.
+                          Container(
+                            key: _commentsSectionKey,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Comments',
+                                  style: TextStyle(
+                                    color: Colors.white.withValues(alpha: 0.9),
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                CommentSectionWidget(
+                                  contentType: 'song',
+                                  contentId: currentMusic.id,
+                                  showHeader: false,
+                                  horizontalPadding: 0,
+                                ),
+                              ],
+                            ),
+                          ),
                           const SizedBox(height: 60),
                         ],
                       ),
@@ -839,52 +874,6 @@ class _PlayerScreenState extends State<PlayerScreen> with TickerProviderStateMix
     } catch (e) {
       debugPrint("Favorite toggle error: $e");
     }
-  }
-}
-
-/// Wraps the existing CommentSectionWidget (already used on song/artist/clash
-/// detail pages) in a draggable bottom sheet for the Now Playing screen —
-/// the widget itself is a plain non-scrolling Column designed to sit inside
-/// a scrollable parent, so it needs one here too.
-class _CommentsBottomSheet extends StatelessWidget {
-  final String songId;
-
-  const _CommentsBottomSheet({required this.songId});
-
-  @override
-  Widget build(BuildContext context) {
-    return DraggableScrollableSheet(
-      initialChildSize: 0.65,
-      minChildSize: 0.4,
-      maxChildSize: 0.92,
-      builder: (_, scrollController) => Container(
-        decoration: const BoxDecoration(
-          color: Color(0xFF1A2332),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-        ),
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 12, bottom: 4),
-              child: Container(
-                width: 40, height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            Expanded(
-              child: SingleChildScrollView(
-                controller: scrollController,
-                padding: const EdgeInsets.only(bottom: 16),
-                child: CommentSectionWidget(contentType: 'song', contentId: songId),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }
 

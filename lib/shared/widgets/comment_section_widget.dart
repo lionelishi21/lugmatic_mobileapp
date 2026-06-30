@@ -11,11 +11,15 @@ import '../../core/theme/neumorphic_theme.dart';
 class CommentSectionWidget extends StatefulWidget {
   final String contentType;
   final String contentId;
+  final bool showHeader;
+  final double horizontalPadding;
 
   const CommentSectionWidget({
     Key? key,
     required this.contentType,
     required this.contentId,
+    this.showHeader = true,
+    this.horizontalPadding = 16,
   }) : super(key: key);
 
   @override
@@ -167,23 +171,24 @@ class _CommentSectionWidgetState extends State<CommentSectionWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          child: Text(
-            'Comments',
-            style: TextStyle(
-              color: NeumorphicTheme.textPrimary,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+        if (widget.showHeader)
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: widget.horizontalPadding, vertical: 8),
+            child: const Text(
+              'Comments',
+              style: TextStyle(
+                color: NeumorphicTheme.textPrimary,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
-        ),
-        
+
         // Post Comment Area
         Padding(
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.symmetric(horizontal: widget.horizontalPadding, vertical: 12),
           child: NeumorphicContainer(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(6),
             isConcave: true,
             child: Row(
               children: [
@@ -196,16 +201,16 @@ class _CommentSectionWidgetState extends State<CommentSectionWidget> {
                       hintText: 'Add a comment...',
                       hintStyle: TextStyle(color: NeumorphicTheme.textTertiary.withValues(alpha: 0.5)),
                       border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12),
                     ),
                   ),
                 ),
                 _isPosting
                     ? const Padding(
-                        padding: EdgeInsets.all(12.0),
+                        padding: EdgeInsets.all(10.0),
                         child: SizedBox(
-                          width: 20,
-                          height: 20,
+                          width: 18,
+                          height: 18,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         ),
                       )
@@ -221,13 +226,13 @@ class _CommentSectionWidgetState extends State<CommentSectionWidget> {
         // Comments List
         _isLoading
             ? const Center(child: Padding(
-                padding: EdgeInsets.all(40.0),
+                padding: EdgeInsets.all(24.0),
                 child: CircularProgressIndicator(),
               ))
             : _error != null
                 ? Center(
                     child: Padding(
-                      padding: const EdgeInsets.all(40.0),
+                      padding: const EdgeInsets.all(24.0),
                       child: Column(
                         children: [
                           Text(
@@ -246,12 +251,12 @@ class _CommentSectionWidgetState extends State<CommentSectionWidget> {
                     ),
                   )
                 : _comments.isEmpty
-                ? const Center(
+                ? Center(
                     child: Padding(
-                      padding: EdgeInsets.all(40.0),
+                      padding: const EdgeInsets.all(24.0),
                       child: Text(
                         'No comments yet. Be the first to say something!',
-                        style: TextStyle(color: NeumorphicTheme.textTertiary),
+                        style: const TextStyle(color: NeumorphicTheme.textTertiary),
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -292,8 +297,8 @@ class _CommentSectionWidgetState extends State<CommentSectionWidget> {
     final isHot = _reactionTiers.any((t) => comment.likes >= t);
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      padding: const EdgeInsets.all(16),
+      margin: EdgeInsets.only(left: widget.horizontalPadding, right: widget.horizontalPadding, bottom: 8),
+      padding: const EdgeInsets.all(12),
       decoration: isHot
           ? NeumorphicTheme.flatNeumorphicDecoration().copyWith(
               border: Border.all(color: NeumorphicTheme.primaryAccent.withValues(alpha: 0.4), width: 1.5),
