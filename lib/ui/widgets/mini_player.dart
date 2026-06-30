@@ -20,11 +20,9 @@ class MiniPlayer extends StatelessWidget {
             : 0.0;
 
         return GestureDetector(
-          onTap: () => showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            backgroundColor: Colors.transparent,
-            builder: (_) => PlayerScreen(music: music),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => PlayerScreen(music: music)),
           ),
           child: Container(
             height: 68,
