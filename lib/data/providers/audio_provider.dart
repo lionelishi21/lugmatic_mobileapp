@@ -22,6 +22,15 @@ class AudioProvider extends ChangeNotifier {
 
   String? _errorMessage;
 
+  // Bumped on every playMusic() call so an in-flight call that gets
+  // superseded by a newer one (e.g. a quick second tap, or the player
+  // screen's own initState racing a list item's tap) can tell it's been
+  // overtaken and silently bail instead of reporting a false failure —
+  // setAudioSources() on the same player doesn't handle two concurrent
+  // calls gracefully, and the loser throws even though the winner plays
+  // fine.
+  int _playRequestGeneration = 0;
+
   AudioProvider({required MusicService musicService}) : _musicService = musicService {
     _audioPlayer = AudioPlayer();
     _initListeners();
@@ -172,6 +181,10 @@ class AudioProvider extends ChangeNotifier {
   }
 
   Future<void> playMusic(MusicModel music, {List<MusicModel>? queue}) async {
+    // Claimed before any early return so a still-in-flight older call (see
+    // below) is reliably recognized as superseded the moment ANY new call
+    // comes in, including ones that just resume/seek instead of reloading.
+    final myGeneration = ++_playRequestGeneration;
     _errorMessage = null;
 
     if (_currentMusic?.id == music.id &&
@@ -248,6 +261,10 @@ class AudioProvider extends ChangeNotifier {
       }
       if (loadError != null) throw loadError;
 
+      // A newer playMusic() call already took over the player while this
+      // one was loading — let it own the state instead of stomping on it.
+      if (myGeneration != _playRequestGeneration) return;
+
       await _audioPlayer.setShuffleModeEnabled(_shuffle);
       await _audioPlayer.setLoopMode(switch (_repeatMode) {
         RepeatMode.off => LoopMode.off,
@@ -257,6 +274,11 @@ class AudioProvider extends ChangeNotifier {
       _musicService.recordPlay(music.id);
       _audioPlayer.play();
     } catch (e) {
+      // Same check here: setAudioSources() doesn't handle two concurrent
+      // calls on one AudioPlayer gracefully, so the call that loses a race
+      // against a newer one throws even though the winner is now playing
+      // fine. Only surface the failure if this is still the latest request.
+      if (myGeneration != _playRequestGeneration) return;
       _errorMessage = "Failed to load audio";
       debugPrint("Error playing music: $e");
       _currentMusic = null;
@@ -267,8 +289,10 @@ class AudioProvider extends ChangeNotifier {
         debugPrint("Error resetting player after failed load: $stopError");
       }
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      if (myGeneration == _playRequestGeneration) {
+        _isLoading = false;
+        notifyListeners();
+      }
     }
   }
 
