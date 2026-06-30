@@ -9,6 +9,7 @@ import '../../../../shared/widgets/comment_section_widget.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/config/api_config.dart';
 import '../../../../data/services/playlist_service.dart';
+import '../../../../shared/widgets/new_badge.dart';
 
 class PlaylistDetailPage extends StatefulWidget {
   final PlaylistModel playlist;
@@ -704,15 +705,22 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            song.title,
-                            style: TextStyle(
-                              color: isPlaying ? const Color(0xFF10B981) : Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                          Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  song.title,
+                                  style: TextStyle(
+                                    color: isPlaying ? const Color(0xFF10B981) : Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              NewBadge(releaseDate: song.releaseDate),
+                            ],
                           ),
                           const SizedBox(height: 4),
                           Row(

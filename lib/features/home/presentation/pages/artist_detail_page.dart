@@ -16,6 +16,7 @@ import '../../../../data/models/video_model.dart';
 import '../../../../ui/widgets/player_screen.dart';
 import '../../../video/presentation/pages/videos_page.dart';
 import '../../../../data/providers/message_provider.dart';
+import '../../../../shared/widgets/new_badge.dart';
 
 const Color _kBg = Color(0xFF0F172A);
 const Color _kAccent = Color(0xFF10B981);
@@ -963,8 +964,15 @@ class _TrackRow extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: Text(song.title, maxLines: 1, overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600)),
+              child: Row(
+                children: [
+                  Flexible(
+                    child: Text(song.title, maxLines: 1, overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600)),
+                  ),
+                  NewBadge(releaseDate: song.releaseDate),
+                ],
+              ),
             ),
             Text(_fmtDur(song.duration),
                 style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 12)),

@@ -6,6 +6,7 @@ import '../../../../data/models/music_model.dart';
 import '../../../../data/models/artist_model.dart';
 import '../../../../data/models/playlist_model.dart';
 import '../../../../data/providers/audio_provider.dart';
+import '../../../../shared/widgets/new_badge.dart';
 
 class LibraryPage extends StatefulWidget {
   const LibraryPage({Key? key}) : super(key: key);
@@ -406,7 +407,16 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
                     )
                   : const Icon(Icons.music_note, color: Colors.white, size: 24),
             ),
-            title: Text(song.title, style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600)),
+            title: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: Text(song.title, style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600),
+                      maxLines: 1, overflow: TextOverflow.ellipsis),
+                ),
+                NewBadge(releaseDate: song.releaseDate),
+              ],
+            ),
             subtitle: Text(song.artist, style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 13)),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,

@@ -10,6 +10,7 @@ import '../../../../data/providers/audio_provider.dart';
 import '../../../../data/services/home_service.dart';
 import '../../../../data/services/video_service.dart';
 import '../../../../core/network/api_client.dart';
+import '../../../../shared/widgets/new_badge.dart';
 
 // ── feed item union type ──────────────────────────────────────────────────
 enum _FeedType { song, video }
@@ -655,11 +656,18 @@ class _BottomOverlay extends StatelessWidget {
                       style: const TextStyle(color: AppColors.primary, fontSize: 11, fontWeight: FontWeight.bold),
                     ),
                   ),
-                Text(
-                  item.title,
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        item.title,
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (isSong && item.song != null) NewBadge(releaseDate: item.song!.releaseDate),
+                  ],
                 ),
                 const SizedBox(height: 4),
                 Row(

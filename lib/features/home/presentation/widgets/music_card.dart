@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../data/models/music_model.dart';
+import '../../../../shared/widgets/new_badge.dart';
 
 class MusicCard extends StatelessWidget {
   final MusicModel music;
@@ -97,7 +98,7 @@ class MusicCard extends StatelessWidget {
                     ),
                   ),
                 // NEW badge for recently released tracks
-                if (DateTime.now().difference(music.releaseDate).inDays <= 14)
+                if (NewBadge(releaseDate: music.releaseDate).isNew)
                   Positioned(
                     top: 10,
                     right: 10,
