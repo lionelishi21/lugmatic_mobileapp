@@ -263,7 +263,10 @@ class _EarningsScreenState extends State<EarningsScreen> {
                     onPressed: isRequesting ? null : () async {
                       setState(() => isRequesting = true);
                       final provider = context.read<DashboardProvider>();
-                      final success = await provider.requestPayout(provider.artistEarnings?.totalEarnings ?? 0.0);
+                      // totalEarnings is in dollars (see dashboard_models.dart);
+                      // the backend expects cents.
+                      final amountCents = (provider.artistEarnings?.totalEarnings ?? 0.0) * 100;
+                      final success = await provider.requestPayout(amountCents);
                       
                       if (bottomSheetContext.mounted) {
                         Navigator.pop(bottomSheetContext);

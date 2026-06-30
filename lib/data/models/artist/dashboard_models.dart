@@ -41,7 +41,8 @@ class Transaction {
   factory Transaction.fromJson(Map<String, dynamic> json) => Transaction(
         id: json['_id'] ?? '',
         type: json['type'] ?? '',
-        amount: (json['amount'] ?? 0).toDouble(),
+        // Backend amounts are always in cents (matches webapp/admin parsing).
+        amount: (json['amount'] ?? 0).toDouble() / 100,
         currency: json['currency'] ?? 'USD',
         status: json['status'] ?? '',
         description: json['description'] ?? '',
@@ -63,8 +64,9 @@ class ArtistEarnings {
   factory ArtistEarnings.fromJson(Map<String, dynamic> json) {
     final historyList = json['history'] as List? ?? [];
     return ArtistEarnings(
-      totalEarnings: (json['totalEarnings'] ?? 0).toDouble(),
-      monthlyEarnings: (json['monthlyEarnings'] ?? 0).toDouble(),
+      // Backend amounts are always in cents (matches webapp/admin parsing).
+      totalEarnings: (json['totalEarnings'] ?? 0).toDouble() / 100,
+      monthlyEarnings: (json['monthlyEarnings'] ?? 0).toDouble() / 100,
       history: historyList.map((i) => Transaction.fromJson(i)).toList(),
     );
   }
