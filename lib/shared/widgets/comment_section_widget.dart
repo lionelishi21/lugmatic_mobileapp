@@ -1,8 +1,11 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../../data/models/comment_model.dart';
 import '../../data/services/comment_service.dart';
+import '../../data/services/socket_service.dart';
+import '../../core/network/token_storage.dart';
 import '../../core/theme/neumorphic_theme.dart';
 
 class CommentSectionWidget extends StatefulWidget {
@@ -25,11 +28,55 @@ class _CommentSectionWidgetState extends State<CommentSectionWidget> {
   bool _isPosting = false;
   String? _error;
   List<CommentModel> _comments = [];
+  // Ids that arrived (or were posted) this session — drives the entrance animation.
+  final Set<String> _animatedIds = {};
+
+  SocketService? _socketService;
+  StreamSubscription? _newCommentSub;
+  StreamSubscription? _likedSub;
 
   @override
   void initState() {
     super.initState();
     _fetchComments();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _subscribeToLiveUpdates());
+  }
+
+  void _subscribeToLiveUpdates() {
+    if (!mounted) return;
+    final socketService = SocketService.getInstance(tokenStorage: context.read<TokenStorage>());
+    _socketService = socketService;
+    socketService.joinCommentThread(widget.contentType, widget.contentId);
+
+    _newCommentSub = socketService.onCommentNew.listen((data) {
+      if (data['contentType'] != widget.contentType || data['contentId'] != widget.contentId) return;
+      final comment = CommentModel.fromJson(data);
+      if (!mounted || _comments.any((c) => c.id == comment.id)) return;
+      setState(() {
+        _comments.insert(0, comment);
+        _animatedIds.add(comment.id);
+      });
+    });
+
+    _likedSub = socketService.onCommentLiked.listen((data) {
+      final commentId = data['commentId']?.toString();
+      final likeCount = (data['likeCount'] as num?)?.toInt();
+      if (commentId == null || likeCount == null || !mounted) return;
+      final index = _comments.indexWhere((c) => c.id == commentId);
+      if (index == -1) return;
+      setState(() {
+        _comments[index] = _comments[index].copyWith(likes: likeCount);
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _socketService?.leaveCommentThread(widget.contentType, widget.contentId);
+    _newCommentSub?.cancel();
+    _likedSub?.cancel();
+    _commentController.dispose();
+    super.dispose();
   }
 
   Future<void> _fetchComments() async {
@@ -76,6 +123,7 @@ class _CommentSectionWidgetState extends State<CommentSectionWidget> {
       if (mounted) {
         setState(() {
           _comments.insert(0, newComment);
+          _animatedIds.add(newComment.id);
           _commentController.clear();
           _isPosting = false;
         });
@@ -90,6 +138,27 @@ class _CommentSectionWidgetState extends State<CommentSectionWidget> {
           SnackBar(content: Text('Failed to post comment: $e')),
         );
       }
+    }
+  }
+
+  Future<void> _toggleLike(CommentModel comment) async {
+    final startIndex = _comments.indexWhere((c) => c.id == comment.id);
+    if (startIndex == -1) return;
+    final optimistic = comment.copyWith(
+      isLiked: !comment.isLiked,
+      likes: comment.isLiked ? comment.likes - 1 : comment.likes + 1,
+    );
+    setState(() => _comments[startIndex] = optimistic);
+    try {
+      final commentService = context.read<CommentService>();
+      final (likeCount, isLiked) = await commentService.toggleLike(comment.id);
+      final index = _comments.indexWhere((c) => c.id == comment.id);
+      if (mounted && index != -1) {
+        setState(() => _comments[index] = _comments[index].copyWith(likes: likeCount, isLiked: isLiked));
+      }
+    } catch (e) {
+      final index = _comments.indexWhere((c) => c.id == comment.id);
+      if (mounted && index != -1) setState(() => _comments[index] = comment);
     }
   }
 
@@ -193,18 +262,50 @@ class _CommentSectionWidgetState extends State<CommentSectionWidget> {
                     itemCount: _comments.length,
                     itemBuilder: (context, index) {
                       final comment = _comments[index];
-                      return _buildCommentItem(comment);
+                      final shouldAnimate = _animatedIds.remove(comment.id);
+                      final item = _buildCommentItem(comment);
+                      if (!shouldAnimate) return item;
+                      return TweenAnimationBuilder<double>(
+                        key: ValueKey(comment.id),
+                        tween: Tween(begin: 0, end: 1),
+                        duration: const Duration(milliseconds: 350),
+                        curve: Curves.easeOutBack,
+                        builder: (context, t, child) => Opacity(
+                          opacity: t.clamp(0.0, 1.0),
+                          child: Transform.scale(
+                            scale: 0.85 + (0.15 * t.clamp(0.0, 1.0)),
+                            alignment: Alignment.topCenter,
+                            child: child,
+                          ),
+                        ),
+                        child: item,
+                      );
                     },
                   ),
       ],
     );
   }
 
+  static const List<int> _reactionTiers = [5, 20, 50];
+
   Widget _buildCommentItem(CommentModel comment) {
-    return Container(
+    final isHot = _reactionTiers.any((t) => comment.likes >= t);
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       padding: const EdgeInsets.all(16),
-      decoration: NeumorphicTheme.flatNeumorphicDecoration(),
+      decoration: isHot
+          ? NeumorphicTheme.flatNeumorphicDecoration().copyWith(
+              border: Border.all(color: NeumorphicTheme.primaryAccent.withValues(alpha: 0.4), width: 1.5),
+              boxShadow: [
+                BoxShadow(
+                  color: NeumorphicTheme.primaryAccent.withValues(alpha: 0.15),
+                  blurRadius: 12,
+                  spreadRadius: 1,
+                ),
+              ],
+            )
+          : NeumorphicTheme.flatNeumorphicDecoration(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -240,22 +341,29 @@ class _CommentSectionWidgetState extends State<CommentSectionWidget> {
                   ],
                 ),
               ),
-              Row(
-                children: [
-                  Icon(
-                    comment.isLiked ? Icons.favorite : Icons.favorite_border,
-                    size: 14,
-                    color: comment.isLiked ? Colors.red : NeumorphicTheme.textTertiary,
+              InkWell(
+                onTap: () => _toggleLike(comment),
+                borderRadius: BorderRadius.circular(12),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                  child: Row(
+                    children: [
+                      Icon(
+                        comment.isLiked ? Icons.favorite : Icons.favorite_border,
+                        size: 14,
+                        color: comment.isLiked ? Colors.red : NeumorphicTheme.textTertiary,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${comment.likes}',
+                        style: const TextStyle(
+                          color: NeumorphicTheme.textTertiary,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${comment.likes}',
-                    style: const TextStyle(
-                      color: NeumorphicTheme.textTertiary,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ],
           ),

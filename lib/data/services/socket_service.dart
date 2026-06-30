@@ -39,6 +39,8 @@ class SocketService {
   final _notificationController = StreamController<Map<String, dynamic>>.broadcast();
   final _hostSwitchedSessionController = StreamController<Map<String, dynamic>>.broadcast();
   final _dmMessageController = StreamController<Map<String, dynamic>>.broadcast();
+  final _commentNewController = StreamController<Map<String, dynamic>>.broadcast();
+  final _commentLikedController = StreamController<Map<String, dynamic>>.broadcast();
 
   /// Real-time chat messages.
   Stream<LiveStreamChatMessage> get onChatMessage => _chatController.stream;
@@ -88,6 +90,12 @@ class SocketService {
   Stream<Map<String, dynamic>> get onNotification => _notificationController.stream;
   Stream<Map<String, dynamic>> get onHostSwitchedSession => _hostSwitchedSessionController.stream;
   Stream<Map<String, dynamic>> get onDmMessage => _dmMessageController.stream;
+
+  /// A new comment was posted in a thread this client has joined.
+  Stream<Map<String, dynamic>> get onCommentNew => _commentNewController.stream;
+
+  /// A comment's like count changed in a thread this client has joined.
+  Stream<Map<String, dynamic>> get onCommentLiked => _commentLikedController.stream;
 
   SocketService._({required TokenStorage tokenStorage})
       : _tokenStorage = tokenStorage;
@@ -277,6 +285,19 @@ class SocketService {
       }
     });
 
+    // ── Comment thread events ───────────────────────────────────────
+    _socket!.on('comment:new', (data) {
+      if (data is Map<String, dynamic>) {
+        _commentNewController.add(data);
+      }
+    });
+
+    _socket!.on('comment:liked', (data) {
+      if (data is Map<String, dynamic>) {
+        _commentLikedController.add(data);
+      }
+    });
+
     _socket!.connect();
   }
 
@@ -305,6 +326,16 @@ class SocketService {
     if (_currentStreamId == streamId) {
       _currentStreamId = null;
     }
+  }
+
+  /// Join a comment thread room to receive new comments/likes live.
+  void joinCommentThread(String contentType, String contentId) {
+    _socket?.emit('comment:join', {'contentType': contentType, 'contentId': contentId});
+  }
+
+  /// Leave a comment thread room.
+  void leaveCommentThread(String contentType, String contentId) {
+    _socket?.emit('comment:leave', {'contentType': contentType, 'contentId': contentId});
   }
 
   /// Send a chat message to the current stream.

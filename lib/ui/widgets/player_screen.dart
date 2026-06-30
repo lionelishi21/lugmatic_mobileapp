@@ -10,6 +10,7 @@ import 'package:video_player/video_player.dart';
 import 'neumorphic_button.dart';
 import '../../shared/widgets/gift_bottom_sheet.dart';
 import '../../shared/widgets/playlist_selection_bottom_sheet.dart';
+import '../../shared/widgets/comment_section_widget.dart';
 import 'karaoke_lyrics_view.dart';
 
 class PlayerScreen extends StatefulWidget {
@@ -485,6 +486,17 @@ class _PlayerScreenState extends State<PlayerScreen> with TickerProviderStateMix
                                 },
                                 icon: const Icon(Icons.card_giftcard, color: Colors.white60),
                               ),
+                              IconButton(
+                                onPressed: () {
+                                  showModalBottomSheet(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    backgroundColor: Colors.transparent,
+                                    builder: (context) => _CommentsBottomSheet(songId: currentMusic.id),
+                                  );
+                                },
+                                icon: const Icon(Icons.chat_bubble_outline, color: Colors.white60),
+                              ),
                             ],
                           ),
                           const SizedBox(height: 30),
@@ -811,6 +823,52 @@ class _PlayerScreenState extends State<PlayerScreen> with TickerProviderStateMix
     } catch (e) {
       debugPrint("Favorite toggle error: $e");
     }
+  }
+}
+
+/// Wraps the existing CommentSectionWidget (already used on song/artist/clash
+/// detail pages) in a draggable bottom sheet for the Now Playing screen —
+/// the widget itself is a plain non-scrolling Column designed to sit inside
+/// a scrollable parent, so it needs one here too.
+class _CommentsBottomSheet extends StatelessWidget {
+  final String songId;
+
+  const _CommentsBottomSheet({required this.songId});
+
+  @override
+  Widget build(BuildContext context) {
+    return DraggableScrollableSheet(
+      initialChildSize: 0.65,
+      minChildSize: 0.4,
+      maxChildSize: 0.92,
+      builder: (_, scrollController) => Container(
+        decoration: const BoxDecoration(
+          color: Color(0xFF1A2332),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 12, bottom: 4),
+              child: Container(
+                width: 40, height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                controller: scrollController,
+                padding: const EdgeInsets.only(bottom: 16),
+                child: CommentSectionWidget(contentType: 'song', contentId: songId),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

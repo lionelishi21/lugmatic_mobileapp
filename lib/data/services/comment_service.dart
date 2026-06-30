@@ -41,9 +41,13 @@ class CommentService {
     }
   }
 
-  Future<void> toggleLike(String commentId) async {
+  /// Returns the updated (likeCount, isLiked) from the backend.
+  Future<(int, bool)> toggleLike(String commentId) async {
     try {
-      await _apiClient.dio.post('${ApiConfig.commentLike}/$commentId/like');
+      final response = await _apiClient.dio.post('${ApiConfig.commentLike}/$commentId/like');
+      final body = response.data;
+      final data = body['data'] ?? body;
+      return ((data['likeCount'] as num?)?.toInt() ?? 0, data['isLiked'] as bool? ?? false);
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);
     }

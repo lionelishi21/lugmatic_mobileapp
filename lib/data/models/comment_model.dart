@@ -55,6 +55,21 @@ class CommentModel {
     );
   }
 
+  CommentModel copyWith({int? likes, bool? isLiked}) {
+    return CommentModel(
+      id: id,
+      userId: userId,
+      userName: userName,
+      userAvatar: userAvatar,
+      content: content,
+      contentType: contentType,
+      contentId: contentId,
+      likes: likes ?? this.likes,
+      isLiked: isLiked ?? this.isLiked,
+      createdAt: createdAt,
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,

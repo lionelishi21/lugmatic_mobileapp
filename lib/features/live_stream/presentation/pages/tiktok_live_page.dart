@@ -37,6 +37,9 @@ class _TikTokLivePageState extends State<TikTokLivePage>
 
   List<LiveStreamModel> _liveStreams = [];
   List<LiveStreamChatMessage> _comments = [];
+  // Indices that just arrived — drives a one-shot entrance animation, then
+  // consumed on first build so unrelated rebuilds don't replay it.
+  final Set<int> _animatedMessageIndices = {};
   final Map<String, LiveStreamTokenData> _tokenCache = {};
   final Map<String, String> _tokenErrors = {};
 
@@ -91,9 +94,11 @@ class _TikTokLivePageState extends State<TikTokLivePage>
       if (mounted) {
         setState(() {
           _comments.add(msg);
+          _animatedMessageIndices.add(_comments.length - 1);
           // Keep last 200 messages
           if (_comments.length > 200) {
             _comments = _comments.sublist(_comments.length - 200);
+            _animatedMessageIndices.clear();
           }
         });
       }
@@ -1183,7 +1188,21 @@ class _TikTokLivePageState extends State<TikTokLivePage>
                 reverse: false,
                 itemBuilder: (context, index) {
                   final comment = _comments[index];
-                  return _buildCommentItem(comment);
+                  final item = _buildCommentItem(comment);
+                  if (!_animatedMessageIndices.remove(index)) return item;
+                  return TweenAnimationBuilder<double>(
+                    tween: Tween(begin: 0, end: 1),
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeOutBack,
+                    builder: (context, t, child) => Opacity(
+                      opacity: t.clamp(0.0, 1.0),
+                      child: Transform.translate(
+                        offset: Offset((1 - t.clamp(0.0, 1.0)) * -24, 0),
+                        child: child,
+                      ),
+                    ),
+                    child: item,
+                  );
                 },
               ),
             ),
