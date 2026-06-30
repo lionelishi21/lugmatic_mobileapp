@@ -202,10 +202,22 @@ class _PlayerScreenState extends State<PlayerScreen> with TickerProviderStateMix
                   elevation: 0,
                   toolbarHeight: 64,
                   leading: Padding(
-                    // Extra clearance below the status bar/notch on top of the
-                    // outer SafeArea — still reported as too tight on some
-                    // devices at 10px, bumped for a clearly visible gap.
-                    padding: const EdgeInsets.only(top: 20),
+                    // The outer SafeArea already strips the notch/status-bar
+                    // inset, so MediaQuery.padding here only reflects extra
+                    // hardware safe-area left over from rounded corners /
+                    // side cutouts (e.g. landscape camera punch-holes) — not
+                    // device-fixed magic numbers, since those previously
+                    // needed re-tuning per device (10px, then 20px) and the
+                    // gap still came back too tight on some screens. left is
+                    // included even though this is the leading side because
+                    // foldables/curved-edge phones can report a non-zero
+                    // inset on either side depending on orientation.
+                    padding: EdgeInsets.fromLTRB(
+                      8 + MediaQuery.of(context).padding.left,
+                      16,
+                      0,
+                      0,
+                    ),
                     child: NeumorphicButton(
                       width: 44,
                       height: 44,
@@ -222,13 +234,17 @@ class _PlayerScreenState extends State<PlayerScreen> with TickerProviderStateMix
                   centerTitle: true,
                   actions: [
                     Padding(
-                      padding: const EdgeInsets.only(top: 20),
+                      padding: EdgeInsets.fromLTRB(
+                        0,
+                        16,
+                        8 + MediaQuery.of(context).padding.right,
+                        0,
+                      ),
                       child: IconButton(
                         onPressed: () => _shareSong(currentMusic),
                         icon: const Icon(Icons.share_outlined, color: NeumorphicTheme.textPrimary),
                       ),
                     ),
-                    const SizedBox(width: 8),
                   ],
                 ),
                 body: SafeArea(
