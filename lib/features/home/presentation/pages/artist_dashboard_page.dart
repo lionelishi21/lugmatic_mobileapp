@@ -154,15 +154,23 @@ class _ArtistDashboardPageState extends State<ArtistDashboardPage> {
               right: 20,
               child: Row(
                 children: [
-                  CircleAvatar(
-                    radius: 36,
-                    backgroundColor: _kAccent.withValues(alpha: 0.2),
-                    backgroundImage: profilePic != null && profilePic.isNotEmpty
-                        ? NetworkImage(ApiConfig.resolveUrl(profilePic))
-                        : null,
-                    child: profilePic == null || profilePic.isEmpty
-                        ? const Icon(Icons.person, color: Colors.white54, size: 36)
-                        : null,
+                  Container(
+                    width: 72,
+                    height: 72,
+                    decoration: BoxDecoration(shape: BoxShape.circle, color: _kAccent.withValues(alpha: 0.2)),
+                    // CircleAvatar's backgroundImage always centers its crop,
+                    // cutting off the top of the head/face on a portrait photo.
+                    // Image.network lets us bias the crop upward instead.
+                    child: ClipOval(
+                      child: profilePic != null && profilePic.isNotEmpty
+                          ? Image.network(
+                              ApiConfig.resolveUrl(profilePic),
+                              fit: BoxFit.cover,
+                              alignment: Alignment.topCenter,
+                              errorBuilder: (_, __, ___) => const Icon(Icons.person, color: Colors.white54, size: 36),
+                            )
+                          : const Icon(Icons.person, color: Colors.white54, size: 36),
+                    ),
                   ),
                   const SizedBox(width: 14),
                   Expanded(
