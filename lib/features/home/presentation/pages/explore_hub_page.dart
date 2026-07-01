@@ -12,6 +12,8 @@ import 'package:lugmatic_flutter/features/music/presentation/pages/discover_page
 import 'package:lugmatic_flutter/features/home/presentation/pages/meet_artist_page.dart';
 import 'package:lugmatic_flutter/features/live_stream/presentation/pages/recorded_streams_page.dart';
 import 'package:lugmatic_flutter/features/live_stream/presentation/pages/clash_view_page.dart';
+import 'package:lugmatic_flutter/features/music/presentation/pages/billboard_page.dart';
+import 'package:lugmatic_flutter/features/home/presentation/pages/albums_page.dart';
 
 class ExploreHubPage extends StatelessWidget {
   const ExploreHubPage({Key? key}) : super(key: key);
@@ -62,6 +64,20 @@ class ExploreHubPage extends StatelessWidget {
                   icon: Icons.people,
                   color: AppColors.secondary,
                   onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MeetArtistPage())),
+                ),
+                _buildHubCard(
+                  context,
+                  title: 'Billboard',
+                  icon: Icons.emoji_events,
+                  color: Colors.amber,
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BillboardPage())),
+                ),
+                _buildHubCard(
+                  context,
+                  title: 'Albums',
+                  icon: Icons.album,
+                  color: AppColors.primary,
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AlbumsPage())),
                 ),
                 _buildHubCard(
                   context,
