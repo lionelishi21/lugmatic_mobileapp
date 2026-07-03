@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../../../data/models/video_model.dart';
 import '../../../../data/services/video_service.dart';
 
@@ -141,7 +142,7 @@ class _VideosPageState extends State<VideosPage> with SingleTickerProviderStateM
       actions: [
         IconButton(
           icon: const Icon(Icons.search, color: Colors.white),
-          onPressed: () {},
+          onPressed: () => Navigator.pushNamed(context, '/search'),
         ),
       ],
     );
@@ -624,7 +625,9 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                         icon: Icons.share_outlined,
                         label: 'Share',
                         color: Colors.white70,
-                        onTap: () {},
+                        onTap: () {
+                          Share.share('Check out ${widget.video.title} on Lugmatic Music!\nhttps://lugmaticmusic.com/video/${widget.video.id}');
+                        },
                       ),
                     ],
                   ),

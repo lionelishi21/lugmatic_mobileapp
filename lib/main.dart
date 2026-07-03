@@ -49,6 +49,7 @@ import 'features/mixer/presentation/pages/mixer_page.dart';
 import 'ui/widgets/mini_player.dart';
 import 'core/theme/app_theme.dart';
 import 'core/constants/app_colors.dart';
+import 'ui/widgets/lugmatic_logo.dart';
 
 final ValueNotifier<String> appStatus = ValueNotifier<String>("Initalizing...");
 
@@ -339,42 +340,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       // App Logo
-                      Container(
-                        width: 140,
-                        height: 140,
-                        decoration: BoxDecoration(
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFF10B981).withValues(alpha: 0.2),
-                              blurRadius: 40,
-                              spreadRadius: 10,
-                            ),
-                          ],
-                        ),
-                        child: Image.asset(
-                          'assets/images/app_logo_transparent.png',
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-                      const SizedBox(height: 32),
-                      const Text(
-                        'LUGMATIC',
-                        style: TextStyle(
-                          fontSize: 32,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 4,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Your Music Universe',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.white.withValues(alpha: 0.6),
-                          fontWeight: FontWeight.w300,
-                          letterSpacing: 2,
-                        ),
+                      const LugmaticLogo(
+                        variant: LogoVariant.stacked,
+                        scale: 1.3,
                       ),
                     ],
                   ),

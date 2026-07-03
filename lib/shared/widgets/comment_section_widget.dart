@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
+import 'package:flutter/foundation.dart' as foundation;
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../../data/models/comment_model.dart';
@@ -34,6 +36,7 @@ class _CommentSectionWidgetState extends State<CommentSectionWidget> {
   List<CommentModel> _comments = [];
   // Ids that arrived (or were posted) this session — drives the entrance animation.
   final Set<String> _animatedIds = {};
+  bool _showEmojiPicker = false;
 
   SocketService? _socketService;
   StreamSubscription? _newCommentSub;
@@ -205,6 +208,18 @@ class _CommentSectionWidgetState extends State<CommentSectionWidget> {
                     ),
                   ),
                 ),
+                IconButton(
+                  icon: Icon(
+                    _showEmojiPicker ? Icons.keyboard : Icons.emoji_emotions_outlined,
+                    color: NeumorphicTheme.primaryAccent,
+                  ),
+                  onPressed: () {
+                    FocusScope.of(context).unfocus();
+                    setState(() {
+                      _showEmojiPicker = !_showEmojiPicker;
+                    });
+                  },
+                ),
                 _isPosting
                     ? const Padding(
                         padding: EdgeInsets.all(10.0),
@@ -222,6 +237,26 @@ class _CommentSectionWidgetState extends State<CommentSectionWidget> {
             ),
           ),
         ),
+
+        // Emoji Picker
+        if (_showEmojiPicker)
+          SizedBox(
+            height: 250,
+            child: EmojiPicker(
+              textEditingController: _commentController,
+              config: Config(
+                checkPlatformCompatibility: true,
+                emojiViewConfig: EmojiViewConfig(
+                  backgroundColor: NeumorphicTheme.backgroundColor,
+                ),
+                bottomActionBarConfig: BottomActionBarConfig(
+                  backgroundColor: NeumorphicTheme.backgroundColor,
+                  buttonIconColor: Colors.white60,
+                  buttonColor: NeumorphicTheme.backgroundColor,
+                ),
+              ),
+            ),
+          ),
 
         // Comments List
         _isLoading
@@ -295,22 +330,41 @@ class _CommentSectionWidgetState extends State<CommentSectionWidget> {
 
   Widget _buildCommentItem(CommentModel comment) {
     final isHot = _reactionTiers.any((t) => comment.likes >= t);
+    final isGift = comment.isGift;
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       margin: EdgeInsets.only(left: widget.horizontalPadding, right: widget.horizontalPadding, bottom: 8),
       padding: const EdgeInsets.all(12),
-      decoration: isHot
-          ? NeumorphicTheme.flatNeumorphicDecoration().copyWith(
-              border: Border.all(color: NeumorphicTheme.primaryAccent.withValues(alpha: 0.4), width: 1.5),
+      decoration: isGift
+          ? BoxDecoration(
+              gradient: LinearGradient(
+                colors: [const Color(0xFF10B981).withValues(alpha: 0.2), const Color(0xFF10B981).withValues(alpha: 0.05)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.5), width: 1.5),
               boxShadow: [
                 BoxShadow(
-                  color: NeumorphicTheme.primaryAccent.withValues(alpha: 0.15),
+                  color: const Color(0xFF10B981).withValues(alpha: 0.2),
                   blurRadius: 12,
                   spreadRadius: 1,
                 ),
               ],
             )
-          : NeumorphicTheme.flatNeumorphicDecoration(),
+          : isHot
+              ? NeumorphicTheme.flatNeumorphicDecoration().copyWith(
+                  border: Border.all(color: NeumorphicTheme.primaryAccent.withValues(alpha: 0.4), width: 1.5),
+                  boxShadow: [
+                    BoxShadow(
+                      color: NeumorphicTheme.primaryAccent.withValues(alpha: 0.15),
+                      blurRadius: 12,
+                      spreadRadius: 1,
+                    ),
+                  ],
+                )
+              : NeumorphicTheme.flatNeumorphicDecoration(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -372,6 +426,23 @@ class _CommentSectionWidgetState extends State<CommentSectionWidget> {
               ),
             ],
           ),
+          if (isGift) ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(Icons.card_giftcard, color: Color(0xFF10B981), size: 18),
+                const SizedBox(width: 6),
+                Text(
+                  'Gifted \$${comment.giftAmount.toStringAsFixed(2)}!',
+                  style: const TextStyle(
+                    color: Color(0xFF10B981),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ],
           const SizedBox(height: 12),
           Text(
             comment.content,

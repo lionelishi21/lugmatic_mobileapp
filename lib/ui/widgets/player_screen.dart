@@ -37,6 +37,7 @@ class _PlayerScreenState extends State<PlayerScreen> with TickerProviderStateMix
   late AnimationController _entranceController;
   late Animation<double> _artEntrance;
   late Animation<double> _detailsEntrance;
+  late TabController _tabController;
 
   @override
   void initState() {
@@ -66,6 +67,8 @@ class _PlayerScreenState extends State<PlayerScreen> with TickerProviderStateMix
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _entranceController.forward();
     });
+
+    _tabController = TabController(length: 2, vsync: this);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -136,17 +139,14 @@ class _PlayerScreenState extends State<PlayerScreen> with TickerProviderStateMix
     _bgAnimController.dispose();
     _entranceController.dispose();
     _scrollController.dispose();
+    _tabController.dispose();
     super.dispose();
   }
 
   void _scrollToComments() {
-    final ctx = _commentsSectionKey.currentContext;
-    if (ctx == null) return;
-    Scrollable.ensureVisible(
-      ctx,
-      duration: const Duration(milliseconds: 400),
-      curve: Curves.easeOutCubic,
-    );
+    _tabController.animateTo(1);
+    final ctx = _scrollController.position.context;
+    // Scroll a bit down so tabs are visible if needed, but switching tabs is usually enough.
   }
 
   String _formatDuration(Duration duration) {
@@ -524,264 +524,274 @@ class _PlayerScreenState extends State<PlayerScreen> with TickerProviderStateMix
                           ),
                           const SizedBox(height: 30),
                           
-                          // Lyrics Section
-                          if (currentMusic.lyrics.isNotEmpty) ...[
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.all(24),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.05),
-                                borderRadius: BorderRadius.circular(24),
-                                border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  InkWell(
-                                    onTap: () => setState(() => _lyricsExpanded = !_lyricsExpanded),
-                                    borderRadius: BorderRadius.circular(12),
-                                    child: Row(
-                                      children: [
-                                        const Icon(Icons.lyrics_outlined, color: Color(0xFF10B981), size: 20),
-                                        const SizedBox(width: 10),
-                                        Text(
-                                          'LYRICS',
-                                          style: TextStyle(
-                                            color: Colors.white.withValues(alpha: 0.9),
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w900,
-                                            letterSpacing: 1.5,
+                          const SizedBox(height: 30),
+
+                          TabBar(
+                            controller: _tabController,
+                            indicatorColor: const Color(0xFF10B981),
+                            labelColor: Colors.white,
+                            unselectedLabelColor: Colors.white60,
+                            dividerColor: Colors.white10,
+                            tabs: const [
+                              Tab(text: 'Details'),
+                              Tab(text: 'Comments'),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+
+                          SizedBox(
+                            height: 600, // Fixed height for tabs area to allow inner scrolling
+                            child: TabBarView(
+                              controller: _tabController,
+                              children: [
+                                // Tab 1: Lyrics & Up Next
+                                SingleChildScrollView(
+                                  physics: const NeverScrollableScrollPhysics(), // Scroll handled by outer view, but we can also limit it
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      if (currentMusic.lyrics.isNotEmpty) ...[
+                                        Container(
+                                          width: double.infinity,
+                                          padding: const EdgeInsets.all(24),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white.withValues(alpha: 0.05),
+                                            borderRadius: BorderRadius.circular(24),
+                                            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
                                           ),
-                                        ),
-                                        if (currentMusic.lyricsLines != null &&
-                                            currentMusic.lyricsLines!.isNotEmpty) ...[
-                                          const Spacer(),
-                                          GestureDetector(
-                                            onTap: () => setState(() => _karaokeMode = !_karaokeMode),
-                                            child: Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                              decoration: BoxDecoration(
-                                                color: _karaokeMode
-                                                    ? const Color(0xFF10B981).withValues(alpha: 0.2)
-                                                    : Colors.white.withValues(alpha: 0.08),
-                                                borderRadius: BorderRadius.circular(20),
-                                                border: Border.all(
-                                                  color: _karaokeMode
-                                                      ? const Color(0xFF10B981).withValues(alpha: 0.6)
-                                                      : Colors.white.withValues(alpha: 0.15),
-                                                ),
-                                              ),
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Icon(
-                                                    Icons.mic_external_on,
-                                                    size: 14,
-                                                    color: _karaokeMode ? const Color(0xFF10B981) : Colors.white60,
-                                                  ),
-                                                  const SizedBox(width: 6),
-                                                  Text(
-                                                    'KARAOKE',
-                                                    style: TextStyle(
-                                                      fontSize: 11,
-                                                      fontWeight: FontWeight.w800,
-                                                      letterSpacing: 1,
-                                                      color: _karaokeMode ? const Color(0xFF10B981) : Colors.white60,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ] else
-                                          const Spacer(),
-                                        const SizedBox(width: 8),
-                                        AnimatedRotation(
-                                          turns: _lyricsExpanded ? 0.5 : 0,
-                                          duration: const Duration(milliseconds: 250),
-                                          child: Icon(
-                                            Icons.keyboard_arrow_down,
-                                            color: Colors.white.withValues(alpha: 0.6),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  AnimatedSize(
-                                    duration: const Duration(milliseconds: 250),
-                                    curve: Curves.easeInOut,
-                                    alignment: Alignment.topCenter,
-                                    child: !_lyricsExpanded
-                                        ? const SizedBox(width: double.infinity)
-                                        : Column(
+                                          child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                              const SizedBox(height: 20),
-                                              if (_karaokeMode &&
-                                                  currentMusic.lyricsLines != null &&
-                                                  currentMusic.lyricsLines!.isNotEmpty)
-                                                KaraokeLyricsView(lines: currentMusic.lyricsLines!)
-                                              else
-                                                Text(
-                                                  currentMusic.lyrics,
-                                                  style: TextStyle(
-                                                    color: Colors.white.withValues(alpha: 0.8),
-                                                    fontSize: 18,
-                                                    height: 1.8,
-                                                    fontWeight: FontWeight.w500,
-                                                  ),
-                                                ),
-                                            ],
-                                          ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ] else ...[
-                             Center(
-                               child: Text(
-                                 'Lyrics not available for this track',
-                                 style: TextStyle(color: Colors.white.withValues(alpha: 0.3), fontSize: 13),
-                               ),
-                             ),
-                          ],
-                          const SizedBox(height: 40),
-
-                          // Up Next Section
-                          Consumer<AudioProvider>(
-                            builder: (context, audioProvider, _) {
-                              if (audioProvider.queue.isEmpty) return const SizedBox();
-                              return Column(
-                                children: [
-                                  Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                'Up Next',
-                                style: TextStyle(
-                                  color: Colors.white.withValues(alpha: 0.9),
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            ...audioProvider.queue.skip(audioProvider.currentIndex + 1).take(3).toList().asMap().entries.map((entry) {
-                              final int index = entry.key;
-                              final song = entry.value;
-                              final isNext = index == 0;
-                              
-                              return Container(
-                                margin: const EdgeInsets.only(bottom: 12),
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: isNext ? const Color(0xFF10B981).withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.05),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: isNext ? Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.5), width: 1.5) : null,
-                                  boxShadow: isNext ? [
-                                    BoxShadow(
-                                      color: const Color(0xFF10B981).withValues(alpha: 0.2),
-                                      blurRadius: 8,
-                                      spreadRadius: 1,
-                                    )
-                                  ] : null,
-                                ),
-                                child: Row(
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: Image.network(
-                                        song.imageUrl,
-                                        width: 48,
-                                        height: 48,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (_, __, ___) => Container(
-                                          width: 48,
-                                          height: 48,
-                                          color: Colors.white10,
-                                          child: const Icon(Icons.music_note, color: Colors.white38),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              Expanded(
-                                                child: Text(
-                                                  song.title,
-                                                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-                                                  maxLines: 1,
-                                                  overflow: TextOverflow.ellipsis,
+                                              InkWell(
+                                                onTap: () => setState(() => _lyricsExpanded = !_lyricsExpanded),
+                                                borderRadius: BorderRadius.circular(12),
+                                                child: Row(
+                                                  children: [
+                                                    const Icon(Icons.lyrics_outlined, color: Color(0xFF10B981), size: 20),
+                                                    const SizedBox(width: 10),
+                                                    Text(
+                                                      'LYRICS',
+                                                      style: TextStyle(
+                                                        color: Colors.white.withValues(alpha: 0.9),
+                                                        fontSize: 14,
+                                                        fontWeight: FontWeight.w900,
+                                                        letterSpacing: 1.5,
+                                                      ),
+                                                    ),
+                                                    if (currentMusic.lyricsLines != null &&
+                                                        currentMusic.lyricsLines!.isNotEmpty) ...[
+                                                      const Spacer(),
+                                                      GestureDetector(
+                                                        onTap: () => setState(() => _karaokeMode = !_karaokeMode),
+                                                        child: Container(
+                                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                                          decoration: BoxDecoration(
+                                                            color: _karaokeMode
+                                                                ? const Color(0xFF10B981).withValues(alpha: 0.2)
+                                                                : Colors.white.withValues(alpha: 0.08),
+                                                            borderRadius: BorderRadius.circular(20),
+                                                            border: Border.all(
+                                                              color: _karaokeMode
+                                                                  ? const Color(0xFF10B981).withValues(alpha: 0.6)
+                                                                  : Colors.white.withValues(alpha: 0.15),
+                                                            ),
+                                                          ),
+                                                          child: Row(
+                                                            mainAxisSize: MainAxisSize.min,
+                                                            children: [
+                                                              Icon(
+                                                                Icons.mic_external_on,
+                                                                size: 14,
+                                                                color: _karaokeMode ? const Color(0xFF10B981) : Colors.white60,
+                                                              ),
+                                                              const SizedBox(width: 6),
+                                                              Text(
+                                                                'KARAOKE',
+                                                                style: TextStyle(
+                                                                  fontSize: 11,
+                                                                  fontWeight: FontWeight.w800,
+                                                                  letterSpacing: 1,
+                                                                  color: _karaokeMode ? const Color(0xFF10B981) : Colors.white60,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ] else
+                                                      const Spacer(),
+                                                    const SizedBox(width: 8),
+                                                    AnimatedRotation(
+                                                      turns: _lyricsExpanded ? 0.5 : 0,
+                                                      duration: const Duration(milliseconds: 250),
+                                                      child: Icon(
+                                                        Icons.keyboard_arrow_down,
+                                                        color: Colors.white.withValues(alpha: 0.6),
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
                                               ),
-                                              if (isNext)
-                                                Container(
-                                                  margin: const EdgeInsets.only(left: 8),
-                                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                                  decoration: BoxDecoration(
-                                                    color: const Color(0xFF10B981),
-                                                    borderRadius: BorderRadius.circular(4),
+                                              AnimatedSize(
+                                                duration: const Duration(milliseconds: 250),
+                                                curve: Curves.easeInOut,
+                                                alignment: Alignment.topCenter,
+                                                child: !_lyricsExpanded
+                                                    ? const SizedBox(width: double.infinity)
+                                                    : Column(
+                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        children: [
+                                                          const SizedBox(height: 20),
+                                                          if (_karaokeMode &&
+                                                              currentMusic.lyricsLines != null &&
+                                                              currentMusic.lyricsLines!.isNotEmpty)
+                                                            KaraokeLyricsView(lines: currentMusic.lyricsLines!)
+                                                          else
+                                                            Text(
+                                                              currentMusic.lyrics,
+                                                              style: TextStyle(
+                                                                color: Colors.white.withValues(alpha: 0.8),
+                                                                fontSize: 18,
+                                                                height: 1.8,
+                                                                fontWeight: FontWeight.w500,
+                                                              ),
+                                                            ),
+                                                        ],
+                                                      ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ] else ...[
+                                         Center(
+                                           child: Text(
+                                             'Lyrics not available for this track',
+                                             style: TextStyle(color: Colors.white.withValues(alpha: 0.3), fontSize: 13),
+                                           ),
+                                         ),
+                                      ],
+                                      const SizedBox(height: 40),
+
+                                      // Up Next Section
+                                      Consumer<AudioProvider>(
+                                        builder: (context, audioProvider, _) {
+                                          if (audioProvider.queue.isEmpty) return const SizedBox();
+                                          return Column(
+                                            children: [
+                                              Align(
+                                                alignment: Alignment.centerLeft,
+                                                child: Text(
+                                                  'Up Next',
+                                                  style: TextStyle(
+                                                    color: Colors.white.withValues(alpha: 0.9),
+                                                    fontSize: 18,
+                                                    fontWeight: FontWeight.bold,
                                                   ),
-                                                  child: const Text(
-                                                    'NEXT',
-                                                    style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 10,
-                                                      fontWeight: FontWeight.w900,
-                                                      letterSpacing: 0.5,
-                                                    ),
+                                                ),
+                                              ),
+                                              const SizedBox(height: 16),
+                                              ...audioProvider.queue.skip(audioProvider.currentIndex + 1).take(3).toList().asMap().entries.map((entry) {
+                                                final int index = entry.key;
+                                                final song = entry.value;
+                                                final isNext = index == 0;
+                                                
+                                                return Container(
+                                                  margin: const EdgeInsets.only(bottom: 12),
+                                                  padding: const EdgeInsets.all(12),
+                                                  decoration: BoxDecoration(
+                                                    color: isNext ? const Color(0xFF10B981).withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.05),
+                                                    borderRadius: BorderRadius.circular(12),
+                                                    border: isNext ? Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.5), width: 1.5) : null,
+                                                    boxShadow: isNext ? [
+                                                      BoxShadow(
+                                                        color: const Color(0xFF10B981).withValues(alpha: 0.2),
+                                                        blurRadius: 8,
+                                                        spreadRadius: 1,
+                                                      )
+                                                    ] : null,
+                                                  ),
+                                                  child: Row(
+                                                    children: [
+                                                      ClipRRect(
+                                                        borderRadius: BorderRadius.circular(8),
+                                                        child: Image.network(
+                                                          song.imageUrl,
+                                                          width: 48,
+                                                          height: 48,
+                                                          fit: BoxFit.cover,
+                                                          errorBuilder: (_, __, ___) => Container(
+                                                            width: 48,
+                                                            height: 48,
+                                                            color: Colors.white10,
+                                                            child: const Icon(Icons.music_note, color: Colors.white38),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      const SizedBox(width: 12),
+                                                      Expanded(
+                                                        child: Column(
+                                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                                          children: [
+                                                            Row(
+                                                              children: [
+                                                                Expanded(
+                                                                  child: Text(
+                                                                    song.title,
+                                                                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                                                                    maxLines: 1,
+                                                                    overflow: TextOverflow.ellipsis,
+                                                                  ),
+                                                                ),
+                                                                if (isNext)
+                                                                  Container(
+                                                                    margin: const EdgeInsets.only(left: 8),
+                                                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                                                    decoration: BoxDecoration(
+                                                                      color: const Color(0xFF10B981),
+                                                                      borderRadius: BorderRadius.circular(4),
+                                                                    ),
+                                                                    child: const Text(
+                                                                      'NEXT',
+                                                                      style: TextStyle(
+                                                                        color: Colors.white,
+                                                                        fontSize: 10,
+                                                                        fontWeight: FontWeight.w900,
+                                                                        letterSpacing: 0.5,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                              ],
+                                                            ),
+                                                            const SizedBox(height: 4),
+                                                            Text(
+                                                              song.artist,
+                                                              style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 13),
+                                                              maxLines: 1,
+                                                              overflow: TextOverflow.ellipsis,
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                );
+                                              }).toList(),
+                                              if (audioProvider.queue.length - audioProvider.currentIndex - 1 > 3)
+                                                Padding(
+                                                  padding: const EdgeInsets.only(top: 8.0),
+                                                  child: Text(
+                                                    '+ ${audioProvider.queue.length - audioProvider.currentIndex - 4} more',
+                                                    style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 13),
                                                   ),
                                                 ),
                                             ],
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            song.artist,
-                                            style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 13),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ],
+                                          );
+                                        },
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }).toList(),
-                            if (audioProvider.queue.length - audioProvider.currentIndex - 1 > 3)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 8.0),
-                                child: Text(
-                                  '+ ${audioProvider.queue.length - audioProvider.currentIndex - 4} more',
-                                  style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 13),
-                                ),
-                              ),
-                                ],
-                              );
-                            },
-                          ),
-                          const SizedBox(height: 40),
-
-                          // Comments Section — inline so it's part of the
-                          // normal scroll flow like Lyrics/Up Next, instead
-                          // of hidden behind a small icon-triggered sheet.
-                          Container(
-                            key: _commentsSectionKey,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Comments',
-                                  style: TextStyle(
-                                    color: Colors.white.withValues(alpha: 0.9),
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
+                                    ],
                                   ),
                                 ),
-                                const SizedBox(height: 16),
+                                // Tab 2: Comments
                                 CommentSectionWidget(
                                   contentType: 'song',
                                   contentId: currentMusic.id,

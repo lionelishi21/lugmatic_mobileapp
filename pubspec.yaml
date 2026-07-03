@@ -50,9 +50,7 @@ dependencies:
   flutter_svg: ^2.0.10+1 # For rendering SVG files
 
   # In-App Purchases & Monetization
-  flutter_stripe: ^9.0.0 # Native Stripe payments
-  webview_flutter: ^4.10.0 # In-app browser for PayPal order approval
-  # in_app_purchase: ^3.2.0 # To handle in-app purchases for virtual gifts (temporarily disabled for demo)
+  purchases_flutter: ^8.1.1 # RevenueCat for Apple/Google In-App Purchases
 
   # Device & Permissions
   image_picker: ^1.1.2 # To let users pick images for their profile or uploads
@@ -75,6 +73,7 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  emoji_picker_flutter: ^4.4.0
 
 dev_dependencies:
   flutter_test:

@@ -4,7 +4,7 @@ import 'package:lugmatic_flutter/data/models/artist_model.dart';
 import 'package:provider/provider.dart';
 import 'package:lugmatic_flutter/data/services/gift_service.dart';
 import 'package:lugmatic_flutter/data/services/home_service.dart';
-import 'package:lugmatic_flutter/data/services/stripe_service.dart';
+import 'package:lugmatic_flutter/data/services/revenuecat_service.dart';
 import 'package:lugmatic_flutter/core/theme/neumorphic_theme.dart';
 import 'package:lugmatic_flutter/core/network/api_exception.dart';
 import 'package:lugmatic_flutter/core/gifts/gift_pop_controller.dart';
@@ -25,6 +25,7 @@ class _GiftSendPageState extends State<GiftSendPage> {
   GiftModel? _selectedGift;
   String _message = '';
   final TextEditingController _messageController = TextEditingController();
+  final RevenueCatService _revenueCatService = RevenueCatService();
 
   List<GiftModel> _popularGifts = [
     GiftModel(
@@ -777,31 +778,43 @@ class _GiftSendPageState extends State<GiftSendPage> {
   }
 
   Future<void> _handlePurchase(int amount) async {
-    final stripeService = context.read<StripeService>();
-    
     // Show loading
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Initializing payment...'), duration: Duration(seconds: 1)),
     );
 
-    final error = await stripeService.purchaseCoins(amount);
-    
-    if (error == null) {
-      await _refreshBalance();
+    try {
+      final error = await _revenueCatService.purchaseCoins(amount);
+      
+      if (error == null) {
+        // Wait a brief moment for the webhook to hit our backend
+        await Future.delayed(const Duration(seconds: 2));
+        await _refreshBalance();
+        
+        if (mounted) {
+          Navigator.pop(context); // Close wallet dialog
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Successfully purchased $amount coins!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else if (error != 'cancelled') {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(error),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
       if (mounted) {
-        Navigator.pop(context); // Close wallet dialog
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Successfully purchased $amount coins!'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-    } else {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Payment failed or cancelled.'),
+            content: Text(e.toString()),
             backgroundColor: Colors.red,
           ),
         );

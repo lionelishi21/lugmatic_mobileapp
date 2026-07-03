@@ -8,6 +8,8 @@ class CommentModel {
   final String contentId;
   final int likes;
   final bool isLiked;
+  final bool isGift;
+  final num giftAmount;
   final DateTime createdAt;
 
   CommentModel({
@@ -20,6 +22,8 @@ class CommentModel {
     required this.contentId,
     this.likes = 0,
     this.isLiked = false,
+    this.isGift = false,
+    this.giftAmount = 0,
     required this.createdAt,
   });
 
@@ -49,6 +53,8 @@ class CommentModel {
       contentId: json['contentId'] ?? '',
       likes: json['likeCount'] ?? (json['likes'] is List ? (json['likes'] as List).length : json['likes']) ?? 0,
       isLiked: json['isLiked'] ?? false,
+      isGift: json['isGift'] ?? json['type'] == 'GIFT' ?? false,
+      giftAmount: json['giftAmount'] ?? json['amount'] ?? 0,
       createdAt: json['createdAt'] != null 
           ? DateTime.tryParse(json['createdAt'].toString()) ?? DateTime.now() 
           : DateTime.now(),
@@ -66,6 +72,8 @@ class CommentModel {
       contentId: contentId,
       likes: likes ?? this.likes,
       isLiked: isLiked ?? this.isLiked,
+      isGift: isGift,
+      giftAmount: giftAmount,
       createdAt: createdAt,
     );
   }

@@ -10,6 +10,7 @@ import '../../utils/auth_validator.dart';
 import '../widgets/social_login_button.dart';
 import '../../../../ui/widgets/custom_preloader.dart';
 import '../../../../features/home/presentation/pages/home_page.dart';
+import '../../../../ui/widgets/lugmatic_logo.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key}) : super(key: key);
@@ -220,26 +221,10 @@ class _SignUpScreenState extends State<SignUpScreen>
                                     CrossAxisAlignment.stretch,
                                 children: [
                                   // Logo
-                                  Center(
-                                    child: Image.asset(
-                                      'assets/images/logo.png',
-                                      height: 60,
-                                      fit: BoxFit.contain,
-                                      errorBuilder: (ctx, e, st) =>
-                                          Container(
-                                        width: 60,
-                                        height: 60,
-                                        decoration: BoxDecoration(
-                                          color: AppColors.muted,
-                                          borderRadius:
-                                              BorderRadius.circular(14),
-                                        ),
-                                        child: const Icon(
-                                          Icons.music_note_rounded,
-                                          color: AppColors.primary,
-                                          size: 30,
-                                        ),
-                                      ),
+                                  const Center(
+                                    child: LugmaticLogo(
+                                      variant: LogoVariant.icon,
+                                      scale: 0.95,
                                     ),
                                   ),
                                   const SizedBox(height: 16),

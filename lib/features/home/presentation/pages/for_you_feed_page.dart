@@ -11,6 +11,7 @@ import '../../../../data/services/home_service.dart';
 import '../../../../data/services/video_service.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../shared/widgets/new_badge.dart';
+import 'package:share_plus/share_plus.dart';
 
 // ── feed item union type ──────────────────────────────────────────────────
 enum _FeedType { song, video }
@@ -163,7 +164,11 @@ class _ForYouFeedPageState extends State<ForYouFeedPage>
             _GenreTab(
               label: 'Following',
               active: false,
-              onTap: () {},
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Following feed coming soon!')),
+                );
+              },
             ),
             const SizedBox(width: 8),
             const Text('·', style: TextStyle(color: Colors.white38)),
@@ -482,7 +487,12 @@ class _FeedCardState extends State<_FeedCard> with SingleTickerProviderStateMixi
                 HapticFeedback.selectionClick();
               },
               onPlay: widget.onPlay,
-              onShare: () {},
+              onShare: () {
+                final link = item.type == _FeedType.song
+                    ? 'https://lugmaticmusic.com/song/${item.id}'
+                    : 'https://lugmaticmusic.com/video/${item.id}';
+                Share.share('Check out ${item.title} on Lugmatic Music!\n$link');
+              },
             ),
           ),
         ],

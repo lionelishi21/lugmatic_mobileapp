@@ -6,10 +6,9 @@ import '../../core/config/api_config.dart';
 import '../../core/network/api_client.dart';
 import '../../data/models/gift_model.dart';
 import '../../data/providers/auth_provider.dart';
-import '../../data/services/stripe_service.dart';
 import '../../data/services/gift_service.dart';
+import '../../data/services/revenuecat_service.dart';
 import '../../core/gifts/gift_pop_controller.dart';
-import '../../features/store/presentation/pages/paypal_checkout_page.dart';
 
 class GiftBottomSheet extends StatefulWidget {
   final String artistId;
@@ -578,7 +577,7 @@ class _TopUpDialog extends StatefulWidget {
 class _TopUpDialogState extends State<_TopUpDialog> {
   bool _loading = false;
   int? _loadingAmount;
-  bool _usePaypal = false;
+  final RevenueCatService _revenueCatService = RevenueCatService();
 
   final List<Map<String, dynamic>> _packages = [
     {'amount': 500, 'price': '\$5', 'label': 'Starter'},
@@ -587,83 +586,34 @@ class _TopUpDialogState extends State<_TopUpDialog> {
     {'amount': 5000, 'price': '\$50', 'label': 'Supporter'},
   ];
 
-  void _handleBuy(int amount) {
-    if (_usePaypal) {
-      _handlePayPalPurchase(amount);
-    } else {
-      _handleCardPurchase(amount);
-    }
-  }
-
-  Future<void> _handleCardPurchase(int amount) async {
+  Future<void> _handlePurchase(int amount) async {
     setState(() {
       _loading = true;
       _loadingAmount = amount;
     });
     try {
-      final stripeService = context.read<StripeService>();
-      final error = await stripeService.purchaseCoins(amount);
+      final error = await _revenueCatService.purchaseCoins(amount);
       if (!mounted) return;
 
       if (error == null) {
+        // Wait a brief moment for the webhook to hit our backend
+        await Future.delayed(const Duration(seconds: 2));
+        
         final giftService = context.read<GiftService>();
         final balanceData = await giftService.getCoinBalance();
         final newBalance = balanceData['coins'] as int? ?? 0;
+        
         if (!mounted) return;
         widget.onSuccess(newBalance);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('$amount coins added to your wallet!'), backgroundColor: const Color(0xFF10B981)),
         );
         Navigator.pop(context);
-      } else if (error.isNotEmpty) {
+      } else if (error != 'cancelled') {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(error), backgroundColor: const Color(0xFFEF4444)),
         );
       }
-      // empty string = user cancelled, no error shown
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString()), backgroundColor: const Color(0xFFEF4444)),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _loading = false);
-    }
-  }
-
-  Future<void> _handlePayPalPurchase(int amount) async {
-    setState(() {
-      _loading = true;
-      _loadingAmount = amount;
-    });
-
-    try {
-      final giftService = context.read<GiftService>();
-      final order = await giftService.createPaypalCoinOrder(amount);
-
-      if (order.approveUrl == null) throw Exception('Could not start PayPal checkout');
-      if (!mounted) return;
-
-      final approved = await Navigator.push<bool>(
-        context,
-        MaterialPageRoute(
-          builder: (_) => PayPalCheckoutPage(approveUrl: order.approveUrl!),
-        ),
-      );
-
-      if (approved != true) return; // user cancelled — no error needed
-
-      await giftService.capturePaypalOrder(order.orderId);
-      final balanceData = await giftService.getCoinBalance();
-      final newBalance = balanceData['coins'] as int? ?? 0;
-
-      if (!mounted) return;
-      widget.onSuccess(newBalance);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$amount coins added to your wallet!'), backgroundColor: const Color(0xFF10B981)),
-      );
-      Navigator.pop(context); // Close the dialog
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -700,38 +650,12 @@ class _TopUpDialogState extends State<_TopUpDialog> {
               ),
             ],
             const SizedBox(height: 20),
-            Row(
-              children: [
-                Expanded(
-                  child: ChoiceChip(
-                    label: const Text('Card'),
-                    selected: !_usePaypal,
-                    onSelected: (_) => setState(() => _usePaypal = false),
-                    selectedColor: const Color(0xFF10B981),
-                    labelStyle: TextStyle(color: !_usePaypal ? Colors.black : Colors.white60, fontWeight: FontWeight.w700),
-                    backgroundColor: Colors.white.withValues(alpha: 0.05),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: ChoiceChip(
-                    label: const Text('PayPal'),
-                    selected: _usePaypal,
-                    onSelected: (_) => setState(() => _usePaypal = true),
-                    selectedColor: const Color(0xFF10B981),
-                    labelStyle: TextStyle(color: _usePaypal ? Colors.black : Colors.white60, fontWeight: FontWeight.w700),
-                    backgroundColor: Colors.white.withValues(alpha: 0.05),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
             ..._packages.map((pkg) {
               final isThisLoading = _loading && _loadingAmount == pkg['amount'];
               return Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: InkWell(
-                  onTap: _loading ? null : () => _handleBuy(pkg['amount']),
+                  onTap: _loading ? null : () => _handlePurchase(pkg['amount']),
                   borderRadius: BorderRadius.circular(16),
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

@@ -87,11 +87,19 @@ class _RadioPageState extends State<RadioPage> {
       ),
       actions: [
         IconButton(
-          onPressed: () {},
+          onPressed: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Radio feature coming soon!')),
+            );
+          },
           icon: const Icon(Icons.favorite_border, color: Colors.white),
         ),
         IconButton(
-          onPressed: () {},
+          onPressed: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Radio feature coming soon!')),
+            );
+          },
           icon: const Icon(Icons.more_vert, color: Colors.white),
         ),
         const SizedBox(width: 8),
@@ -122,7 +130,11 @@ class _RadioPageState extends State<RadioPage> {
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: () {},
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Radio feature coming soon!')),
+              );
+            },
             borderRadius: BorderRadius.circular(20),
             child: Padding(
               padding: const EdgeInsets.all(24),
@@ -165,7 +177,11 @@ class _RadioPageState extends State<RadioPage> {
                       ),
                       const Spacer(),
                       IconButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Radio feature coming soon!')),
+                          );
+                        },
                         icon: const Icon(
                           Icons.favorite_border,
                           color: Colors.white,
@@ -201,7 +217,11 @@ class _RadioPageState extends State<RadioPage> {
                     child: Material(
                       color: Colors.transparent,
                       child: InkWell(
-                        onTap: () {},
+                        onTap: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Radio feature coming soon!')),
+                          );
+                        },
                         borderRadius: BorderRadius.circular(24),
                         child: const Center(
                           child: Row(
@@ -288,7 +308,11 @@ class _RadioPageState extends State<RadioPage> {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () {},
+          onTap: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Radio streaming coming soon!')),
+            );
+          },
           borderRadius: BorderRadius.circular(16),
           child: Padding(
             padding: const EdgeInsets.all(16),

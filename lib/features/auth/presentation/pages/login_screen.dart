@@ -11,6 +11,7 @@ import 'signup_screen.dart';
 import 'forgot_password_screen.dart';
 import '../../../home/presentation/pages/home_page.dart';
 import '../../../../ui/widgets/custom_preloader.dart';
+import '../../../../ui/widgets/lugmatic_logo.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -224,34 +225,10 @@ class _LoginScreenState extends State<LoginScreen>
                                       CrossAxisAlignment.stretch,
                                   children: [
                                     // Logo
-                                    Center(
-                                      child: Container(
-                                        width: 64,
-                                        height: 64,
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(16),
-                                        ),
-                                        child: Image.asset(
-                                          'assets/images/app_logo_transparent.png',
-                                          fit: BoxFit.contain,
-                                          errorBuilder:
-                                              (ctx, e, st) => Container(
-                                            width: 64,
-                                            height: 64,
-                                            decoration: BoxDecoration(
-                                              color: AppColors.muted,
-                                              borderRadius:
-                                                  BorderRadius.circular(
-                                                      16),
-                                            ),
-                                            child: const Icon(
-                                              Icons.music_note_rounded,
-                                              color: AppColors.primary,
-                                              size: 32,
-                                            ),
-                                          ),
-                                        ),
+                                    const Center(
+                                      child: LugmaticLogo(
+                                        variant: LogoVariant.icon,
+                                        scale: 1.0,
                                       ),
                                     ),
                                     const SizedBox(height: 20),

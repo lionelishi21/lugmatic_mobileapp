@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
+import 'lugmatic_logo.dart';
 
 class CustomPreloader extends StatefulWidget {
   final String text;
@@ -76,16 +77,9 @@ class _CustomPreloaderState extends State<CustomPreloader>
                         ),
                       ),
                     ),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: Image.asset(
-                        'assets/images/logo.png',
-                        width: 30,
-                        height: 30,
-                        fit: BoxFit.contain,
-                        errorBuilder: (context, error, stackTrace) =>
-                            const Icon(Icons.music_note, color: Colors.white, size: 24),
-                      ),
+                    const LugmaticLogo(
+                      variant: LogoVariant.icon,
+                      scale: 0.47,
                     ),
                   ],
                 ),
