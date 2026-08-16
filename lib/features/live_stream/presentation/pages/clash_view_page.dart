@@ -147,7 +147,7 @@ class _ClashViewPageState extends State<ClashViewPage> {
           child: ClashVideoWidget(
             tokenData: token,
             challengerId: clash.challengerUserId ?? clash.challenger.id,
-            opponentId: clash.opponentUserId ?? clash.opponent.id,
+            opponentId: clash.opponentUserId ?? clash.opponent?.id ?? 'none',
             isHost: false,
           ),
         ),
@@ -169,12 +169,73 @@ class _ClashViewPageState extends State<ClashViewPage> {
             challengerScore: clash.challengerScore,
             opponentScore: clash.opponentScore,
             challengerName: clash.challenger.name,
-            opponentName: clash.opponent.name,
+            opponentName: clash.opponent?.name ?? 'Waiting...',
             durationSeconds: clash.duration,
             startTime: clash.startTime,
           ),
         ),
+
+        // Challenge Host Button (Only if Open Challenge)
+        if (clash.isOpenChallenge && clash.opponent == null)
+          Positioned(
+            bottom: 120,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.flash_on),
+                label: const Text('CHALLENGE HOST'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.amber,
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                ),
+                onPressed: () async {
+                  try {
+                    await _liveStreamService.challengeOpenClash(clash.id);
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Challenge accepted! Joining stream...')));
+                    // Normally we would reconnect LiveKit here or wait for socket event
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to join: $e')));
+                  }
+                },
+              ),
+            ),
+          ),
+
+        // Vote Buttons (If active and has opponent)
+        if (clash.status == 'active' && clash.opponent != null)
+          Positioned(
+            bottom: 40,
+            left: 20,
+            right: 20,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+                  onPressed: () => _vote('challenger'),
+                  child: const Text('VOTE CHALLENGER'),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent),
+                  onPressed: () => _vote('opponent'),
+                  child: const Text('VOTE OPPONENT'),
+                ),
+              ],
+            ),
+          ),
       ],
     );
+  }
+
+  Future<void> _vote(String voteFor) async {
+    try {
+      await _liveStreamService.voteClash(widget.clashId, voteFor);
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Vote cast!')));
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+    }
   }
 }

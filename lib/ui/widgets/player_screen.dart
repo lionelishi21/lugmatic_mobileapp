@@ -865,7 +865,7 @@ class _PlayerScreenState extends State<PlayerScreen> with TickerProviderStateMix
   }
 
   void _shareSong(MusicModel music) {
-    Share.share('Listening to ${music.title} by ${music.artist} on Lugmatic!');
+    Share.share('Listening to "${music.title}" by ${music.artist} on Lugmatic!\nhttps://music.lugmatic.com/song/${music.id}');
   }
 
   Future<void> _toggleFavorite(MusicModel music) async {

@@ -3,7 +3,7 @@ import 'package:lugmatic_flutter/data/models/live_stream_model.dart';
 class LiveClashModel {
   final String id;
   final LiveStreamHost challenger;
-  final LiveStreamHost opponent;
+  final LiveStreamHost? opponent;
   final String status; // pending, active, ended, cancelled, rejected
   final int duration;
   final double challengerScore;
@@ -17,11 +17,12 @@ class LiveClashModel {
   final String? livekitUrl;
   final String? challengerUserId;
   final String? opponentUserId;
+  final bool isOpenChallenge;
 
   const LiveClashModel({
     required this.id,
     required this.challenger,
-    required this.opponent,
+    this.opponent,
     required this.status,
     required this.duration,
     this.challengerScore = 0,
@@ -35,6 +36,7 @@ class LiveClashModel {
     this.livekitUrl,
     this.challengerUserId,
     this.opponentUserId,
+    this.isOpenChallenge = false,
   });
 
   factory LiveClashModel.fromJson(Map<String, dynamic> json) {
@@ -43,9 +45,11 @@ class LiveClashModel {
       challenger: json['challenger'] is Map
           ? LiveStreamHost.fromJson(json['challenger'])
           : LiveStreamHost(id: json['challenger']?.toString() ?? '', name: 'Challenger'),
-      opponent: json['opponent'] is Map
-          ? LiveStreamHost.fromJson(json['opponent'])
-          : LiveStreamHost(id: json['opponent']?.toString() ?? '', name: 'Opponent'),
+      opponent: json['opponent'] != null 
+          ? (json['opponent'] is Map
+              ? LiveStreamHost.fromJson(json['opponent'])
+              : LiveStreamHost(id: json['opponent']?.toString() ?? '', name: 'Opponent'))
+          : null,
       status: json['status'] ?? 'pending',
       duration: json['duration'] ?? 300,
       challengerScore: (json['challengerScore'] ?? 0).toDouble(),
@@ -61,6 +65,7 @@ class LiveClashModel {
       livekitUrl: json['livekitUrl']?.toString(),
       challengerUserId: json['challengerUserId']?.toString(),
       opponentUserId: json['opponentUserId']?.toString(),
+      isOpenChallenge: json['isOpenChallenge'] ?? false,
     );
   }
 

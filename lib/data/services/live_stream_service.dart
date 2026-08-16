@@ -115,6 +115,32 @@ class LiveStreamService {
     }
   }
 
+  /// Join an open challenge clash.
+  Future<LiveClashModel> challengeOpenClash(String clashId) async {
+    try {
+      final response = await _apiClient.dio.post(
+        '${ApiConfig.clash}/$clashId/challenge',
+      );
+      final body = response.data;
+      final data = body['data'] ?? body;
+      return LiveClashModel.fromJson(data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// Vote for a participant in a clash.
+  Future<void> voteClash(String clashId, String voteFor) async {
+    try {
+      await _apiClient.dio.post(
+        '${ApiConfig.clash}/$clashId/vote',
+        data: {'voteFor': voteFor},
+      );
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
   /// Get a LiveKit token for the shared clash room (viewer or host).
   Future<Map<String, dynamic>> getClashToken(String clashId) async {
     try {

@@ -157,7 +157,7 @@ class _SongPageState extends State<SongPage> with TickerProviderStateMixin {
 
   void _shareSong() {
     Share.share(
-      'Check out "${widget.song.title}" by ${widget.song.artist} on Lugmatic Music!',
+      'Check out "${widget.song.title}" by ${widget.song.artist} on Lugmatic Music!\nhttps://music.lugmatic.com/song/${widget.song.id}',
       subject: widget.song.title,
     );
   }
