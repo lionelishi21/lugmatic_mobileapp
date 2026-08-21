@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lugmatic_flutter/core/constants/app_colors.dart';
+import 'package:lugmatic_flutter/shared/widgets/role_switcher_button.dart' as lugmatic_switcher;
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -42,6 +43,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
               Row(
                 children: [
+                  const lugmatic_switcher.RoleSwitcherButton(),
+                  const SizedBox(width: 8),
                   if (onStoreTap != null) ...[
                     GestureDetector(
                       onTap: onStoreTap,

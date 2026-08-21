@@ -50,7 +50,6 @@ import 'package:lugmatic_flutter/data/services/socket_service.dart';
 import 'package:lugmatic_flutter/core/network/token_storage.dart';
 import 'package:lugmatic_flutter/data/models/genre_model.dart';
 import 'package:lugmatic_flutter/features/music/presentation/pages/genre_music_page.dart';
-import 'package:lugmatic_flutter/shared/widgets/role_switcher_button.dart';
 import 'package:lugmatic_flutter/shared/widgets/brand_gradient_fallback.dart';
 import 'package:lugmatic_flutter/features/home/presentation/widgets/billboard_list_item.dart';
 import 'package:lugmatic_flutter/features/live_stream/presentation/pages/recorded_streams_page.dart';
@@ -422,8 +421,7 @@ class _HomePageState extends State<HomePage> {
           const LibraryPage(),
         ],
       ),
-      floatingActionButton: const RoleSwitcherButton(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      ),
       bottomNavigationBar: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -1752,12 +1750,12 @@ class _HomePageState extends State<HomePage> {
                               padding: EdgeInsets.symmetric(horizontal: 12),
                               child: Text('VS', style: TextStyle(color: Colors.white24, fontWeight: FontWeight.w900, fontSize: 12)),
                             ),
-                            _buildMiniArtist(clash.opponent.name, clash.opponent.image),
+                            _buildMiniArtist(clash.opponent?.name ?? 'Opponent', clash.opponent?.image ?? ''),
                           ],
                         ),
                         const Spacer(),
                         Text(
-                          'Winner: ${clash.winnerId == clash.challenger.id ? clash.challenger.name : (clash.winnerId == clash.opponent.id ? clash.opponent.name : 'Draw')}',
+                          'Winner: ${clash.winnerId == clash.challenger.id ? clash.challenger.name : (clash.winnerId == clash.opponent?.id ? (clash.opponent?.name ?? 'Opponent') : 'Draw')}',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 13,
