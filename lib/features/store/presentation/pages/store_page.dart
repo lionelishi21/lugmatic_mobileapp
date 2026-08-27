@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lugmatic_flutter/data/services/gift_service.dart';
 import 'package:lugmatic_flutter/data/services/revenuecat_service.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 
 class CoinPackage {
   final String label;
@@ -34,57 +35,30 @@ class StorePage extends StatefulWidget {
 class _StorePageState extends State<StorePage> {
   int? _balance;
   bool _isLoadingBalance = true;
-  int? _purchasingAmount;
-  final RevenueCatService _revenueCatService = RevenueCatService();
-
-  final List<CoinPackage> _packages = [
-    CoinPackage(
-      label: 'Starter Pack',
-      amount: 500,
-      price: '\$5.00',
-      description: 'Perfect to try gifting',
-      icon: Icons.flash_on,
-      baseColor: Colors.blueGrey,
-    ),
-    CoinPackage(
-      label: 'Standard Pack',
-      amount: 1000,
-      price: '\$10.00',
-      description: 'Great value for fans',
-      icon: Icons.star,
-      baseColor: Colors.blue,
-    ),
-    CoinPackage(
-      label: 'Creator\'s Choice',
-      amount: 2000,
-      price: '\$20.00',
-      description: 'Most popular support',
-      icon: Icons.workspace_premium,
-      baseColor: const Color(0xFF10B981),
-      popular: true,
-    ),
-    CoinPackage(
-      label: 'Super Supporter',
-      amount: 5000,
-      price: '\$50.00',
-      description: 'Show serious support',
-      icon: Icons.card_giftcard,
-      baseColor: Colors.purple,
-    ),
-    CoinPackage(
-      label: 'Whale Pack',
-      amount: 10000,
-      price: '\$100.00',
-      description: 'Ultimate artist support',
-      icon: Icons.shield,
-      baseColor: Colors.amber,
-    ),
-  ];
+  bool _isLoadingPackages = true;
+  String? _purchasingAmount;
+  List<Package> _packages = [];
 
   @override
   void initState() {
     super.initState();
     _fetchBalance();
+    _loadPackages();
+  }
+
+  Future<void> _loadPackages() async {
+    try {
+      final giftService = context.read<GiftService>();
+      final pkgs = await giftService.getCoinPackages();
+      if (mounted) {
+        setState(() {
+          _packages = pkgs;
+          _isLoadingPackages = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) setState(() => _isLoadingPackages = false);
+    }
   }
 
   Future<void> _fetchBalance() async {
@@ -102,14 +76,15 @@ class _StorePageState extends State<StorePage> {
     }
   }
 
-  Future<void> _handlePurchase(int amount) async {
-    setState(() => _purchasingAmount = amount);
+  Future<void> _handlePurchase(Package package) async {
+    setState(() => _purchasingAmount = package.identifier);
     try {
-      final error = await _revenueCatService.purchaseCoins(amount);
+      final giftService = context.read<GiftService>();
+      final customerInfo = await giftService.purchaseCoins(package);
 
       if (!mounted) return;
 
-      if (error == null) {
+      if (customerInfo != null) {
         // Wait a brief moment for the webhook to hit our backend
         await Future.delayed(const Duration(seconds: 2));
         await _fetchBalance();
@@ -119,12 +94,12 @@ class _StorePageState extends State<StorePage> {
           title: 'Purchase Complete!',
           message: 'Your purchase is complete. Coins will appear in your wallet shortly.',
         );
-      } else if (error != 'cancelled') {
+      } else {
         _showDialog(
           icon: Icons.error_outline,
           iconColor: Colors.redAccent,
-          title: 'Purchase Failed',
-          message: error,
+          title: 'Purchase Cancelled',
+          message: 'Purchase was cancelled or failed.',
         );
       }
     } catch (e) {
@@ -208,11 +183,21 @@ class _StorePageState extends State<StorePage> {
           padding: const EdgeInsets.symmetric(horizontal: 20),
           sliver: SliverList(
             delegate: SliverChildBuilderDelegate(
-              (context, index) => Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: _buildPackageCard(_packages[index]),
-              ),
-              childCount: _packages.length,
+              (context, index) {
+                if (_isLoadingPackages) {
+                  if (index == 0) return const Center(child: CircularProgressIndicator(color: Color(0xFF10B981)));
+                  return const SizedBox.shrink();
+                }
+                if (_packages.isEmpty) {
+                  if (index == 0) return const Center(child: Text('No coin packages available.', style: TextStyle(color: Colors.white70)));
+                  return const SizedBox.shrink();
+                }
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: _buildPackageCard(_packages[index]),
+                );
+              },
+              childCount: _isLoadingPackages || _packages.isEmpty ? 1 : _packages.length,
             ),
           ),
         ),
@@ -365,20 +350,21 @@ class _StorePageState extends State<StorePage> {
     );
   }
 
-  Widget _buildPackageCard(CoinPackage package) {
-    bool isPurchasing = _purchasingAmount == package.amount;
+  Widget _buildPackageCard(Package package) {
+    bool isPurchasing = _purchasingAmount == package.identifier;
+    bool popular = false; // We can deduce popular from package name if needed later
     
     return Container(
       decoration: BoxDecoration(
-        color: package.popular ? const Color(0xFF1A1A1A) : Colors.transparent,
+        color: popular ? const Color(0xFF1A1A1A) : Colors.transparent,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: package.popular 
+          color: popular 
             ? const Color(0xFF10B981).withValues(alpha: 0.4) 
             : Colors.white.withValues(alpha: 0.05),
-          width: package.popular ? 2 : 1,
+          width: popular ? 2 : 1,
         ),
-        boxShadow: package.popular 
+        boxShadow: popular 
           ? [
               BoxShadow(
                 color: const Color(0xFF10B981).withValues(alpha: 0.1),
@@ -396,10 +382,10 @@ class _StorePageState extends State<StorePage> {
               width: 56,
               height: 56,
               decoration: BoxDecoration(
-                color: package.baseColor.withValues(alpha: 0.1),
+                color: const Color(0xFF10B981).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Icon(package.icon, color: package.baseColor, size: 28),
+              child: const Icon(Icons.flash_on, color: Color(0xFF10B981), size: 28),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -409,14 +395,14 @@ class _StorePageState extends State<StorePage> {
                   Row(
                     children: [
                       Text(
-                        package.label,
+                        package.storeProduct.title,
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
                         ),
                       ),
-                      if (package.popular) ...[
+                      if (popular) ...[
                         const SizedBox(width: 8),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -438,10 +424,19 @@ class _StorePageState extends State<StorePage> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${package.amount.toLocaleString()} coins • ${package.price}',
+                    package.storeProduct.description,
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.5),
                       fontSize: 12,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    package.storeProduct.priceString,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.8),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
@@ -449,11 +444,11 @@ class _StorePageState extends State<StorePage> {
             ),
             const SizedBox(width: 12),
             GestureDetector(
-              onTap: isPurchasing ? null : () => _handlePurchase(package.amount),
+              onTap: isPurchasing ? null : () => _handlePurchase(package),
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
-                  color: package.popular ? const Color(0xFF10B981) : Colors.white.withValues(alpha: 0.05),
+                  color: popular ? const Color(0xFF10B981) : Colors.white.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: isPurchasing
@@ -468,7 +463,7 @@ class _StorePageState extends State<StorePage> {
                   : Text(
                       'BUY',
                       style: TextStyle(
-                        color: package.popular ? Colors.black : Colors.white,
+                        color: popular ? Colors.black : Colors.white,
                         fontWeight: FontWeight.bold,
                         fontSize: 13,
                       ),

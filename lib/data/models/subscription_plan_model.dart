@@ -6,6 +6,7 @@ class SubscriptionPlan {
   final String interval;
   final List<String> features;
   final bool isPopular;
+  final dynamic rcPackage; // Stores RevenueCat Package if available
 
   SubscriptionPlan({
     required this.id,
@@ -15,6 +16,7 @@ class SubscriptionPlan {
     required this.interval,
     required this.features,
     this.isPopular = false,
+    this.rcPackage,
   });
 
   factory SubscriptionPlan.fromJson(Map<String, dynamic> json) {

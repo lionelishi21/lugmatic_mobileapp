@@ -142,6 +142,17 @@ class ApiConfig {
     defaultValue: 'wss://lugmaticmusic-m52lge19.livekit.cloud',
   );
 
+  // ── RevenueCat ─────────────────────────────────────────────────
+  static const String revenuecatAppleKey = String.fromEnvironment(
+    'REVENUECAT_APPLE_KEY',
+    defaultValue: 'sk_DrWhHnqEYuIVpauUjmpOnScmgkAdc',
+  );
+  
+  static const String revenuecatGoogleKey = String.fromEnvironment(
+    'REVENUECAT_GOOGLE_KEY',
+    defaultValue: 'goog_PiidSiLKLTEkGXqYUvpAETuiBGl',
+  );
+
   // ── Socket.io URL ───────────────────────────────────────────────
   static const String socketUrl = String.fromEnvironment(
     'SOCKET_URL',

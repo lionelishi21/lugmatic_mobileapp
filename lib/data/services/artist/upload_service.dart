@@ -26,7 +26,7 @@ class UploadService {
         'type': type,
         'genreId': genreId,
         'description': description ?? '',
-        'file': await MultipartFile.fromFile(file.path, filename: fileName),
+        'audioFile': await MultipartFile.fromFile(file.path, filename: fileName),
         'coverArt': await MultipartFile.fromFile(coverArt.path, filename: coverName),
       };
       if (videoFileKey != null) fields['videoFileKey'] = videoFileKey;

@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "518032014474",
-    "project_id": "lugmatic-fe310",
-    "storage_bucket": "lugmatic-fe310.firebasestorage.app"
+    "project_number": "64518993933",
+    "project_id": "lugmatic-music",
+    "storage_bucket": "lugmatic-music.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:518032014474:android:4029956832156d91cec173",
+        "mobilesdk_app_id": "1:64518993933:android:0c758829367e7a91ee3d44",
         "android_client_info": {
-          "package_name": "com.lugmatic.lugmatic"
+          "package_name": "com.aibridix.lugmaticmusic"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDq-WNETC5gu9SqeJ92UpRNR6qmvU2ptSU"
+          "current_key": "AIzaSyCr6JGuzv6bv_707nAwnFGm0g8NeeOkQG0"
         }
       ],
       "services": {

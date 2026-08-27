@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:lugmatic_flutter/data/models/podcast_model.dart';
 import 'package:lugmatic_flutter/data/models/music_model.dart';
+import 'package:lugmatic_flutter/data/models/video_model.dart';
 import 'package:lugmatic_flutter/data/providers/audio_provider.dart';
 import 'package:lugmatic_flutter/data/services/podcast_service.dart';
 import 'package:lugmatic_flutter/core/network/api_exception.dart';
 import 'package:lugmatic_flutter/ui/widgets/player_screen.dart';
+import 'package:lugmatic_flutter/features/video/presentation/pages/video_player_page.dart';
 import 'package:provider/provider.dart';
 import '../../../../shared/widgets/comment_section_widget.dart';
 
@@ -379,6 +381,28 @@ class _PodcastStreamPageState extends State<PodcastStreamPage> {
   }
 
   void _playEpisode(PodcastModel podcast, PodcastEpisode? episode) {
+    final videoUrl = episode?.videoUrl.isNotEmpty == true ? episode!.videoUrl : (podcast.videoUrl.isNotEmpty ? podcast.videoUrl : null);
+    
+    if (videoUrl != null && videoUrl.isNotEmpty) {
+      final videoModel = VideoModel(
+        id: episode?.id ?? podcast.id,
+        title: episode != null ? '${podcast.title} — ${episode.title}' : podcast.title,
+        description: episode?.description ?? podcast.description,
+        videoUrl: videoUrl,
+        thumbnailUrl: podcast.imageUrl,
+        artistId: podcast.host,
+        artistName: podcast.host,
+        createdAt: podcast.publishDate,
+      );
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => VideoPlayerPage(video: videoModel),
+        ),
+      );
+      return;
+    }
+
     final audioUrl = episode?.audioUrl ?? podcast.audioUrl;
     if (audioUrl.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(

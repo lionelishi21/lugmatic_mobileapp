@@ -472,8 +472,8 @@ class _LiveClashCard extends StatelessWidget {
                         ),
                         Expanded(
                             child: _ArtistSide(
-                          name: clash.opponent.name,
-                          image: clash.opponent.image,
+                          name: clash.opponent?.name ?? 'Opponent',
+                          image: clash.opponent?.image ?? '',
                           score: clash.opponentScore.toInt(),
                           isLeading: clash.opponentScore > clash.challengerScore,
                           alignment: Alignment.centerRight,
@@ -734,8 +734,8 @@ class _PastClashCard extends StatelessWidget {
                 ),
               ),
               _MiniArtist(
-                name: clash.opponent.name,
-                image: clash.opponent.image,
+                name: clash.opponent?.name ?? 'Opponent',
+                image: clash.opponent?.image ?? '',
                 isWinner: !challengerWon,
                 score: clash.opponentScore.toInt(),
                 labelLeft: false,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/responsive.dart';
 import '../../../../data/models/music_model.dart';
 import '../../../../shared/widgets/new_badge.dart';
 
@@ -23,9 +24,10 @@ class MusicCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cardSize = Responsive.musicCardWidth(context);
     return Container(
       margin: const EdgeInsets.only(right: 16),
-      width: 160,
+      width: cardSize,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
@@ -49,13 +51,13 @@ class MusicCard extends StatelessWidget {
                   tag: 'music_art_${music.id}',
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(16),
-                    child: _buildImage(music.imageUrl, 160, 160),
+                    child: _buildImage(music.imageUrl, cardSize, cardSize),
                   ),
                 ),
                 // Gradient overlay
                 Container(
-                  width: 160,
-                  height: 160,
+                  width: cardSize,
+                  height: cardSize,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
                     gradient: LinearGradient(

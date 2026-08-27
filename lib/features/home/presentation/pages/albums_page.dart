@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../../../core/config/api_config.dart';
 import '../../../../core/network/api_client.dart';
+import 'package:provider/provider.dart';
 import '../../../../core/constants/app_colors.dart';
 import 'album_detail_page.dart';
+import '../../../../core/utils/responsive.dart';
 
 class AlbumsPage extends StatefulWidget {
   const AlbumsPage({Key? key}) : super(key: key);
@@ -23,11 +25,12 @@ class _AlbumsPageState extends State<AlbumsPage> {
 
   Future<void> _fetchAlbums() async {
     try {
-      final res = await ApiClient.get('/album/list');
-      if (res['success'] == true) {
+      final apiClient = context.read<ApiClient>();
+      final res = await apiClient.dio.get('/album/list');
+      if (res.data['success'] == true) {
         if (mounted) {
           setState(() {
-            _albums = List<Map<String, dynamic>>.from(res['data'] ?? []);
+            _albums = List<Map<String, dynamic>>.from(res.data['data'] ?? []);
             _loading = false;
           });
         }
@@ -101,8 +104,8 @@ class _AlbumsPageState extends State<AlbumsPage> {
                           )
                         : GridView.builder(
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
+                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: Responsive.musicGridColumns(context),
                               childAspectRatio: 0.75,
                               crossAxisSpacing: 16,
                               mainAxisSpacing: 16,

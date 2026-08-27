@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lugmatic_flutter/core/utils/responsive.dart';
 import 'package:lugmatic_flutter/data/models/artist_model.dart';
 import 'package:lugmatic_flutter/shared/widgets/brand_gradient_fallback.dart';
 
@@ -18,17 +19,19 @@ class ArtistCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cardWidth = Responsive.artistCardWidth(context);
+    final avatarSize = cardWidth * 0.786; // keeps the same ratio as 110/140
     return GestureDetector(
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(right: 16),
-        width: 140,
+        width: cardWidth,
         child: Column(
           children: [
             // Artist Image (circular)
             Container(
-              width: 110,
-              height: 110,
+              width: avatarSize,
+              height: avatarSize,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 boxShadow: [
@@ -37,7 +40,7 @@ class ArtistCard extends StatelessWidget {
               ),
               child: Stack(
                 children: [
-                  ClipOval(child: _buildImage(artist.imageUrl, 110, 110)),
+                  ClipOval(child: _buildImage(artist.imageUrl, avatarSize, avatarSize)),
                   // Verified badge
                   if (artist.isVerified)
                     Positioned(

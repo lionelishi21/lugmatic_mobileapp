@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../data/services/management_service.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/responsive.dart';
 
 class AdminDashboardPage extends StatefulWidget {
   const AdminDashboardPage({Key? key}) : super(key: key);
@@ -118,7 +119,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> with SingleTick
             const Text('Platform Statistics', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
             GridView.count(
-              crossAxisCount: 2,
+              crossAxisCount: Responsive.genreGridColumns(context),
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               mainAxisSpacing: 12,

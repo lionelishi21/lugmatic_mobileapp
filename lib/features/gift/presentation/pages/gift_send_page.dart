@@ -10,6 +10,7 @@ import 'package:lugmatic_flutter/core/network/api_exception.dart';
 import 'package:lugmatic_flutter/core/gifts/gift_pop_controller.dart';
 import 'package:dio/dio.dart';
 import 'dart:async';
+import 'package:lugmatic_flutter/shared/widgets/gift_bottom_sheet.dart';
 
 class GiftSendPage extends StatefulWidget {
   final ArtistModel? selectedArtist;
@@ -25,7 +26,6 @@ class _GiftSendPageState extends State<GiftSendPage> {
   GiftModel? _selectedGift;
   String _message = '';
   final TextEditingController _messageController = TextEditingController();
-  final RevenueCatService _revenueCatService = RevenueCatService();
 
   List<GiftModel> _popularGifts = [
     GiftModel(
@@ -730,96 +730,17 @@ class _GiftSendPageState extends State<GiftSendPage> {
   void _showWalletDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1F2937),
-        title: const Text(
-          'Wallet',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Current Balance',
-              style: TextStyle(color: Colors.white70),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '$_userCoins 🪙',
-              style: const TextStyle(
-                color: Color(0xFFFFD700),
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [500, 1000, 2000, 5000].map((amount) {
-                return ActionChip(
-                  label: Text('$amount 🪙'),
-                  onPressed: () => _handlePurchase(amount),
-                  backgroundColor: const Color(0xFFFFD700).withValues(alpha: 0.1),
-                  labelStyle: const TextStyle(color: Color(0xFFFFD700)),
-                );
-              }).toList(),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
-          ),
-        ],
+      builder: (context) => TopUpDialog(
+        onSuccess: (newBalance) {
+          if (mounted) {
+            setState(() {
+              _userCoins = newBalance;
+              _userBalance = _userCoins / 100.0;
+            });
+          }
+        },
       ),
     );
-  }
-
-  Future<void> _handlePurchase(int amount) async {
-    // Show loading
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Initializing payment...'), duration: Duration(seconds: 1)),
-    );
-
-    try {
-      final error = await _revenueCatService.purchaseCoins(amount);
-      
-      if (error == null) {
-        // Wait a brief moment for the webhook to hit our backend
-        await Future.delayed(const Duration(seconds: 2));
-        await _refreshBalance();
-        
-        if (mounted) {
-          Navigator.pop(context); // Close wallet dialog
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Successfully purchased $amount coins!'),
-              backgroundColor: Colors.green,
-            ),
-          );
-        }
-      } else if (error != 'cancelled') {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(error),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
   }
 
   void _sendGift() {

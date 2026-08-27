@@ -9,6 +9,7 @@ import '../../data/providers/auth_provider.dart';
 import '../../data/services/gift_service.dart';
 import '../../data/services/revenuecat_service.dart';
 import '../../core/gifts/gift_pop_controller.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 
 class GiftBottomSheet extends StatefulWidget {
   final String artistId;
@@ -176,7 +177,7 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> with SingleTickerProv
   void _showTopUpDialog({int? requiredAmount}) {
     showDialog(
       context: context,
-      builder: (context) => _TopUpDialog(
+      builder: (context) => TopUpDialog(
         requiredAmount: requiredAmount,
         onSuccess: (newBalance) {
           if (mounted) setState(() => _coinBalance = newBalance);
@@ -564,54 +565,71 @@ class _GiftCard extends StatelessWidget {
   }
 }
 
-class _TopUpDialog extends StatefulWidget {
+class TopUpDialog extends StatefulWidget {
   final int? requiredAmount;
   final Function(int) onSuccess;
 
-  const _TopUpDialog({this.requiredAmount, required this.onSuccess});
+  const TopUpDialog({super.key, this.requiredAmount, required this.onSuccess});
 
   @override
-  State<_TopUpDialog> createState() => _TopUpDialogState();
+  State<TopUpDialog> createState() => TopUpDialogState();
 }
 
-class _TopUpDialogState extends State<_TopUpDialog> {
+class TopUpDialogState extends State<TopUpDialog> {
   bool _loading = false;
-  int? _loadingAmount;
-  final RevenueCatService _revenueCatService = RevenueCatService();
+  bool _loadingPackages = true;
+  String? _loadingAmount;
+  List<Package> _packages = [];
 
-  final List<Map<String, dynamic>> _packages = [
-    {'amount': 500, 'price': '\$5', 'label': 'Starter'},
-    {'amount': 1000, 'price': '\$10', 'label': 'Popular'},
-    {'amount': 2000, 'price': '\$20', 'label': 'Best Value'},
-    {'amount': 5000, 'price': '\$50', 'label': 'Supporter'},
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadPackages();
+  }
 
-  Future<void> _handlePurchase(int amount) async {
+  Future<void> _loadPackages() async {
+    try {
+      final giftService = context.read<GiftService>();
+      final pkgs = await giftService.getCoinPackages();
+      if (mounted) {
+        setState(() {
+          _packages = pkgs;
+          _loadingPackages = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _loadingPackages = false);
+      }
+    }
+  }
+
+  Future<void> _handlePurchase(Package package) async {
     setState(() {
       _loading = true;
-      _loadingAmount = amount;
+      _loadingAmount = package.identifier;
     });
     try {
-      final error = await _revenueCatService.purchaseCoins(amount);
+      final giftService = context.read<GiftService>();
+      final customerInfo = await giftService.purchaseCoins(package);
       if (!mounted) return;
 
-      if (error == null) {
+      if (customerInfo != null) {
         // Wait a brief moment for the webhook to hit our backend
         await Future.delayed(const Duration(seconds: 2));
         
-        final giftService = context.read<GiftService>();
         final balanceData = await giftService.getCoinBalance();
         final newBalance = balanceData['coins'] as int? ?? 0;
         
         if (!mounted) return;
         widget.onSuccess(newBalance);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$amount coins added to your wallet!'), backgroundColor: const Color(0xFF10B981)),
+          const SnackBar(content: Text('Coins added to your wallet!'), backgroundColor: Color(0xFF10B981)),
         );
         Navigator.pop(context);
-      } else if (error != 'cancelled') {
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(error), backgroundColor: const Color(0xFFEF4444)),
+          const SnackBar(content: Text('Purchase cancelled or failed'), backgroundColor: Color(0xFFEF4444)),
         );
       }
     } catch (e) {
@@ -649,44 +667,48 @@ class _TopUpDialogState extends State<_TopUpDialog> {
                 textAlign: TextAlign.center,
               ),
             ],
-            const SizedBox(height: 20),
-            ..._packages.map((pkg) {
-              final isThisLoading = _loading && _loadingAmount == pkg['amount'];
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: InkWell(
-                  onTap: _loading ? null : () => _handlePurchase(pkg['amount']),
-                  borderRadius: BorderRadius.circular(16),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.05),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-                    ),
-                    child: Row(
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(pkg['label'], style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                            Text('${pkg['amount']} Coins', style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 12)),
-                          ],
-                        ),
-                        const Spacer(),
-                        if (isThisLoading)
-                          const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF10B981)))
-                        else
-                          Text(
-                            pkg['price'] as String,
-                            style: const TextStyle(color: Color(0xFF10B981), fontWeight: FontWeight.w900),
+            if (_loadingPackages)
+              const CircularProgressIndicator(color: Color(0xFF10B981))
+            else if (_packages.isEmpty)
+              Text('No coin packages available.', style: TextStyle(color: Colors.white.withValues(alpha: 0.6)))
+            else
+              ..._packages.map((pkg) {
+                final isThisLoading = _loading && _loadingAmount == pkg.identifier;
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: InkWell(
+                    onTap: _loading ? null : () => _handlePurchase(pkg),
+                    borderRadius: BorderRadius.circular(16),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.05),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                      ),
+                      child: Row(
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(pkg.storeProduct.title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                              Text(pkg.storeProduct.description, style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 12)),
+                            ],
                           ),
-                      ],
+                          const Spacer(),
+                          if (isThisLoading)
+                            const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF10B981)))
+                          else
+                            Text(
+                              pkg.storeProduct.priceString,
+                              style: const TextStyle(color: Color(0xFF10B981), fontWeight: FontWeight.w900),
+                            ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              );
-            }).toList(),
+                );
+              }).toList(),
             const SizedBox(height: 8),
             TextButton(
               onPressed: _loading ? null : () => Navigator.pop(context),

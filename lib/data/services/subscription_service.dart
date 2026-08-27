@@ -1,29 +1,40 @@
 import 'package:dio/dio.dart';
-import '../../core/config/api_config.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/api_exception.dart';
 import '../models/subscription_plan_model.dart';
+import 'revenuecat_service.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 
 class SubscriptionService {
   final ApiClient _apiClient;
+  final RevenueCatService _revenueCatService = RevenueCatService();
 
   SubscriptionService({required ApiClient apiClient}) : _apiClient = apiClient;
 
-  /// Fetch available subscription plans.
-  /// Note: Falls back to hardcoded defaults if API fails or returns empty.
+  /// Fetch available subscription plans from RevenueCat.
   Future<List<SubscriptionPlan>> getSubscriptionPlans() async {
     try {
-      // Trying to fetch from admin plans if available, or a dedicated public endpoint
-      // For now, we'll try the dedicated endpoint or use defaults.
-      final response = await _apiClient.dio.get('/subscription/plans').catchError((_) => 
-        _apiClient.dio.get('/admin/subscription-plans')
-      );
-      
-      final body = response.data;
-      final items = body['data'] ?? body;
-      
-      if (items is List && items.isNotEmpty) {
-        return items.map((json) => SubscriptionPlan.fromJson(json)).toList();
+      final offerings = await _revenueCatService.getOfferings();
+      if (offerings != null && offerings.current != null) {
+        final currentOffering = offerings.current!;
+        return currentOffering.availablePackages.map((package) {
+          final isPopular = package.identifier.contains('popular') || package.identifier.contains('premium_monthly');
+          return SubscriptionPlan(
+            id: package.identifier,
+            name: package.storeProduct.title,
+            description: package.storeProduct.description,
+            price: package.storeProduct.price,
+            interval: package.packageType == PackageType.annual ? 'year' : 'month',
+            features: [
+              'Ad-free music',
+              'Hi-Fi Audio Quality',
+              'Offline downloads',
+              if (package.packageType == PackageType.annual) 'Everything in Monthly',
+            ],
+            isPopular: isPopular,
+            rcPackage: package,
+          );
+        }).toList();
       }
       return _getHardcodedPlans();
     } catch (e) {
@@ -31,17 +42,12 @@ class SubscriptionService {
     }
   }
 
-  /// Create a subscription payment intent.
-  Future<Map<String, dynamic>> createSubscriptionIntent(String planId) async {
-    try {
-      final response = await _apiClient.dio.post(
-        '/subscription/create-intent',
-        data: {'planId': planId},
-      );
-      return response.data['data'] ?? response.data;
-    } on DioException catch (e) {
-      throw ApiException.fromDioException(e);
+  /// Purchase a subscription plan using RevenueCat.
+  Future<CustomerInfo?> purchaseSubscription(SubscriptionPlan plan) async {
+    if (plan.rcPackage == null) {
+      throw Exception('Invalid package for purchase');
     }
+    return await _revenueCatService.purchasePackage(plan.rcPackage);
   }
 
   List<SubscriptionPlan> _getHardcodedPlans() {

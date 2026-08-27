@@ -532,7 +532,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
                       tokenData: _clashRoomTokenData!,
                       // Match by user ID (LiveKit participant identity), not artist ID
                       challengerId: _activeClash!.challengerUserId ?? _activeClash!.challenger.id,
-                      opponentId:   _activeClash!.opponentUserId   ?? _activeClash!.opponent.id,
+                      opponentId:   _activeClash!.opponentUserId   ?? _activeClash!.opponent?.id ?? '',
                       isHost: _clashRoomTokenData!.isHost,
                     ),
                     SafeArea(
@@ -542,7 +542,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
                           challengerScore: _activeClash!.challengerScore,
                           opponentScore: _activeClash!.opponentScore,
                           challengerName: _activeClash!.challenger.name,
-                          opponentName: _activeClash!.opponent.name,
+                          opponentName: _activeClash!.opponent?.name ?? 'Opponent',
                           durationSeconds: _activeClash!.duration,
                           startTime: _activeClash!.startTime,
                         ),

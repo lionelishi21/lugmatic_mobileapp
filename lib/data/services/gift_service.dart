@@ -3,10 +3,13 @@ import '../../core/config/api_config.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/api_exception.dart';
 import '../models/gift_model.dart';
+import 'revenuecat_service.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 
 /// Handles gift browsing, sending, and coin purchases.
 class GiftService {
   final ApiClient _apiClient;
+  final RevenueCatService _revenueCatService = RevenueCatService();
 
   GiftService({required ApiClient apiClient}) : _apiClient = apiClient;
 
@@ -58,82 +61,40 @@ class GiftService {
     }
   }
 
-  /// Create a payment intent for native Stripe payments.
-  Future<Map<String, dynamic>> createPaymentIntent(int amount) async {
-    try {
-      final response = await _apiClient.dio.post(
-        ApiConfig.createPaymentIntent,
-        data: {'amount': amount},
-      );
-      return response.data['data'];
-    } on DioException catch (e) {
-      throw ApiException.fromDioException(e);
+  /// Get coin packages from RevenueCat
+  Future<List<Package>> getCoinPackages() async {
+    final offerings = await _revenueCatService.getOfferings();
+    if (offerings != null && offerings.all.containsKey('coins')) {
+      return offerings.all['coins']!.availablePackages;
     }
+    // Fallback to current offering if 'coins' offering is not explicitly named
+    if (offerings != null && offerings.current != null) {
+      return offerings.current!.availablePackages.where((p) => p.identifier.contains('coin')).toList();
+    }
+    return [];
   }
 
-  /// Purchase coins with a payment token (legacy/manual).
-  Future<void> purchaseCoins({
-    required int amount,
-    required String paymentMethod,
-    String? paymentToken,
-  }) async {
-    try {
-      await _apiClient.dio.post(
-        ApiConfig.purchaseCoins,
-        data: {
-          'amount': amount,
-          'paymentMethod': paymentMethod,
-          if (paymentToken != null) 'paymentToken': paymentToken,
-        },
-      );
-    } on DioException catch (e) {
-      throw ApiException.fromDioException(e);
-    }
-  }
-
-  /// Create a PayPal order for a coin purchase. Returns the orderId and the
-  /// PayPal approval URL to open in a WebView — the user approves there, then
-  /// the app calls [capturePaypalOrder] to finish the purchase.
-  Future<({String orderId, String? approveUrl})> createPaypalCoinOrder(int amount) async {
-    try {
-      final response = await _apiClient.dio.post(
-        ApiConfig.purchaseCoins,
-        data: {'amount': amount},
-      );
-      final data = response.data['data'];
-      final orderId = data?['orderId'] as String?;
-      if (orderId == null || orderId.isEmpty) {
-        throw Exception('Failed to create PayPal order');
+  /// Purchase coins using RevenueCat
+  Future<CustomerInfo?> purchaseCoins(Package package) async {
+    final customerInfo = await _revenueCatService.purchasePackage(package);
+    
+    // If purchase was successful, notify the backend to grant the coins
+    if (customerInfo != null && customerInfo.entitlements.all.isNotEmpty) {
+      try {
+        await _apiClient.dio.post(
+          ApiConfig.purchaseCoins,
+          data: {
+            'packageId': package.identifier,
+            'rcUserId': customerInfo.originalAppUserId,
+          },
+        );
+      } catch (e) {
+        // Log the error but don't fail the whole flow if the backend sync is delayed.
+        // In a production app, you might want a retry queue for this.
+        print('Backend sync for coin purchase failed: $e');
       }
-      return (orderId: orderId, approveUrl: data?['approveUrl'] as String?);
-    } on DioException catch (e) {
-      throw ApiException.fromDioException(e);
     }
-  }
-
-  /// Capture an approved PayPal order — this is what actually credits the coins.
-  Future<Map<String, dynamic>> capturePaypalOrder(String orderId) async {
-    try {
-      final response = await _apiClient.dio.post(
-        ApiConfig.paypalCaptureOrder,
-        data: {'orderId': orderId},
-      );
-      return response.data['data'] ?? {};
-    } on DioException catch (e) {
-      throw ApiException.fromDioException(e);
-    }
-  }
-
-  /// Verify a completed Stripe payment intent and credit coins to the user.
-  Future<Map<String, dynamic>> verifyPurchase(String paymentIntentId) async {
-    try {
-      final response = await _apiClient.dio.post(
-        ApiConfig.verifyPurchase,
-        data: {'paymentIntentId': paymentIntentId},
-      );
-      return response.data['data'] ?? {};
-    } on DioException catch (e) {
-      throw ApiException.fromDioException(e);
-    }
+    
+    return customerInfo;
   }
 }

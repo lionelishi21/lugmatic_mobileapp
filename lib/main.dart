@@ -20,9 +20,9 @@ import 'data/services/notification_service.dart';
 import 'data/services/artist_request_service.dart';
 import 'data/services/video_service.dart';
 import 'data/services/gift_service.dart';
-import 'data/services/stripe_service.dart';
 import 'data/services/music_service.dart';
 import 'data/services/subscription_service.dart';
+import 'data/services/revenuecat_service.dart';
 import 'data/services/mixer_service.dart';
 import 'data/services/management_service.dart';
 import 'data/services/artist_service.dart';
@@ -77,12 +77,13 @@ void main() async {
       debugPrint("Firebase init error: $e");
     }
 
-    // Initialize Stripe SDK (non-fatal — app still launches if this fails)
+    // Initialize RevenueCat SDK
     try {
-      appStatus.value = "Initializing Stripe...";
-      await StripeService.init().timeout(const Duration(seconds: 5));
+      appStatus.value = "Initializing RevenueCat...";
+      await RevenueCatService().init();
     } catch (e) {
-      appStatus.value = "Stripe Error: $e";
+      appStatus.value = "RevenueCat Error: $e";
+      debugPrint("RevenueCat init error: $e");
     }
     
     appStatus.value = "Setting orientations...";
@@ -108,7 +109,6 @@ void main() async {
     final artistRequestService = ArtistRequestService(apiClient: apiClient);
     final videoService = VideoService(apiClient: apiClient);
     final giftService = GiftService(apiClient: apiClient);
-    final stripeService = StripeService(giftService: giftService);
     final musicService = MusicService(apiClient: apiClient);
     final subscriptionService = SubscriptionService(apiClient: apiClient);
     final mixerService = MixerService(apiClient: apiClient);
@@ -149,7 +149,6 @@ void main() async {
           Provider<ArtistService>(create: (context) => ArtistService(apiClient: context.read<ApiClient>())),
           Provider<VideoService>.value(value: videoService),
           Provider<GiftService>.value(value: giftService),
-          Provider<StripeService>.value(value: stripeService),
           Provider<MusicService>.value(value: musicService),
           Provider<SubscriptionService>.value(value: subscriptionService),
           Provider<MixerService>.value(value: mixerService),

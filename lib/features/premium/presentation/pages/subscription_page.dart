@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../data/models/subscription_plan_model.dart';
 import '../../../../data/services/subscription_service.dart';
-import '../../../../data/services/stripe_service.dart';
 
 class SubscriptionPage extends StatefulWidget {
   const SubscriptionPage({Key? key}) : super(key: key);
@@ -54,26 +53,23 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     setState(() => _isLoading = true);
     try {
       final subscriptionService = context.read<SubscriptionService>();
-      final stripeService = context.read<StripeService>();
 
-      // 1. Create intent
-      final intentData = await subscriptionService.createSubscriptionIntent(plan.id);
+      // 1. Purchase via RevenueCat
+      final customerInfo = await subscriptionService.purchaseSubscription(plan);
       
-      // TODO: Implement proper subscription flow via dedicated backend routes
-      // For now, we provide a notice that subscriptions are handled via our web portal.
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please visit our website to manage subscriptions.'),
-          backgroundColor: Color(0xFF10B981),
-        ),
-      );
-      // await stripeService.purchaseCoins((plan.price * 100).toInt());
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Successfully subscribed to ${plan.name}!')),
-        );
-        Navigator.pop(context);
+      if (customerInfo != null && customerInfo.entitlements.active.isNotEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Successfully subscribed to ${plan.name}!')),
+          );
+          Navigator.pop(context);
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Purchase cancelled or failed.')),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {

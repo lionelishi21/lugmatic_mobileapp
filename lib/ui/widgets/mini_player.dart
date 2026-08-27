@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../../core/utils/responsive.dart';
 import '../../data/providers/audio_provider.dart';
 import '../../shared/widgets/gift_bottom_sheet.dart';
 import 'player_screen.dart';
@@ -19,13 +20,16 @@ class MiniPlayer extends StatelessWidget {
             ? (audio.position.inMilliseconds / audio.duration.inMilliseconds).clamp(0.0, 1.0)
             : 0.0;
 
+        final isTablet = Responsive.isTabletOrLarger(context);
+        final playerHeight = Responsive.miniPlayerHeight(context);
+
         return GestureDetector(
           onTap: () => Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => PlayerScreen(music: music)),
           ),
           child: Container(
-            height: 68,
+            height: playerHeight,
             decoration: BoxDecoration(
               color: const Color(0xFF1A1A2E),
               border: Border(
@@ -65,34 +69,89 @@ class MiniPlayer extends StatelessWidget {
 
                         // Song info — expands and clips
                         Expanded(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                music.title,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                  letterSpacing: -0.2,
+                          child: isTablet
+                              // Tablet: show title + artist + seek slider
+                              ? Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            music.title,
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w600,
+                                              letterSpacing: -0.2,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          music.artist,
+                                          style: TextStyle(
+                                            color: Colors.white.withValues(alpha: 0.55),
+                                            fontSize: 12,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    SliderTheme(
+                                      data: SliderTheme.of(context).copyWith(
+                                        trackHeight: 2,
+                                        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 5),
+                                        overlayShape: const RoundSliderOverlayShape(overlayRadius: 10),
+                                        activeTrackColor: const Color(0xFF10B981),
+                                        inactiveTrackColor: Colors.white12,
+                                        thumbColor: const Color(0xFF10B981),
+                                        overlayColor: Color(0x2010B981),
+                                      ),
+                                      child: Slider(
+                                        value: progress,
+                                        onChanged: (v) {
+                                          final ms = (v * audio.duration.inMilliseconds).round();
+                                          audio.seek(Duration(milliseconds: ms));
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              // Phone: title + artist stacked
+                              : Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      music.title,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        letterSpacing: -0.2,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      music.artist,
+                                      style: TextStyle(
+                                        color: Colors.white.withValues(alpha: 0.55),
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
                                 ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                music.artist,
-                                style: TextStyle(
-                                  color: Colors.white.withValues(alpha: 0.55),
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w400,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ),
                         ),
                         const SizedBox(width: 4),
 

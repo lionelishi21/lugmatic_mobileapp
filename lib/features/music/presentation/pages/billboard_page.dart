@@ -46,9 +46,10 @@ class _BillboardPageState extends State<BillboardPage> with SingleTickerProvider
       
       List<Map<String, dynamic>> albums = [];
       try {
-        final res = await ApiClient.get('/album/list'); // Assuming billboard albums endpoint is the same for now
-        if (res['success'] == true) {
-          albums = List<Map<String, dynamic>>.from(res['data'] ?? []);
+        final apiClient = context.read<ApiClient>();
+        final res = await apiClient.dio.get('/album/list'); // Assuming billboard albums endpoint is the same for now
+        if (res.data['success'] == true) {
+          albums = List<Map<String, dynamic>>.from(res.data['data'] ?? []);
         }
       } catch (e) {
         debugPrint("Error fetching albums: $e");

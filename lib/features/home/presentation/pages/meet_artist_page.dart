@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lugmatic_flutter/core/network/api_client.dart';
 import 'package:lugmatic_flutter/data/models/artist_model.dart';
+import 'package:lugmatic_flutter/core/utils/responsive.dart';
 import 'package:lugmatic_flutter/data/services/home_service.dart';
 import 'package:lugmatic_flutter/core/constants/app_colors.dart';
 import 'package:lugmatic_flutter/core/config/api_config.dart';
@@ -204,8 +205,8 @@ class _MeetArtistPageState extends State<MeetArtistPage> {
     return SliverPadding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       sliver: SliverGrid(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: Responsive.musicGridColumns(context),
           mainAxisSpacing: 16,
           crossAxisSpacing: 16,
           childAspectRatio: 0.85,

@@ -76,7 +76,7 @@ class _ClashDetailsPageState extends State<ClashDetailsPage> {
     }
 
     final isWinnerChallenger = (_clash.winnerId == _clash.challenger.id);
-    final isWinnerOpponent = (_clash.winnerId == _clash.opponent.id);
+    final isWinnerOpponent = (_clash.winnerId == _clash.opponent?.id);
     final isDraw = _clash.winnerId == null && _clash.status == 'ended';
 
     return Scaffold(
@@ -110,7 +110,7 @@ class _ClashDetailsPageState extends State<ClashDetailsPage> {
                     challengerScore: _clash.challengerScore,
                     opponentScore: _clash.opponentScore,
                     challengerName: _clash.challenger.name,
-                    opponentName: _clash.opponent.name,
+                    opponentName: _clash.opponent?.name ?? 'Opponent',
                     durationSeconds: _clash.duration,
                     startTime: null, // Don't start timer
                   ),
@@ -176,7 +176,7 @@ class _ClashDetailsPageState extends State<ClashDetailsPage> {
       color = Colors.amber;
     } else if (isOpponent) {
       text = 'WINNER';
-      winnerName = _clash.opponent.name;
+      winnerName = _clash.opponent?.name ?? 'Opponent';
       color = Colors.amber;
     }
 
@@ -214,7 +214,7 @@ class _ClashDetailsPageState extends State<ClashDetailsPage> {
         children: [
           _buildArtistStat(_clash.challenger.name, _clash.challenger.image, _clash.challengerScore),
           const Text('VS', style: TextStyle(color: NeumorphicTheme.textTertiary, fontWeight: FontWeight.bold)),
-          _buildArtistStat(_clash.opponent.name, _clash.opponent.image, _clash.opponentScore),
+          _buildArtistStat(_clash.opponent?.name ?? 'Opponent', _clash.opponent?.image ?? '', _clash.opponentScore),
         ],
       ),
     );

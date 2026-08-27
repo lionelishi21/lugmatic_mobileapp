@@ -5,6 +5,7 @@ class PodcastEpisode {
   final String title;
   final String description;
   final String audioUrl;
+  final String videoUrl;
   final Duration duration;
   final int episodeNumber;
   final int seasonNumber;
@@ -16,6 +17,7 @@ class PodcastEpisode {
     required this.title,
     this.description = '',
     required this.audioUrl,
+    this.videoUrl = '',
     required this.duration,
     this.episodeNumber = 1,
     this.seasonNumber = 1,
@@ -28,13 +30,18 @@ class PodcastEpisode {
     final rawAudio = json['audioUrl']?.toString() ??
         (json['audioFile'] is Map ? json['audioFile']['url']?.toString() : null) ??
         '';
+    final rawVideo = json['videoUrl']?.toString() ??
+        (json['videoFile'] is Map ? json['videoFile']['url']?.toString() : null) ??
+        '';
     final rawDuration = json['duration'] ??
-        (json['audioFile'] is Map ? json['audioFile']['duration'] : null);
+        (json['audioFile'] is Map ? json['audioFile']['duration'] : null) ??
+        (json['videoFile'] is Map ? json['videoFile']['duration'] : null);
     return PodcastEpisode(
       id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
       title: json['title']?.toString() ?? '',
       description: json['description']?.toString() ?? '',
       audioUrl: ApiConfig.resolveUrl(rawAudio),
+      videoUrl: ApiConfig.resolveUrl(rawVideo),
       duration: Duration(seconds: _parseDurationSeconds(rawDuration)),
       episodeNumber: json['episodeNumber'] ?? 1,
       seasonNumber: json['seasonNumber'] ?? 1,
@@ -61,6 +68,7 @@ class PodcastModel {
   final String host;
   final String imageUrl;
   final String audioUrl;
+  final String videoUrl;
   final Duration duration;
   final String category;
   final DateTime publishDate;
@@ -80,6 +88,7 @@ class PodcastModel {
     required this.host,
     required this.imageUrl,
     required this.audioUrl,
+    this.videoUrl = '',
     required this.duration,
     required this.category,
     required this.publishDate,
@@ -107,7 +116,7 @@ class PodcastModel {
     final rawEpisodes = json['episodes'] as List? ?? [];
     final parsedEpisodes = rawEpisodes
         .map((e) => PodcastEpisode.fromJson(e as Map<String, dynamic>))
-        .where((e) => e.isPublished && e.audioUrl.isNotEmpty)
+        .where((e) => e.isPublished && (e.audioUrl.isNotEmpty || e.videoUrl.isNotEmpty))
         .toList();
 
     // Use first episode for the playable audio/duration — fall back to top-level fields
@@ -115,6 +124,9 @@ class PodcastModel {
     final rawAudio = json['audioUrl']?.toString() ??
         (json['audioFile'] is Map ? json['audioFile']['url']?.toString() : null) ??
         firstEp?.audioUrl ?? '';
+    final rawVideo = json['videoUrl']?.toString() ??
+        (json['videoFile'] is Map ? json['videoFile']['url']?.toString() : null) ??
+        firstEp?.videoUrl ?? '';
     final rawDuration = json['duration'] ?? firstEp?.duration.inSeconds ?? 0;
 
     return PodcastModel(
@@ -124,6 +136,7 @@ class PodcastModel {
       host: hostName,
       imageUrl: ApiConfig.resolveUrl(rawImage is String ? rawImage : ''),
       audioUrl: ApiConfig.resolveUrl(rawAudio),
+      videoUrl: ApiConfig.resolveUrl(rawVideo),
       duration: firstEp?.duration ?? Duration(seconds: _parseDurationSeconds(rawDuration)),
       category: json['category']?.toString() ?? json['genre']?.toString() ?? '',
       publishDate: json['publishDate'] != null
@@ -150,6 +163,7 @@ class PodcastModel {
       'host': host,
       'imageUrl': imageUrl,
       'audioUrl': audioUrl,
+      'videoUrl': videoUrl,
       'duration': duration.inSeconds,
       'category': category,
       'publishDate': publishDate.toIso8601String(),

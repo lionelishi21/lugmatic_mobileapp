@@ -8,7 +8,8 @@ import '../../../../data/providers/audio_provider.dart';
 import '../../../../ui/widgets/player_screen.dart';
 
 class TrendingSongsPage extends StatefulWidget {
-  const TrendingSongsPage({Key? key}) : super(key: key);
+  final String? genre;
+  const TrendingSongsPage({Key? key, this.genre}) : super(key: key);
 
   @override
   State<TrendingSongsPage> createState() => _TrendingSongsPageState();
@@ -53,6 +54,7 @@ class _TrendingSongsPageState extends State<TrendingSongsPage> {
         page: _currentPage,
         limit: 20,
         sort: '-playCount', // Fetch trending songs
+        genre: widget.genre,
       );
 
       if (mounted) {
@@ -110,9 +112,9 @@ class _TrendingSongsPageState extends State<TrendingSongsPage> {
         icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
         onPressed: () => Navigator.pop(context),
       ),
-      title: const Text(
-        'Trending Now',
-        style: TextStyle(
+      title: Text(
+        widget.genre != null ? '${widget.genre} Trending' : 'Trending Now',
+        style: const TextStyle(
           color: Colors.white,
           fontSize: 22,
           fontWeight: FontWeight.w900,

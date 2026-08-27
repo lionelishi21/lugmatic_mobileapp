@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lugmatic_flutter/core/network/api_client.dart';
 import 'package:lugmatic_flutter/data/models/live_stream_model.dart';
+import 'package:lugmatic_flutter/core/utils/responsive.dart';
 import 'package:lugmatic_flutter/data/services/live_stream_service.dart';
 import 'package:lugmatic_flutter/core/theme/neumorphic_theme.dart';
 import 'package:lugmatic_flutter/core/config/api_config.dart';
@@ -86,8 +87,8 @@ class _RecordedStreamsPageState extends State<RecordedStreamsPage> {
       onRefresh: _fetchRecordedStreams,
       child: GridView.builder(
         padding: const EdgeInsets.all(16),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: Responsive.musicGridColumns(context),
           childAspectRatio: 0.7,
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,

@@ -297,7 +297,7 @@ class _LiveHostScreenState extends State<LiveHostScreen>
                   ? ClashVideoWidget(
                       tokenData: _tokenData!,
                       challengerId: _activeClash!.challenger.id,
-                      opponentId: _activeClash!.opponent.id,
+                      opponentId: _activeClash!.opponent?.id ?? '',
                       isHost: true,
                     )
                   : (_tokenData != null
@@ -317,7 +317,7 @@ class _LiveHostScreenState extends State<LiveHostScreen>
                     challengerScore: _activeClash!.challengerScore,
                     opponentScore: _activeClash!.opponentScore,
                     challengerName: _activeClash!.challenger.name,
-                    opponentName: _activeClash!.opponent.name,
+                    opponentName: _activeClash!.opponent?.name ?? 'Opponent',
                     durationSeconds: _activeClash!.duration,
                     startTime: _activeClash!.startTime,
                   ),

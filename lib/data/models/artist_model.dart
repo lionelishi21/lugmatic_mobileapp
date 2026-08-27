@@ -107,7 +107,7 @@ class ArtistModel {
       userRating: json['userRating']?.toDouble(),
       isFollowing: json['isFollowing'] ?? false,
       isLive: json['isLive'] ?? false,
-      userId: json['user']?['id'] ?? json['user']?['_id'],
+      userId: (json['user'] is Map) ? (json['user']['_id'] ?? json['user']['id']) : (json['user'] is String ? json['user'] : null),
     );
   }
 

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:lugmatic_flutter/core/utils/responsive.dart';
 import 'package:lugmatic_flutter/ui/screens/profile_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:lugmatic_flutter/core/config/api_config.dart';
@@ -387,6 +388,89 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final isTablet = Responsive.useNavigationRail(context);
+
+    // Pages (same for both phone and tablet)
+    final pages = [
+      _buildHomePage(),
+      const ForYouFeedPage(),
+      const TikTokLivePage(),
+      const VideosPage(),
+      const LibraryPage(),
+    ];
+
+    // Tablet layout: NavigationRail on the left, content on the right
+    if (isTablet) {
+      return Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: _currentIndex == 0
+            ? CustomAppBar(
+                title: 'Lugmatic',
+                unreadCount: _unreadNotifications,
+                unreadMessageCount: context.watch<MessageProvider>().totalUnreadCount,
+                onNotificationTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const NotificationsPage()),
+                  ).then((_) => _loadNotifications());
+                },
+                onMessageTap: () => Navigator.pushNamed(context, '/messages'),
+                onProfileTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen())),
+                onStoreTap: () => Navigator.pushNamed(context, '/store'),
+              )
+            : null,
+        body: Row(
+          children: [
+            // ── Left Navigation Rail ──────────────────────────────────────
+            NavigationRail(
+              selectedIndex: _currentIndex,
+              onDestinationSelected: (i) => setState(() => _currentIndex = i),
+              backgroundColor: const Color(0xFF0F172A),
+              selectedIconTheme: const IconThemeData(color: Color(0xFF10B981), size: 26),
+              unselectedIconTheme: IconThemeData(color: Colors.white.withValues(alpha: 0.45), size: 24),
+              selectedLabelTextStyle: const TextStyle(color: Color(0xFF10B981), fontSize: 11, fontWeight: FontWeight.w600),
+              unselectedLabelTextStyle: TextStyle(color: Colors.white.withValues(alpha: 0.45), fontSize: 11),
+              indicatorColor: const Color(0xFF10B981).withValues(alpha: 0.15),
+              labelType: NavigationRailLabelType.all,
+              destinations: const [
+                NavigationRailDestination(icon: Icon(Icons.home_rounded), label: Text('Home')),
+                NavigationRailDestination(icon: Icon(Icons.auto_awesome_rounded), label: Text('For You')),
+                NavigationRailDestination(icon: Icon(Icons.sensors_rounded), label: Text('Live')),
+                NavigationRailDestination(icon: Icon(Icons.play_circle_outline_rounded), label: Text('Video')),
+                NavigationRailDestination(icon: Icon(Icons.library_music_rounded), label: Text('Library')),
+              ],
+            ),
+            // Vertical divider
+            VerticalDivider(
+              thickness: 1,
+              width: 1,
+              color: Colors.white.withValues(alpha: 0.06),
+            ),
+            // ── Page Content ─────────────────────────────────────────────
+            Expanded(
+              child: Column(
+                children: [
+                  Expanded(
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: kContentMaxWidth),
+                        child: IndexedStack(
+                          index: _currentIndex,
+                          children: pages,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const MiniPlayer(),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Phone layout: standard BottomNavigationBar
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: _currentIndex == 0
@@ -413,14 +497,7 @@ class _HomePageState extends State<HomePage> {
           : null,
       body: IndexedStack(
         index: _currentIndex,
-        children: [
-          _buildHomePage(),
-          const ForYouFeedPage(),
-          const TikTokLivePage(),
-          const VideosPage(),
-          const LibraryPage(),
-        ],
-      ),
+        children: pages,
       ),
       bottomNavigationBar: Column(
         mainAxisSize: MainAxisSize.min,
@@ -1009,9 +1086,9 @@ class _HomePageState extends State<HomePage> {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 2.8,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: Responsive.genreGridColumns(context),
+        childAspectRatio: Responsive.value(context, phone: 2.8, tablet: 3.2),
         mainAxisSpacing: 10,
         crossAxisSpacing: 10,
       ),

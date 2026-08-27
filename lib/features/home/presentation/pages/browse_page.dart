@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/config/api_config.dart';
 import '../../../../core/network/api_client.dart';
+import '../../../../core/utils/responsive.dart';
 import '../../../../data/models/music_model.dart';
 import '../../../../data/models/artist_model.dart';
 import '../../../../data/providers/audio_provider.dart';
@@ -421,8 +422,8 @@ class _BrowsePageState extends State<BrowsePage> {
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: Responsive.genreGridColumns(context),
               mainAxisSpacing: 16,
               crossAxisSpacing: 16,
               childAspectRatio: 1.5,

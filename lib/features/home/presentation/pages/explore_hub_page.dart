@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:lugmatic_flutter/core/theme/neumorphic_theme.dart';
+import 'package:lugmatic_flutter/core/utils/responsive.dart';
 import 'package:lugmatic_flutter/core/constants/app_colors.dart';
 import 'package:lugmatic_flutter/features/music/presentation/pages/music_hub_page.dart';
 import 'package:lugmatic_flutter/features/podcast/presentation/pages/podcast_hub_page.dart';
@@ -44,8 +46,8 @@ class ExploreHubPage extends StatelessWidget {
           SliverPadding(
             padding: const EdgeInsets.all(16),
             sliver: SliverGrid(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: Responsive.genreGridColumns(context),
                 mainAxisSpacing: 16,
                 crossAxisSpacing: 16,
                 childAspectRatio: 1.1,

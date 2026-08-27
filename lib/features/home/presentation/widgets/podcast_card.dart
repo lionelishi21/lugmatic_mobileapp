@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lugmatic_flutter/core/utils/responsive.dart';
 import 'package:lugmatic_flutter/data/models/podcast_model.dart';
 
 class PodcastCard extends StatelessWidget {
@@ -17,9 +18,11 @@ class PodcastCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cardWidth = Responsive.podcastCardWidth(context);
+    final imageHeight = Responsive.podcastCardImageHeight(context);
     return Container(
       margin: const EdgeInsets.only(right: 12),
-      width: 160,
+      width: cardWidth,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -27,8 +30,8 @@ class PodcastCard extends StatelessWidget {
           GestureDetector(
             onTap: onTap,
             child: Container(
-              height: 100,
-              width: 160,
+              height: imageHeight,
+              width: cardWidth,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
                 image: DecorationImage(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../../data/models/genre_model.dart';
+import 'package:lugmatic_flutter/data/models/genre_model.dart';
+import 'package:lugmatic_flutter/core/utils/responsive.dart';
 import '../../../../data/services/music_service.dart';
 import '../../../../core/network/api_client.dart';
 
@@ -58,8 +59,8 @@ class _GenreListPageState extends State<GenreListPage> {
           ? const Center(child: CircularProgressIndicator(color: Color(0xFF10B981)))
           : GridView.builder(
               padding: const EdgeInsets.all(16),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: Responsive.genreGridColumns(context),
                 mainAxisSpacing: 16,
                 crossAxisSpacing: 16,
                 childAspectRatio: 1.5,

@@ -34,7 +34,9 @@ import '../features/video/presentation/pages/video_recording_page.dart';
 import '../features/video/presentation/pages/video_player_page.dart';
 import '../features/provider/navigation/provider_shell.dart';
 import '../features/home/presentation/pages/browse_page.dart';
+import '../features/playlist/presentation/pages/playlist_detail_page.dart';
 import '../data/models/video_model.dart';
+import '../data/models/playlist_model.dart';
 
 class AppRouter {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
@@ -100,6 +102,13 @@ class AppRouter {
           builder: (_) => const CreatePlaylistScreen(),
         );
 
+      case '/playlist_details':
+        final args = settings.arguments;
+        if (args is PlaylistModel) {
+          return MaterialPageRoute(builder: (_) => PlaylistDetailPage(playlist: args));
+        }
+        return _notFound();
+
       case '/store':
         return MaterialPageRoute(builder: (_) => const StorePage());
 
@@ -107,7 +116,8 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const NewReleasesPage());
 
       case '/trending':
-        return MaterialPageRoute(builder: (_) => const TrendingSongsPage());
+        final args = settings.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(builder: (_) => TrendingSongsPage(genre: args?['genre'] as String?));
 
       case '/mixer':
         return MaterialPageRoute(builder: (_) => const MixerPage());

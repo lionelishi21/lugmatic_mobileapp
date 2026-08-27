@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/responsive.dart';
 import '../../../../data/models/music_model.dart';
 import '../../../../data/models/genre_model.dart';
 import '../../../../data/services/music_service.dart';
@@ -210,8 +211,8 @@ class _GenreMusicPageState extends State<GenreMusicPage> {
     return SliverPadding(
       padding: const EdgeInsets.all(16),
       sliver: SliverGrid(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: Responsive.musicGridColumns(context),
           childAspectRatio: 0.75,
           crossAxisSpacing: 16,
           mainAxisSpacing: 24,

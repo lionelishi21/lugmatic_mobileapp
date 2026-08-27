@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
+import 'package:lugmatic_flutter/features/video/presentation/pages/video_player_page.dart';
+import 'package:lugmatic_flutter/core/utils/responsive.dart';
 import 'package:chewie/chewie.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../../data/models/video_model.dart';
@@ -243,8 +245,8 @@ class _VideosPageState extends State<VideosPage> with SingleTickerProviderStateM
     return SliverPadding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       sliver: SliverGrid(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: Responsive.musicGridColumns(context),
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
           childAspectRatio: 0.7,
@@ -322,8 +324,8 @@ class _ShellingCard extends StatelessWidget {
             children: [
               video.thumbnailUrl.isNotEmpty
                   ? Image.network(video.thumbnailUrl, fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(color: const Color(0xFF1F2937)))
-                  : Container(color: const Color(0xFF1F2937)),
+                      errorBuilder: (_, __, ___) => Container(color: const Color(0xFF1F2937), child: const Center(child: Icon(Icons.video_library, color: Colors.white24, size: 40))))
+                  : Container(color: const Color(0xFF1F2937), child: const Center(child: Icon(Icons.video_library, color: Colors.white24, size: 40))),
               // Dark gradient
               Container(
                 decoration: const BoxDecoration(

@@ -111,7 +111,11 @@ class AudioProvider extends ChangeNotifier {
       if (e is PlayerException) {
         _errorMessage = "Error: ${e.message}";
       } else if (e is PlayerInterruptedException) {
-        _errorMessage = "Playback interrupted";
+        // This just means a new playMusic() call interrupted the previous one.
+        // DO NOT reset the player, because the new call is actively using it!
+        _errorMessage = null; 
+        debugPrint("Player Interrupted (Normal): $e");
+        return;
       } else {
         _errorMessage = "An unknown error occurred";
       }
@@ -242,20 +246,22 @@ class AudioProvider extends ChangeNotifier {
       // (warm connection) succeeds. One silent retry absorbs that instead
       // of showing "Failed to load audio" for something that isn't broken.
       Object? loadError;
-      for (var attempt = 0; attempt < 2; attempt++) {
+      final maxAttempts = 4;
+      for (var attempt = 0; attempt < maxAttempts; attempt++) {
         try {
           await _audioPlayer.setAudioSources(
             _queue.map(_toAudioSource).toList(),
             initialIndex: _currentIndex,
             initialPosition: Duration.zero,
-          );
+          ).timeout(const Duration(seconds: 45));
           loadError = null;
           break;
         } catch (e) {
           loadError = e;
-          if (attempt == 0) {
-            debugPrint("First setAudioSources attempt failed, retrying: $e");
-            await Future.delayed(const Duration(milliseconds: 500));
+          if (attempt < maxAttempts - 1) {
+            final delayMs = 1000 * (1 << attempt); // 1s, 2s, 4s
+            debugPrint("setAudioSources attempt ${attempt + 1} failed, retrying in ${delayMs}ms: $e");
+            await Future.delayed(Duration(milliseconds: delayMs));
           }
         }
       }
