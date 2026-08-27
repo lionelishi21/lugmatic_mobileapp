@@ -508,7 +508,7 @@ class _MusicDetailPageState extends State<MusicDetailPage> {
   }
 
   void _shareSong() {
-    final String shareText = 'Check out "${widget.music.title}" by ${widget.music.artist} on Lugmatic!\n'
+    final String shareText = 'Check out "${widget.music.title}" by ${widget.music.artist} on Lumatix!\n'
         'Listen here: https://music.lugmatic.com/song/${widget.music.id}';
     Share.share(shareText);
   }

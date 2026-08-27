@@ -628,7 +628,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                         label: 'Share',
                         color: Colors.white70,
                         onTap: () {
-                          Share.share('Check out ${widget.video.title} on Lugmatic Music!\nhttps://lugmaticmusic.com/video/${widget.video.id}');
+                          Share.share('Check out ${widget.video.title} on Lumatix Music!\nhttps://lugmaticmusic.com/video/${widget.video.id}');
                         },
                       ),
                     ],

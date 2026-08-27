@@ -38,7 +38,7 @@ class PrivacyPolicyPage extends StatelessWidget {
               _buildSectionTitle('Last Updated: April 2026'),
               const SizedBox(height: 24),
               _buildContentText(
-                'At Lugmatic, we take your privacy seriously. This Privacy Policy explains how we collect, use, and protect your personal information when you use our music streaming and live broadcasting services.',
+                'At Lumatix, we take your privacy seriously. This Privacy Policy explains how we collect, use, and protect your personal information when you use our music streaming and live broadcasting services.',
               ),
               const SizedBox(height: 32),
               _buildSectionTitle('1. Information We Collect'),
@@ -58,7 +58,7 @@ class PrivacyPolicyPage extends StatelessWidget {
               const SizedBox(height: 32),
               _buildSectionTitle('3. Live Streaming & Recording'),
               _buildContentText(
-                'Live streams on Lugmatic are public events. As an artist, your broadcasts are recorded for later viewing (VOD). By broadcasting, you consent to this recording and distribution within the platform.',
+                'Live streams on Lumatix are public events. As an artist, your broadcasts are recorded for later viewing (VOD). By broadcasting, you consent to this recording and distribution within the platform.',
               ),
               const SizedBox(height: 32),
               _buildSectionTitle('4. Data Security'),
@@ -73,7 +73,7 @@ class PrivacyPolicyPage extends StatelessWidget {
               const SizedBox(height: 48),
               Center(
                 child: Text(
-                  '© 2026 Lugmatic Music. All rights reserved.',
+                  '© 2026 Lumatix Music. All rights reserved.',
                   style: TextStyle(color: NeumorphicTheme.textTertiary, fontSize: 12),
                 ),
               ),

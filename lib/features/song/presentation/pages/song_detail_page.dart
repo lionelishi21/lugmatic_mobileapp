@@ -308,7 +308,7 @@ class _SongDetailPageState extends State<SongDetailPage> {
                       onTap: () {
                         final url = 'https://studio.lugmaticmusic.com/share/song/${song.id}';
                         Share.share(
-                          'Listen to "${song.title}" on Lugmatic 🎵\n$url',
+                          'Listen to "${song.title}" on Lumatix 🎵\n$url',
                           subject: song.title,
                         );
                       },

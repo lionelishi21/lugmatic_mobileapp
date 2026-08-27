@@ -262,7 +262,7 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Lugmatic Premium', style: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold)),
+                  Text('Lumatix Premium', style: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold)),
                   SizedBox(height: 2),
                   Text('Ad-free, High Quality & Offline', style: TextStyle(color: Colors.white60, fontSize: 13)),
                 ],

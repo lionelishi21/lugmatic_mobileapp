@@ -141,7 +141,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         ),
         const SizedBox(height: 8),
         Text(
-          'Unlock the full potential of Lugmatic with Premium.',
+          'Unlock the full potential of Lumatix with Premium.',
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.7),
             fontSize: 16,

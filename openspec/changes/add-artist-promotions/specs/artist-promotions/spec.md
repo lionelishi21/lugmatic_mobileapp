@@ -11,4 +11,4 @@ The system SHALL track and display the performance metrics of active campaigns i
 
 #### Scenario: Viewing campaign performance
 - **WHEN** an artist visits the Promotion Analytics dashboard
-- **THEN** the system displays total ad spend, impressions, click-through rates, and resulting Lugmatic streams/followers
+- **THEN** the system displays total ad spend, impressions, click-through rates, and resulting Lumatix streams/followers

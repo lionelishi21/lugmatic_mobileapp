@@ -120,7 +120,7 @@ class _GiftHubPageState extends State<GiftHubPage>
             ),
             const SizedBox(height: 16),
             const Text(
-              'Purchase additional coins on the Lugmatic Music website.',
+              'Purchase additional coins on the Lumatix Music website.',
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.white54, fontSize: 12),
             ),

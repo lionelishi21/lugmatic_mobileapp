@@ -930,7 +930,7 @@ class _TikTokLivePageState extends State<TikTokLivePage>
               final stream = _liveStreams[_currentStreamIndex];
               final url = 'https://studio.lugmaticmusic.com/share/stream/${stream.id}';
               Share.share(
-                '🎵 Watch "${stream.title}" LIVE on Lugmatic!\n$url',
+                '🎵 Watch "${stream.title}" LIVE on Lumatix!\n$url',
                 subject: stream.title,
               );
             },

@@ -5,7 +5,7 @@ import 'package:lugmatic_flutter/data/services/auth_service.dart';
 import 'package:lugmatic_flutter/core/network/api_exception.dart';
 import '../mocks/mocks.mocks.dart';
 
-// Convenience factory — builds a typical user from the Lugmatic backend
+// Convenience factory — builds a typical user from the Lumatix backend
 User _fakeUser({
   String id = 'usr_test_001',
   String email = 'fan@lugmatic.com',

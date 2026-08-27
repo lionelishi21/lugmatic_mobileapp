@@ -1,5 +1,5 @@
 ## Context
-The Lugmatic music streaming platform relies on a synchronized feature set across the Next.js web application and the Flutter mobile application. Recent updates to the webapp need to be backported to the mobile codebase.
+The Lumatix music streaming platform relies on a synchronized feature set across the Next.js web application and the Flutter mobile application. Recent updates to the webapp need to be backported to the mobile codebase.
 
 ## Goals
 - Clear stale data caches (specifically artist dashboard and track providers) when switching user roles.

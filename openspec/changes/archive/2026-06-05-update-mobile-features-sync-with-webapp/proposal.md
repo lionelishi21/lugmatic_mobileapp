@@ -1,5 +1,5 @@
 ## Why
-The Lugmatic webapp has recently introduced several UI/UX and feature enhancements (TikTok-style role switcher, upgraded interactive AI Mixer, custom brand-gradient fallbacks for missing images, and a 60-second limit for video clash recording). To ensure feature parity and consistent user experience across platforms, the mobile Flutter application needs to sync these capabilities.
+The Lumatix webapp has recently introduced several UI/UX and feature enhancements (TikTok-style role switcher, upgraded interactive AI Mixer, custom brand-gradient fallbacks for missing images, and a 60-second limit for video clash recording). To ensure feature parity and consistent user experience across platforms, the mobile Flutter application needs to sync these capabilities.
 
 ## What Changes
 - **Role Switcher State Cleanses**: Implement clear/reset states in `TrackProvider` and `DashboardProvider`. Clear these providers when role switching is triggered.

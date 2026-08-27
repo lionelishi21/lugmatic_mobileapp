@@ -226,7 +226,7 @@ class _LoginScreenState extends State<LoginScreen>
                                   children: [
                                     // Logo
                                     const Center(
-                                      child: LugmaticLogo(
+                                      child: LumatixLogo(
                                         variant: LogoVariant.icon,
                                         scale: 1.0,
                                       ),

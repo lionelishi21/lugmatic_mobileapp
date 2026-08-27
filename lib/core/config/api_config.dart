@@ -1,11 +1,11 @@
-/// API configuration for the Lugmatic backend.
+/// API configuration for the Lumatix backend.
 ///
 /// In production, these values should come from environment config
 /// (e.g. flutter_dotenv or --dart-define).
 class ApiConfig {
   ApiConfig._();
 
-  /// Base URL for the Lugmatic API.
+  /// Base URL for the Lumatix API.
   /// Override with --dart-define=API_BASE_URL=https://api.lugmaticmusic.com/api
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',

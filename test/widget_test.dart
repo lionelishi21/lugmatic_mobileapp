@@ -1,6 +1,6 @@
 // Smoke test placeholder.
 //
-// LugmaticApp requires a real Firebase environment (native platform channels
+// LumatixApp requires a real Firebase environment (native platform channels
 // for Firebase Core, Messaging, and Secure Storage) which cannot be initialised
 // in the headless `flutter test` runner. Attempting to pump the full widget
 // tree leaves pending timers that the AutomatedTestWidgetsFlutterBinding

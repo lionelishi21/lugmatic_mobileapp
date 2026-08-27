@@ -164,7 +164,7 @@ class _TrackItem extends StatelessWidget {
                 if (value == 'analytics') {
                   Navigator.push(context, MaterialPageRoute(builder: (_) => TrackAnalyticsScreen(track: track)));
                 } else if (value == 'share') {
-                  Share.share('Listen to "${track.name}" on Lugmatic 🎵\nhttps://lugmaticmusic.com/song/${track.id}', subject: track.name);
+                  Share.share('Listen to "${track.name}" on Lumatix 🎵\nhttps://lugmaticmusic.com/song/${track.id}', subject: track.name);
                 } else if (value == 'delete') {
                   final confirmed = await showDialog<bool>(context: context, builder: (_) => AlertDialog(
                     backgroundColor: const Color(0xFF1A1A2E),

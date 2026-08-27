@@ -94,7 +94,7 @@ class _ContributorTermsScreenState extends State<ContributorTermsScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: const [
                           Text(
-                            'Lugmatic Music Contributor Agreement',
+                            'Lumatix Music Contributor Agreement',
                             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                           ),
                           SizedBox(height: 16),
@@ -104,7 +104,7 @@ class _ContributorTermsScreenState extends State<ContributorTermsScreen> {
                           ),
                           SizedBox(height: 16),
                           Text(
-                            'This Contributor Agreement ("Agreement") governs the terms under which you contribute content, songwriting, mastering, production, or other musical works (collectively, "Contributions") to collaborative tracks distributed on the Lugmatic Music platform.',
+                            'This Contributor Agreement ("Agreement") governs the terms under which you contribute content, songwriting, mastering, production, or other musical works (collectively, "Contributions") to collaborative tracks distributed on the Lumatix Music platform.',
                             style: TextStyle(fontSize: 13, color: AppColors.foreground, height: 1.5),
                           ),
                           SizedBox(height: 16),
@@ -124,7 +124,7 @@ class _ContributorTermsScreenState extends State<ContributorTermsScreen> {
                           ),
                           SizedBox(height: 8),
                           Text(
-                            'You grant Lugmatic Music a non-exclusive, worldwide, royalty-free license to host, stream, distribute, modify (for transcoding/mastering), and promote your Contributions on the platform.',
+                            'You grant Lumatix Music a non-exclusive, worldwide, royalty-free license to host, stream, distribute, modify (for transcoding/mastering), and promote your Contributions on the platform.',
                             style: TextStyle(fontSize: 13, color: AppColors.foreground, height: 1.5),
                           ),
                           SizedBox(height: 16),
@@ -134,7 +134,7 @@ class _ContributorTermsScreenState extends State<ContributorTermsScreen> {
                           ),
                           SizedBox(height: 8),
                           Text(
-                            'Revenue generated from play counts and virtual gifts will be credited to your balance in the form of Lugmatic Coins. Payouts can be requested once your balance exceeds the threshold limits set in the platform.',
+                            'Revenue generated from play counts and virtual gifts will be credited to your balance in the form of Lumatix Coins. Payouts can be requested once your balance exceeds the threshold limits set in the platform.',
                             style: TextStyle(fontSize: 13, color: AppColors.foreground, height: 1.5),
                           ),
                           SizedBox(height: 16),

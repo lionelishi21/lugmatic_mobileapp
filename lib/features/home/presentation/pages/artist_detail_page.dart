@@ -240,7 +240,7 @@ class _ArtistDetailPageState extends State<ArtistDetailPage> {
                 color: Colors.black.withValues(alpha: 0.35),
                 child: IconButton(
                   icon: const Icon(Icons.ios_share, color: Colors.white, size: 18),
-                  onPressed: () => Share.share('Check out ${artist.name} on Lugmatic!'),
+                  onPressed: () => Share.share('Check out ${artist.name} on Lumatix!'),
                 ),
               ),
             ),

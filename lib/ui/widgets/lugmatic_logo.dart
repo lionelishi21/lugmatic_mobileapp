@@ -4,13 +4,13 @@ import 'package:google_fonts/google_fonts.dart';
 
 enum LogoVariant { full, icon, stacked }
 
-class LugmaticLogo extends StatefulWidget {
+class LumatixLogo extends StatefulWidget {
   final LogoVariant variant;
   final bool hideSubtitle;
   final double scale;
   final bool isLight;
 
-  const LugmaticLogo({
+  const LumatixLogo({
     Key? key,
     this.variant = LogoVariant.full,
     this.hideSubtitle = false,

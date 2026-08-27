@@ -1,7 +1,7 @@
 # Project Context
 
 ## Purpose
-Lugmatic Music is the "Airbnb of Music", a platform designed to connect independent artists directly with their fans and empower them with built-in tools for growth, monetization, and engagement. Our goal is to make artists fully independent while giving fans an interactive and rewarding music experience.
+Lumatix Music is the "Airbnb of Music", a platform designed to connect independent artists directly with their fans and empower them with built-in tools for growth, monetization, and engagement. Our goal is to make artists fully independent while giving fans an interactive and rewarding music experience.
 
 ## Tech Stack
 - Frontend: Flutter (Mobile App - iOS/Android), React (Web)
@@ -31,7 +31,7 @@ Lugmatic Music is the "Airbnb of Music", a platform designed to connect independ
 - **Artists:** Creators who upload music, receive gifts (coins), and promote their tracks.
 - **Fans:** Consumers who listen to music, buy coins, and send gifts to artists during clashes or on tracks.
 - **Coins/Gifts:** The internal virtual currency used for tipping artists.
-- **Artist Promotions:** A built-in marketing engine that allows artists to spend their budget to run automated ad campaigns (e.g., Google Ads) directly from the Lugmatic platform.
+- **Artist Promotions:** A built-in marketing engine that allows artists to spend their budget to run automated ad campaigns (e.g., Google Ads) directly from the Lumatix platform.
 
 ## Important Constraints
 - Coin purchases are handled externally or via web to comply with App Store guidelines, but internal spending (gifting, promoting) can be done within the app using the coin balance.

@@ -345,8 +345,8 @@ class _ArtistLiveScreenState extends State<ArtistLiveScreen> with WidgetsBinding
                     onTap: () {
                       if (provider.streamId == null) return;
                       final url = 'https://lugmaticmusic.com/share/stream/${provider.streamId}';
-                      Share.share('🎵 I\'m live on Lugmatic! Tune in now:\n$url',
-                          subject: 'Watch me live on Lugmatic');
+                      Share.share('🎵 I\'m live on Lumatix! Tune in now:\n$url',
+                          subject: 'Watch me live on Lumatix');
                     },
                     child: Container(
                       padding: const EdgeInsets.all(8),

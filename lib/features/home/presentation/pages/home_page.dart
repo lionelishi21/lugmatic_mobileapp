@@ -587,7 +587,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                     SizedBox(height: 2),
                     Text(
-                      'Welcome to Lugmatic Music',
+                      'Welcome to Lumatix Music',
                       style: TextStyle(
                         color: AppColors.mutedForeground,
                         fontSize: 14,
@@ -1196,7 +1196,7 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   Text('Missing an artist?', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
                   SizedBox(height: 3),
-                  Text('Request them and we\'ll add them to Lugmatic.', style: TextStyle(color: Color(0xFFB0BEC5), fontSize: 13)),
+                  Text('Request them and we\'ll add them to Lumatix.', style: TextStyle(color: Color(0xFFB0BEC5), fontSize: 13)),
                 ],
               ),
             ),

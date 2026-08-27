@@ -219,7 +219,7 @@ class _StorePageState extends State<StorePage> {
         onPressed: () => Navigator.pop(context),
       ),
       title: const Text(
-        'Lugmatic Store',
+        'Lumatix Store',
         style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
       ),
     );

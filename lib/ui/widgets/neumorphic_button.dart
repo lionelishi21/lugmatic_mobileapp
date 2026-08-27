@@ -245,8 +245,8 @@ class _SoftGlassButtonState extends State<SoftGlassButton>
 }
 
 // Music app specific buttons with soft UI design
-class LugmaticOnboardingButtons extends StatelessWidget {
-  const LugmaticOnboardingButtons({super.key});
+class LumatixOnboardingButtons extends StatelessWidget {
+  const LumatixOnboardingButtons({super.key});
 
   @override
   Widget build(BuildContext context) {

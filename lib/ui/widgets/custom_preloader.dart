@@ -77,7 +77,7 @@ class _CustomPreloaderState extends State<CustomPreloader>
                         ),
                       ),
                     ),
-                    const LugmaticLogo(
+                    const LumatixLogo(
                       variant: LogoVariant.icon,
                       scale: 0.47,
                     ),

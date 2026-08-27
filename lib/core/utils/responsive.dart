@@ -1,6 +1,6 @@
 // lib/core/utils/responsive.dart
 //
-// Central responsive layout helper for Lugmatic.
+// Central responsive layout helper for Lumatix.
 // All breakpoint decisions flow through this file so changes are easy.
 
 import 'package:flutter/material.dart';

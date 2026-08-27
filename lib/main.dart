@@ -196,7 +196,7 @@ void main() async {
             ),
           ),
         ],
-        child: const LugmaticApp(),
+        child: const LumatixApp(),
       ),
     );
   } catch (e, stack) {
@@ -214,8 +214,8 @@ void main() async {
 }
 
 
-class LugmaticApp extends StatelessWidget {
-  const LugmaticApp({Key? key}) : super(key: key);
+class LumatixApp extends StatelessWidget {
+  const LumatixApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -339,7 +339,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       // App Logo
-                      const LugmaticLogo(
+                      const LumatixLogo(
                         variant: LogoVariant.stacked,
                         scale: 1.3,
                       ),

@@ -491,7 +491,7 @@ class _FeedCardState extends State<_FeedCard> with SingleTickerProviderStateMixi
                 final link = item.type == _FeedType.song
                     ? 'https://lugmaticmusic.com/song/${item.id}'
                     : 'https://lugmaticmusic.com/video/${item.id}';
-                Share.share('Check out ${item.title} on Lugmatic Music!\n$link');
+                Share.share('Check out ${item.title} on Lumatix Music!\n$link');
               },
             ),
           ),
