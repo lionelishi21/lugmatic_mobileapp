@@ -21,6 +21,7 @@ import 'package:lugmatic_flutter/data/providers/audio_provider.dart';
 import 'package:lugmatic_flutter/ui/widgets/player_screen.dart';
 import 'package:lugmatic_flutter/features/home/presentation/pages/notifications_page.dart';
 import 'package:lugmatic_flutter/shared/widgets/demand_artist_dialog.dart';
+import 'package:lugmatic_flutter/shared/widgets/role_switcher_button.dart';
 import 'package:lugmatic_flutter/data/services/notification_service.dart';
 import 'package:lugmatic_flutter/features/home/presentation/pages/create_playlist_screen.dart';
 import 'package:lugmatic_flutter/features/home/presentation/pages/explore_hub_page.dart';
@@ -405,7 +406,7 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: AppColors.background,
         appBar: _currentIndex == 0
             ? CustomAppBar(
-                title: 'Lugmatic',
+                title: 'Lumatix',
                 unreadCount: _unreadNotifications,
                 unreadMessageCount: context.watch<MessageProvider>().totalUnreadCount,
                 onNotificationTap: () {
@@ -475,7 +476,7 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: AppColors.background,
       appBar: _currentIndex == 0
           ? CustomAppBar(
-              title: 'Lugmatic',
+              title: 'Lumatix',
               unreadCount: _unreadNotifications,
               unreadMessageCount: context.watch<MessageProvider>().totalUnreadCount,
               onNotificationTap: () {
@@ -493,11 +494,24 @@ class _HomePageState extends State<HomePage> {
               onStoreTap: () {
                 Navigator.pushNamed(context, '/store');
               },
+              onLibraryTap: () {
+                setState(() => _currentIndex = 4);
+              },
             )
           : null,
-      body: IndexedStack(
-        index: _currentIndex,
-        children: pages,
+      body: Stack(
+        children: [
+          IndexedStack(
+            index: _currentIndex,
+            children: pages,
+          ),
+          if (_currentIndex == 0)
+            const Positioned(
+              right: 16,
+              bottom: 16,
+              child: RoleSwitcherButton(),
+            ),
+        ],
       ),
       bottomNavigationBar: Column(
         mainAxisSize: MainAxisSize.min,

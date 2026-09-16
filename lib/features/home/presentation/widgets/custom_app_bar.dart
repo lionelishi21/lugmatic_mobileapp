@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:lugmatic_flutter/core/constants/app_colors.dart';
-import 'package:lugmatic_flutter/shared/widgets/role_switcher_button.dart' as lugmatic_switcher;
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -8,6 +7,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onNotificationTap;
   final VoidCallback? onMessageTap;
   final VoidCallback? onStoreTap;
+  final VoidCallback? onLibraryTap;
   final int unreadCount;
   final int unreadMessageCount;
 
@@ -18,6 +18,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.onNotificationTap,
     this.onMessageTap,
     this.onStoreTap,
+    this.onLibraryTap,
     this.unreadCount = 0,
     this.unreadMessageCount = 0,
   }) : super(key: key);
@@ -33,18 +34,19 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
+              Flexible(
+                child: Text(
+                  title,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               Row(
                 children: [
-                  const lugmatic_switcher.RoleSwitcherButton(),
-                  const SizedBox(width: 8),
                   if (onStoreTap != null) ...[
                     GestureDetector(
                       onTap: onStoreTap,
@@ -65,6 +67,32 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                         child: const Icon(
                           Icons.monetization_on,
                           color: Color(0xFFFFD700),
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                  ],
+                  if (onLibraryTap != null) ...[
+                    GestureDetector(
+                      onTap: onLibraryTap,
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: AppColors.darkBackground,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.3),
+                              offset: const Offset(4, 4),
+                              blurRadius: 8,
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.library_music_outlined,
+                          color: Colors.white70,
                           size: 20,
                         ),
                       ),
