@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'dart:async';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/theme/neumorphic_theme.dart';
 import '../../../data/services/artist/upload_service.dart';
+import '../../../data/providers/auth_provider.dart';
 import 'lyrics_timing_screen.dart';
 
 class UploadTrackScreen extends StatefulWidget {
@@ -39,10 +41,24 @@ class _UploadTrackScreenState extends State<UploadTrackScreen> {
   bool _generatingLyrics = false;
   String _generatedLyrics = '';
 
+  // AI-generated disclosure (all uploaders).
+  bool _isAiGenerated = false;
+
+  // Record-label artist attribution.
+  bool _isLabel = false;
+  bool _useExistingArtist = true;
+  final _newArtistNameController = TextEditingController();
+  final _artistSearchController = TextEditingController();
+  Map<String, dynamic>? _selectedArtist;
+  List<Map<String, dynamic>> _artistSearchResults = [];
+  bool _searchingArtists = false;
+  Timer? _artistSearchDebounce;
+
   @override
   void initState() {
     super.initState();
     _uploadService = context.read<UploadService>();
+    _isLabel = context.read<AuthProvider>().hasLabelRole;
     _fetchGenres();
   }
 
@@ -50,7 +66,29 @@ class _UploadTrackScreenState extends State<UploadTrackScreen> {
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
+    _newArtistNameController.dispose();
+    _artistSearchController.dispose();
+    _artistSearchDebounce?.cancel();
     super.dispose();
+  }
+
+  void _onArtistSearchChanged(String query) {
+    _artistSearchDebounce?.cancel();
+    _artistSearchDebounce = Timer(const Duration(milliseconds: 350), () async {
+      if (query.trim().length < 2) {
+        setState(() => _artistSearchResults = []);
+        return;
+      }
+      setState(() => _searchingArtists = true);
+      try {
+        final results = await _uploadService.searchArtists(query);
+        if (mounted) setState(() => _artistSearchResults = results);
+      } catch (_) {
+        if (mounted) setState(() => _artistSearchResults = []);
+      } finally {
+        if (mounted) setState(() => _searchingArtists = false);
+      }
+    });
   }
 
   Future<void> _fetchGenres() async {
@@ -104,6 +142,18 @@ class _UploadTrackScreenState extends State<UploadTrackScreen> {
       return;
     }
 
+    if (_isLabel) {
+      final hasArtist = _useExistingArtist
+          ? _selectedArtist != null
+          : _newArtistNameController.text.trim().isNotEmpty;
+      if (!hasArtist) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Select or enter the artist this release is for')),
+        );
+        return;
+      }
+    }
+
     setState(() {
       _isUploading = true;
       _uploadProgress = 0;
@@ -137,6 +187,9 @@ class _UploadTrackScreenState extends State<UploadTrackScreen> {
         genreId: _selectedGenreId!,
         description: _descriptionController.text.trim(),
         videoFileKey: videoFileKey,
+        isAiGenerated: _isAiGenerated,
+        artistId: _isLabel && _useExistingArtist ? (_selectedArtist?['_id'] as String?) : null,
+        unclaimedArtistName: _isLabel && !_useExistingArtist ? _newArtistNameController.text.trim() : null,
         onProgress: (progress) {
           setState(() => _uploadProgress = progress);
         },
@@ -490,6 +543,14 @@ class _UploadTrackScreenState extends State<UploadTrackScreen> {
               hint: 'What\'s this about?',
               maxLines: 3,
             ),
+            const SizedBox(height: 16),
+
+            if (_isLabel) ...[
+              _buildArtistSelector(),
+              const SizedBox(height: 16),
+            ],
+
+            _buildAiGeneratedToggle(),
             const SizedBox(height: 40),
 
             // Submit Button
@@ -579,6 +640,143 @@ class _UploadTrackScreenState extends State<UploadTrackScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildArtistSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Artist', style: TextStyle(color: AppColors.mutedForeground, fontSize: 14)),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: _buildArtistModeChip('Existing Artist', true),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildArtistModeChip('New Artist', false),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        if (_useExistingArtist) ...[
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: NeumorphicTheme.neumorphicDecoration(borderRadius: BorderRadius.circular(12)),
+            child: TextField(
+              controller: _artistSearchController,
+              onChanged: (v) {
+                setState(() => _selectedArtist = null);
+                _onArtistSearchChanged(v);
+              },
+              style: const TextStyle(color: AppColors.foreground),
+              decoration: InputDecoration(
+                border: InputBorder.none,
+                hintText: 'Search for an artist by name...',
+                hintStyle: const TextStyle(color: AppColors.mutedForeground),
+                suffixIcon: _searchingArtists
+                    ? const Padding(
+                        padding: EdgeInsets.all(14),
+                        child: SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
+                      )
+                    : null,
+              ),
+            ),
+          ),
+          if (_selectedArtist != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Chip(
+                label: Text(_selectedArtist!['name'] as String? ?? ''),
+                backgroundColor: AppColors.primary.withValues(alpha: 0.15),
+                labelStyle: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
+                onDeleted: () => setState(() {
+                  _selectedArtist = null;
+                  _artistSearchController.clear();
+                  _artistSearchResults = [];
+                }),
+              ),
+            )
+          else if (_artistSearchResults.isNotEmpty)
+            Container(
+              margin: const EdgeInsets.only(top: 8),
+              constraints: const BoxConstraints(maxHeight: 220),
+              decoration: NeumorphicTheme.neumorphicDecoration(borderRadius: BorderRadius.circular(12)),
+              child: ListView.separated(
+                shrinkWrap: true,
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                itemCount: _artistSearchResults.length,
+                separatorBuilder: (_, __) => Divider(height: 1, color: AppColors.mutedForeground.withValues(alpha: 0.15)),
+                itemBuilder: (_, i) {
+                  final artist = _artistSearchResults[i];
+                  return ListTile(
+                    dense: true,
+                    title: Text(artist['name'] as String? ?? '', style: const TextStyle(color: AppColors.foreground)),
+                    onTap: () => setState(() {
+                      _selectedArtist = artist;
+                      _artistSearchResults = [];
+                      _artistSearchController.text = artist['name'] as String? ?? '';
+                    }),
+                  );
+                },
+              ),
+            ),
+        ] else
+          _buildTextField(
+            controller: _newArtistNameController,
+            label: 'Artist Name',
+            hint: 'Name of the artist you\'re releasing this for',
+          ),
+      ],
+    );
+  }
+
+  Widget _buildArtistModeChip(String label, bool value) {
+    final isSelected = _useExistingArtist == value;
+    return GestureDetector(
+      onTap: () => setState(() {
+        _useExistingArtist = value;
+        _selectedArtist = null;
+        _artistSearchResults = [];
+      }),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: NeumorphicTheme.neumorphicDecoration(
+          borderRadius: BorderRadius.circular(16),
+        ).copyWith(
+          color: isSelected ? AppColors.primary : AppColors.card,
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? Colors.black : AppColors.mutedForeground,
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAiGeneratedToggle() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      decoration: NeumorphicTheme.neumorphicDecoration(borderRadius: BorderRadius.circular(12)),
+      child: SwitchListTile(
+        contentPadding: EdgeInsets.zero,
+        value: _isAiGenerated,
+        activeThumbColor: AppColors.primary,
+        onChanged: (v) => setState(() => _isAiGenerated = v),
+        title: const Text('AI-generated', style: TextStyle(color: AppColors.foreground, fontWeight: FontWeight.w600)),
+        subtitle: const Text(
+          'This track was made using AI music generation tools',
+          style: TextStyle(color: AppColors.mutedForeground, fontSize: 12),
+        ),
+      ),
     );
   }
 

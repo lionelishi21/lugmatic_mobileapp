@@ -13,6 +13,8 @@ class ArtistRequestService {
     required String artistName,
     String? genre,
     String? socialLink,
+    String requestType = 'new_artist',
+    String? claimedArtistId,
   }) async {
     try {
       final response = await _apiClient.dio.post(
@@ -21,6 +23,8 @@ class ArtistRequestService {
           'artistName': artistName,
           if (genre != null) 'genre': genre,
           if (socialLink != null) 'socialLink': socialLink,
+          'requestType': requestType,
+          if (claimedArtistId != null) 'claimedArtistId': claimedArtistId,
         },
       );
       final body = response.data;
@@ -28,6 +32,18 @@ class ArtistRequestService {
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);
     }
+  }
+
+  /// Request to claim an unclaimed (label-managed) artist profile.
+  Future<ArtistRequestModel> claimProfile({
+    required String artistId,
+    required String artistName,
+  }) {
+    return submitRequest(
+      artistName: artistName,
+      requestType: 'claim_profile',
+      claimedArtistId: artistId,
+    );
   }
 
   Future<List<ArtistRequestModel>> getMyRequests() async {

@@ -17,6 +17,9 @@ class ArtistModel {
   final bool isFollowing;
   final bool isLive;
   final String? userId;
+  final bool isClaimed;
+  final String? managedBy;
+  final String? labelName;
 
   ArtistModel({
     required this.id,
@@ -37,6 +40,9 @@ class ArtistModel {
     this.isFollowing = false,
     this.isLive = false,
     this.userId,
+    this.isClaimed = true,
+    this.managedBy,
+    this.labelName,
   });
 
   ArtistModel copyWith({
@@ -108,6 +114,9 @@ class ArtistModel {
       isFollowing: json['isFollowing'] ?? false,
       isLive: json['isLive'] ?? false,
       userId: (json['user'] is Map) ? (json['user']['_id'] ?? json['user']['id']) : (json['user'] is String ? json['user'] : null),
+      isClaimed: json['isClaimed'] ?? true,
+      managedBy: (json['managedBy'] is Map) ? (json['managedBy']['_id'] ?? json['managedBy']['id']) : (json['managedBy'] is String ? json['managedBy'] : null),
+      labelName: json['labelName'],
     );
   }
 

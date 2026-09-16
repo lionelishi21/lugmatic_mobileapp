@@ -40,6 +40,8 @@ class User {
       roles.contains('contributor') || isContributor;
   bool get hasProviderRole =>
       roles.contains('provider') || role == 'provider';
+  bool get hasLabelRole =>
+      roles.contains('label') || role == 'label';
   bool get hasAdminRole =>
       roles.contains('admin') || roles.contains('super admin') ||
       role == 'admin' || role == 'super admin';

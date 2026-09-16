@@ -39,6 +39,7 @@ class MusicModel {
   final Map<String, dynamic>? billboardStats;
   final double? share;
   final String? role;
+  final bool isAiGenerated;
 
   MusicModel({
     required this.id,
@@ -60,6 +61,7 @@ class MusicModel {
     this.billboardStats,
     this.share,
     this.role,
+    this.isAiGenerated = false,
   });
 
   factory MusicModel.fromJson(Map<String, dynamic> json) {
@@ -141,6 +143,7 @@ class MusicModel {
       billboardStats: json['billboardStats'] as Map<String, dynamic>?,
       share: json['share'] != null ? (json['share'] as num).toDouble() : null,
       role: json['role'],
+      isAiGenerated: json['isAiGenerated'] ?? false,
     );
   }
 

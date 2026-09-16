@@ -329,6 +329,28 @@ class _PlayerScreenState extends State<PlayerScreen> with TickerProviderStateMix
                                   style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 18),
                                   textAlign: TextAlign.center,
                                 ),
+                                if (currentMusic.isAiGenerated) ...[
+                                  const SizedBox(height: 10),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withValues(alpha: 0.12),
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.auto_awesome, size: 12, color: Colors.white.withValues(alpha: 0.8)),
+                                        const SizedBox(width: 5),
+                                        Text(
+                                          'AI-generated',
+                                          style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 11, fontWeight: FontWeight.w600),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ],
                             ),
                           ),

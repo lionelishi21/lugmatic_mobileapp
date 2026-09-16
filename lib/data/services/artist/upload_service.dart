@@ -16,6 +16,11 @@ class UploadService {
     String? description,
     String? videoFileKey,
     Function(double)? onProgress,
+    // Record-label uploads only: either an existing artist's id, or a new
+    // artist name to create as an unclaimed (label-managed) profile.
+    String? artistId,
+    String? unclaimedArtistName,
+    bool isAiGenerated = false,
   }) async {
     try {
       String fileName = file.path.split('/').last;
@@ -26,10 +31,13 @@ class UploadService {
         'type': type,
         'genreId': genreId,
         'description': description ?? '',
+        'isAiGenerated': isAiGenerated,
         'audioFile': await MultipartFile.fromFile(file.path, filename: fileName),
         'coverArt': await MultipartFile.fromFile(coverArt.path, filename: coverName),
       };
       if (videoFileKey != null) fields['videoFileKey'] = videoFileKey;
+      if (artistId != null) fields['artist'] = artistId;
+      if (unclaimedArtistName != null) fields['unclaimedArtistName'] = unclaimedArtistName;
 
       FormData formData = FormData.fromMap(fields);
 
@@ -45,6 +53,22 @@ class UploadService {
 
       final data = response.data;
       return (data['data'] ?? data) as Map<String, dynamic>;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Search existing artists by name (record-label upload flow).
+  Future<List<Map<String, dynamic>>> searchArtists(String query) async {
+    if (query.trim().length < 2) return [];
+    try {
+      final response = await _apiClient.dio.get(
+        '/search/artists',
+        queryParameters: {'q': query.trim()},
+      );
+      final body = response.data;
+      final items = body['data'] ?? [];
+      return (items as List).cast<Map<String, dynamic>>();
     } catch (e) {
       rethrow;
     }

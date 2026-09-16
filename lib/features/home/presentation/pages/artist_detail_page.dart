@@ -16,6 +16,8 @@ import '../../../../data/models/video_model.dart';
 import '../../../../ui/widgets/player_screen.dart';
 import '../../../video/presentation/pages/videos_page.dart';
 import '../../../../data/providers/message_provider.dart';
+import '../../../../data/providers/auth_provider.dart';
+import '../../../../data/services/artist_request_service.dart';
 import '../../../../shared/widgets/new_badge.dart';
 
 const Color _kBg = Color(0xFF0F172A);
@@ -136,6 +138,35 @@ class _ArtistDetailPageState extends State<ArtistDetailPage> {
         setState(() => _isFollowing = oldState);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to update following: $e')),
+        );
+      }
+    }
+  }
+
+  bool _claimSubmitting = false;
+  bool _claimSubmitted = false;
+
+  Future<void> _claimProfile(ArtistModel artist) async {
+    setState(() => _claimSubmitting = true);
+    try {
+      await context.read<ArtistRequestService>().claimProfile(
+            artistId: artist.id,
+            artistName: artist.name,
+          );
+      if (mounted) {
+        setState(() {
+          _claimSubmitting = false;
+          _claimSubmitted = true;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Claim request submitted. Our team will review it shortly.')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _claimSubmitting = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to submit claim: $e')),
         );
       }
     }
@@ -416,6 +447,10 @@ class _ArtistDetailPageState extends State<ArtistDetailPage> {
               style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 14, height: 1.5),
             ),
           ],
+          if (!artist.isClaimed) ...[
+            const SizedBox(height: 14),
+            _buildClaimBanner(artist),
+          ],
           const SizedBox(height: 18),
           Row(
             children: [
@@ -547,6 +582,53 @@ class _ArtistDetailPageState extends State<ArtistDetailPage> {
           }
         );
       },
+    );
+  }
+
+  Widget _buildClaimBanner(ArtistModel artist) {
+    final isAuthenticated = context.watch<AuthProvider>().isAuthenticated;
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: _kAccent.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: _kAccent.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.info_outline, color: _kAccent, size: 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              artist.labelName != null && artist.labelName!.isNotEmpty
+                  ? 'This profile is managed by ${artist.labelName}. Are you ${artist.name}?'
+                  : 'This profile is unclaimed. Are you ${artist.name}?',
+              style: const TextStyle(color: Colors.white, fontSize: 13),
+            ),
+          ),
+          const SizedBox(width: 10),
+          if (_claimSubmitted)
+            const Text('Submitted', style: TextStyle(color: _kAccent, fontWeight: FontWeight.w700, fontSize: 12))
+          else
+            GestureDetector(
+              onTap: (!isAuthenticated || _claimSubmitting) ? null : () => _claimProfile(artist),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(color: _kAccent, borderRadius: BorderRadius.circular(20)),
+                child: _claimSubmitting
+                    ? const SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black),
+                      )
+                    : Text(
+                        'Claim',
+                        style: TextStyle(color: _kBg, fontWeight: FontWeight.w800, fontSize: 12),
+                      ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 
