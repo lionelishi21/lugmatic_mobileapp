@@ -53,10 +53,10 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCr6JGuzv6bv_707nAwnFGm0g8NeeOkQG0',
-    appId: '1:64518993933:android:0c758829367e7a91ee3d44',
-    messagingSenderId: '64518993933',
-    projectId: 'lugmatic-music',
-    storageBucket: 'lugmatic-music.firebasestorage.app',
+    apiKey: 'AIzaSyAGuvBwTiT8wo1f2xxT4SsS6-gr5Qo1yAI',
+    appId: '1:202745646875:android:91eb7104633bef736a8dbe',
+    messagingSenderId: '202745646875',
+    projectId: 'lumatix-3ba7a',
+    storageBucket: 'lumatix-3ba7a.firebasestorage.app',
   );
 }

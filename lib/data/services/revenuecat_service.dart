@@ -76,7 +76,8 @@ class RevenueCatService {
   /// Purchase a package
   Future<CustomerInfo?> purchasePackage(Package package) async {
     try {
-      return await Purchases.purchasePackage(package);
+      final result = await Purchases.purchasePackage(package);
+      return result.customerInfo;
     } catch (e) {
       debugPrint('Failed to purchase package: $e');
       throw e;

@@ -4,7 +4,7 @@ description: "A new Flutter project for the Lumatix Music streaming platform."
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.2.7+24
+version: 1.2.9+26
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -50,7 +50,7 @@ dependencies:
   flutter_svg: ^2.0.10+1 # For rendering SVG files
 
   # In-App Purchases & Monetization
-  purchases_flutter: ^8.1.1 # RevenueCat for Apple/Google In-App Purchases
+  purchases_flutter: ^10.11.0 # RevenueCat for Apple/Google In-App Purchases
 
   # Device & Permissions
   image_picker: ^1.1.2 # To let users pick images for their profile or uploads

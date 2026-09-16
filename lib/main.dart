@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'firebase_options.dart';
 import 'core/navigation/app_navigator_key.dart';
 import 'data/services/fcm_service.dart';
 import 'features/premium/presentation/pages/subscription_page.dart';
@@ -71,7 +72,9 @@ void main() async {
     // Initialize Firebase
     try {
       appStatus.value = "Initializing Firebase...";
-      await Firebase.initializeApp();
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      ).timeout(const Duration(seconds: 10));
     } catch (e) {
       appStatus.value = "Firebase Error: $e";
       debugPrint("Firebase init error: $e");
@@ -80,7 +83,7 @@ void main() async {
     // Initialize RevenueCat SDK
     try {
       appStatus.value = "Initializing RevenueCat...";
-      await RevenueCatService().init();
+      await RevenueCatService().init().timeout(const Duration(seconds: 10));
     } catch (e) {
       appStatus.value = "RevenueCat Error: $e";
       debugPrint("RevenueCat init error: $e");
@@ -123,7 +126,7 @@ void main() async {
     final fcmService = FcmService(notificationService: notificationService);
     try {
       appStatus.value = "Initializing Notifications...";
-      await fcmService.init();
+      await fcmService.init().timeout(const Duration(seconds: 10));
       FirebaseMessaging.onBackgroundMessage(FcmService.onBackgroundMessage);
     } catch (e) {
       debugPrint("FCM Init Error: $e");
