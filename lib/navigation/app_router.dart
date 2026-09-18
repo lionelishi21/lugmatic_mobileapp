@@ -123,7 +123,8 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const MixerPage());
 
       case '/live':
-        return MaterialPageRoute(builder: (_) => const TikTokLivePage());
+        final streamId = settings.arguments as String?;
+        return MaterialPageRoute(builder: (_) => TikTokLivePage(initialStreamId: streamId));
 
       case '/clashes':
         return MaterialPageRoute(builder: (_) => const ClashesHubPage());
