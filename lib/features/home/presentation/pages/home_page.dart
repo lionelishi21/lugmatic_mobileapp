@@ -173,9 +173,29 @@ class _HomePageState extends State<HomePage> {
     } catch (_) { /* socket unavailable */ }
   }
 
+  bool _sectionLoadFailed = false;
+
+  void _onSectionLoadError(Object e, String section) {
+    debugPrint('Home section "$section" failed to load: $e');
+    if (!mounted || _sectionLoadFailed) return;
+    setState(() => _sectionLoadFailed = true);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Some content failed to load'),
+        action: SnackBarAction(
+          label: 'Retry',
+          onPressed: () {
+            setState(() => _sectionLoadFailed = false);
+            _loadData();
+          },
+        ),
+      ),
+    );
+  }
+
   Future<void> _loadData() async {
     final apiClient = context.read<ApiClient>();
-    
+
     // Load unread notifications separately (not part of the main UI blocks)
     _loadNotifications();
 
@@ -183,38 +203,38 @@ class _HomePageState extends State<HomePage> {
     setState(() => _isLoading = false); // We stop the global full-screen spinner earlier
 
     // Trending Songs
-    _homeService.getTrendingSongs().then((songs) {
+    _homeService.getTrendingSongs().then<void>((songs) {
       if (mounted) setState(() => _trendingSongs = songs);
-    });
+    }).catchError((e) => _onSectionLoadError(e, 'trending songs'));
 
     // Featured Artists
-    _homeService.getFeaturedArtists().then((artists) {
+    _homeService.getFeaturedArtists().then<void>((artists) {
       if (mounted) setState(() => _featuredArtists = artists);
-    });
+    }).catchError((e) => _onSectionLoadError(e, 'featured artists'));
 
     // Featured Podcasts
-    _homeService.getFeaturedPodcasts().then((podcasts) {
+    _homeService.getFeaturedPodcasts().then<void>((podcasts) {
       if (mounted) setState(() => _featuredPodcasts = podcasts);
-    });
+    }).catchError((e) => _onSectionLoadError(e, 'featured podcasts'));
 
     // Genres
-    _loadGenres(apiClient).then((genres) {
+    _loadGenres(apiClient).then<void>((genres) {
       if (mounted) setState(() => _genres = genres);
-    });
+    }).catchError((e) => _onSectionLoadError(e, 'genres'));
 
     // Playlists
-    _loadPlaylists(apiClient).then((playlists) {
+    _loadPlaylists(apiClient).then<void>((playlists) {
       if (mounted) setState(() => _playlists = playlists);
-    });
+    }).catchError((e) => _onSectionLoadError(e, 'playlists'));
 
     // Live streams and recent clashes
     final liveStreamService = LiveStreamService(apiClient: apiClient);
-    liveStreamService.getLiveStreams(status: 'live').then((streams) {
+    liveStreamService.getLiveStreams(status: 'live').then<void>((streams) {
       if (mounted) setState(() => _liveStreams = streams);
-    });
-    liveStreamService.getRecentClashes().then((clashes) {
+    }).catchError((e) => _onSectionLoadError(e, 'live streams'));
+    liveStreamService.getRecentClashes().then<void>((clashes) {
       if (mounted) setState(() => _recentClashes = clashes);
-    });
+    }).catchError((e) => _onSectionLoadError(e, 'recent clashes'));
   }
 
   Future<List<Map<String, dynamic>>> _loadGenres(ApiClient apiClient) async {
