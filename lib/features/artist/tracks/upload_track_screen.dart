@@ -503,6 +503,13 @@ class _UploadTrackScreenState extends State<UploadTrackScreen> {
               onTap: _pickImage,
               preview: _selectedCover,
             ),
+            const SizedBox(height: 16),
+            _buildFilePicker(
+              label: 'Video (Optional)',
+              hint: _selectedVideo != null ? _selectedVideo!.name : 'Select MP4 video',
+              icon: FontAwesomeIcons.fileVideo,
+              onTap: _pickVideo,
+            ),
             const SizedBox(height: 32),
 
             // Text Fields
