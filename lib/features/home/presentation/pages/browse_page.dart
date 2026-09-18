@@ -5,6 +5,7 @@ import '../../../../core/network/api_client.dart';
 import '../../../../core/utils/responsive.dart';
 import '../../../../data/models/music_model.dart';
 import '../../../../data/models/artist_model.dart';
+import '../../../../data/models/podcast_model.dart';
 import '../../../../data/providers/audio_provider.dart';
 import '../../../../ui/widgets/player_screen.dart';
 import 'artist_detail_page.dart';
@@ -20,6 +21,7 @@ class _BrowsePageState extends State<BrowsePage> {
   List<Map<String, dynamic>> _genres = [];
   List<MusicModel> _searchResults = [];
   List<ArtistModel> _artistResults = [];
+  List<PodcastModel> _podcastResults = [];
   List<MusicModel> _newReleases = [];
   bool _isSearching = false;
   bool _isLoading = true;
@@ -69,12 +71,42 @@ class _BrowsePageState extends State<BrowsePage> {
     }
   }
 
+  void _openPodcastResult(PodcastModel podcast) {
+    if (podcast.audioUrl.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('This podcast has no playable episode yet')),
+      );
+      return;
+    }
+
+    final musicModel = MusicModel(
+      id: podcast.id,
+      title: podcast.title,
+      artist: podcast.host,
+      album: podcast.seriesTitle,
+      imageUrl: podcast.imageUrl,
+      audioUrl: podcast.audioUrl,
+      duration: podcast.duration,
+      genre: podcast.category,
+      releaseDate: podcast.publishDate,
+    );
+
+    context.read<AudioProvider>().playMusic(musicModel);
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => PlayerScreen(music: musicModel),
+    );
+  }
+
   Future<void> _performSearch(String query) async {
     if (query.trim().isEmpty) {
       setState(() {
         _isSearching = false;
         _searchResults = [];
         _artistResults = [];
+        _podcastResults = [];
       });
       return;
     }
@@ -92,6 +124,7 @@ class _BrowsePageState extends State<BrowsePage> {
 
       final songs = data['songs'] ?? [];
       final artists = data['artists'] ?? [];
+      final podcasts = data['podcasts'] ?? [];
 
       if (mounted) {
         setState(() {
@@ -100,6 +133,9 @@ class _BrowsePageState extends State<BrowsePage> {
               .toList();
           _artistResults = (artists as List)
               .map((j) => ArtistModel.fromJson(j as Map<String, dynamic>))
+              .toList();
+          _podcastResults = (podcasts as List)
+              .map((j) => PodcastModel.fromJson(j as Map<String, dynamic>))
               .toList();
           _isSearching = false;
           _searchQuery = query;
@@ -309,8 +345,39 @@ class _BrowsePageState extends State<BrowsePage> {
                   subtitle: Text(s.artist, style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 13)),
                   trailing: const Icon(Icons.play_circle_outline, color: Color(0xFF10B981)),
                 ))),
+            const SizedBox(height: 24),
           ],
-          if (_searchResults.isEmpty && _artistResults.isEmpty)
+          if (_podcastResults.isNotEmpty) ...[
+            Text(
+              'Podcasts (${_podcastResults.length})',
+              style: const TextStyle(
+                color: Colors.white, fontSize: 20, fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 12),
+            ...(_podcastResults.take(10).map((p) => ListTile(
+                  onTap: () => _openPodcastResult(p),
+                  leading: Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      color: const Color(0xFF10B981).withValues(alpha: 0.2),
+                    ),
+                    child: p.imageUrl.isNotEmpty
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.network(p.imageUrl, fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => const Icon(Icons.mic, color: Colors.white)),
+                          )
+                        : const Icon(Icons.mic, color: Colors.white),
+                  ),
+                  title: Text(p.title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                  subtitle: Text(p.host, style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 13)),
+                  trailing: const Icon(Icons.play_circle_outline, color: Color(0xFF10B981)),
+                ))),
+          ],
+          if (_searchResults.isEmpty && _artistResults.isEmpty && _podcastResults.isEmpty)
             Padding(
               padding: const EdgeInsets.only(top: 60),
               child: Center(
