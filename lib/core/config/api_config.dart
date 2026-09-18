@@ -95,6 +95,7 @@ class ApiConfig {
   static const String notifications = '/notification';
   static const String markRead = '/notification/read-all';
   static const String fcmToken = '/user/fcm-token';
+  static const String requestAccountDeletion = '/user/request-deletion';
 
   // ── Artist Request endpoints ────────────────────────────────────
   static const String artistRequest = '/artist-request';

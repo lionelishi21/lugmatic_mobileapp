@@ -189,6 +189,18 @@ class AuthService {
     }
   }
 
+  /// Permanently (soft-)delete the current account: anonymizes the profile,
+  /// deactivates it, and logs it out on every device. Clears local tokens
+  /// on success since the server-side session is invalidated as part of it.
+  Future<void> requestAccountDeletion() async {
+    try {
+      await _apiClient.dio.post(ApiConfig.requestAccountDeletion);
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+    await _tokenStorage.clearTokens();
+  }
+
   /// Fetch the currently authenticated user profile.
   Future<User?> getCurrentUser() async {
     try {

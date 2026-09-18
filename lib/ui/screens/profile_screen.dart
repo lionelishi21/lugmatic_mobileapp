@@ -177,11 +177,55 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: const Text('LOGOUT', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
               ),
             ),
+            Center(
+              child: TextButton(
+                onPressed: () => _confirmDeleteAccount(context),
+                child: const Text('DELETE ACCOUNT', style: TextStyle(color: Colors.white38, fontSize: 12)),
+              ),
+            ),
           ],
         ),
       ),
       backgroundColor: const Color(0xFF0F172A),
     );
+  }
+
+  Future<void> _confirmDeleteAccount(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: const Color(0xFF1E293B),
+        title: const Text('Delete Account?', style: TextStyle(color: Colors.white)),
+        content: const Text(
+          'This permanently deletes your account and logs you out everywhere. This cannot be undone.',
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel', style: TextStyle(color: Colors.white70)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Delete', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await context.read<AuthProvider>().deleteAccount();
+      if (!context.mounted) return;
+      navigator.pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const OnboardingScreen()),
+        (route) => false,
+      );
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text('Failed to delete account: $e')));
+    }
   }
 
   Widget _buildLegalLink(BuildContext context, String title, String route) {

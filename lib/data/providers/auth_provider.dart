@@ -159,6 +159,17 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Permanently delete the account and clear the local session.
+  /// Throws on failure (e.g. network error) — the session is left intact
+  /// so the user isn't logged out without knowing their account is gone.
+  Future<void> deleteAccount() async {
+    await _authService.requestAccountDeletion();
+    _user = null;
+    _status = AuthStatus.unauthenticated;
+    _errorMessage = null;
+    notifyListeners();
+  }
+
   /// Add a role (artist | contributor) and refresh the stored JWT.
   Future<bool> addRole(String role) async {
     _errorMessage = null;
