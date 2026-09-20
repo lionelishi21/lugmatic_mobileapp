@@ -74,14 +74,19 @@ class _ArtistPromoteScreenState extends State<ArtistPromoteScreen> {
               height: 50,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
+                  backgroundColor: AppColors.muted,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
+                // Paid promotion isn't live yet — no real ad platform is
+                // connected on the backend. Showing a fake "launched"
+                // message here would tell an artist they were charged and
+                // running ads when nothing happened at all.
                 onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Campaign launched successfully!')));
-                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Paid promotion is coming soon — we'll let you know when it's ready.")),
+                  );
                 },
-                child: const Text('Launch Campaign', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                child: const Text('Coming Soon', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.mutedForeground)),
               ),
             )
           ],
