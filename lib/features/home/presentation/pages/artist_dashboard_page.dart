@@ -4,6 +4,7 @@ import '../../../../data/providers/auth_provider.dart';
 import '../../../../data/services/management_service.dart';
 import 'package:lugmatic_flutter/features/video/presentation/pages/video_recording_page.dart';
 import '../../../../core/config/api_config.dart';
+import '../../../artist/clashes/artist_clashes_screen.dart';
 
 class ArtistDashboardPage extends StatefulWidget {
   const ArtistDashboardPage({Key? key}) : super(key: key);
@@ -327,7 +328,8 @@ class _ArtistDashboardPageState extends State<ArtistDashboardPage> {
             MaterialPageRoute(builder: (_) => VideoRecordingPage()));
       }),
       _ActionItem('CLASH', Icons.sports_kabaddi_rounded, const Color(0xFFFF8C00),
-          () => Navigator.pushNamed(context, '/my_clashes')),
+          () => Navigator.push(context,
+              MaterialPageRoute(builder: (_) => const ArtistClashesScreen()))),
       _ActionItem('ANALYTICS', Icons.bar_chart_rounded, _kGreen, () {}),
     ];
 
