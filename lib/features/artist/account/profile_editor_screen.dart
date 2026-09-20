@@ -38,13 +38,26 @@ class _ProfileEditorScreenState extends State<ProfileEditorScreen> {
     super.dispose();
   }
 
+  // Stage name, bio, and social links live on the Artist document, not the
+  // User document — saves already went through ArtistService.updateProfile
+  // (Artist), but loading used to read /auth/me (User), which has none of
+  // these fields. That meant every field always loaded blank, and hitting
+  // Save without manually retyping everything silently wiped the real
+  // Artist data with blanks.
+  String? _artistId;
+
   Future<void> _loadProfileData() async {
     setState(() => _isLoading = true);
     try {
+      final auth = context.read<AuthProvider>();
+      final artistId = auth.user?.artistId ?? auth.user?.id;
+      if (artistId == null) throw Exception('Artist profile not linked');
+      _artistId = artistId;
+
       final apiClient = context.read<ApiClient>();
-      final response = await apiClient.dio.get('/auth/me');
+      final response = await apiClient.dio.get('/artist/details/$artistId');
       final rawData = response.data['data'] ?? response.data;
-      
+
       setState(() {
         _nameController.text = rawData['name'] ?? rawData['stageName'] ?? '';
         _bioController.text = rawData['bio'] ?? '';
@@ -55,6 +68,11 @@ class _ProfileEditorScreenState extends State<ProfileEditorScreen> {
       });
     } catch (e) {
       debugPrint('Error loading profile: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load profile: $e'), backgroundColor: Colors.red),
+        );
+      }
     } finally {
       setState(() => _isLoading = false);
     }
@@ -63,10 +81,9 @@ class _ProfileEditorScreenState extends State<ProfileEditorScreen> {
   Future<void> _saveProfile() async {
     setState(() => _isLoading = true);
     try {
-      final auth = context.read<AuthProvider>();
-      final artistId = auth.user?.artistId ?? auth.user?.id;
+      final artistId = _artistId;
       if (artistId == null) throw Exception('Artist profile not linked');
-      
+
       await _artistService.updateProfile(artistId, {
         'name': _nameController.text.trim(),
         'bio': _bioController.text.trim(),

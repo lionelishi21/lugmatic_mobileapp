@@ -49,13 +49,26 @@ class _PayoutSettingsScreenState extends State<PayoutSettingsScreen> {
     super.dispose();
   }
 
+  // payoutInfo/verificationDocuments live on the Artist document, not the
+  // User document — saves already went through ArtistService.updateProfile
+  // (Artist), but loading used to read /auth/me (User), which has neither
+  // field. Every field always loaded blank, and hitting Save without
+  // manually retyping everything silently wiped the real payout method
+  // with blanks.
+  String? _artistId;
+
   Future<void> _loadPayoutData() async {
     setState(() => _isLoading = true);
     try {
+      final auth = context.read<AuthProvider>();
+      final artistId = auth.user?.artistId ?? auth.user?.id;
+      if (artistId == null) throw Exception('Artist profile not linked');
+      _artistId = artistId;
+
       final apiClient = context.read<ApiClient>();
-      final response = await apiClient.dio.get('/auth/me');
+      final response = await apiClient.dio.get('/artist/details/$artistId');
       final rawData = response.data['data'] ?? response.data;
-      
+
       final payout = rawData['payoutInfo'];
       final verification = rawData['verificationDocuments'];
 
@@ -84,6 +97,11 @@ class _PayoutSettingsScreenState extends State<PayoutSettingsScreen> {
       }
     } catch (e) {
       debugPrint('Error loading payout settings: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load payout settings: $e'), backgroundColor: Colors.red),
+        );
+      }
     } finally {
       setState(() => _isLoading = false);
     }
@@ -92,8 +110,7 @@ class _PayoutSettingsScreenState extends State<PayoutSettingsScreen> {
   Future<void> _savePayoutSettings() async {
     setState(() => _isLoading = true);
     try {
-      final auth = context.read<AuthProvider>();
-      final artistId = auth.user?.artistId ?? auth.user?.id;
+      final artistId = _artistId;
       if (artistId == null) throw Exception('Artist profile not linked');
       
       final payoutData = {
