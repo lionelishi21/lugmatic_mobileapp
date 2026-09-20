@@ -186,11 +186,12 @@ class _GoLiveBanner extends StatelessWidget {
           child: const Icon(FontAwesomeIcons.towerBroadcast, color: AppColors.primary, size: 22),
         ),
         const SizedBox(width: 16),
-        const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('Go Live Now', style: TextStyle(color: AppColors.foreground, fontSize: 16, fontWeight: FontWeight.bold)),
-          SizedBox(height: 3),
-          Text('Stream to your fans in real-time', style: TextStyle(color: AppColors.mutedForeground, fontSize: 12)),
+        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
+          const Text('Go Live Now', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: AppColors.foreground, fontSize: 16, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 3),
+          Text('Stream to your fans', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.mutedForeground, fontSize: 12)),
         ])),
+        const SizedBox(width: 12),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(gradient: AppColors.primaryGradient, borderRadius: BorderRadius.circular(12)),
