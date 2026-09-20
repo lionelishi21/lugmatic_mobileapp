@@ -38,7 +38,7 @@ class _ArtistChallengePageState extends State<ArtistChallengePage> {
   bool _isSearching = false;
   String _selectedRealm = 'fire';
 
-  static const _realms = ['fire', 'ice', 'reggae', 'dancehall', 'hiphop', 'rnb', 'afrobeats'];
+  static const _realms = ['fire', 'ice', 'reggae', 'dancehall', 'singjay', 'hiphop', 'rnb', 'afrobeats'];
 
   @override
   void initState() {

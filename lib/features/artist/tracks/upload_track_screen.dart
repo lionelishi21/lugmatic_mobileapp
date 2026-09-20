@@ -104,14 +104,33 @@ class _UploadTrackScreenState extends State<UploadTrackScreen> {
     }
   }
 
+  // Matches the backend's actual limits (src/config/s3.js FILE_SIZE_LIMITS)
+  // so oversized files are caught here instead of failing deep in the
+  // network call with a generic error.
+  static const _maxAudioBytes = 50 * 1024 * 1024;
+  static const _maxImageBytes = 50 * 1024 * 1024;
+  static const _maxVideoBytes = 200 * 1024 * 1024;
+
+  void _showFileTooLarge(String label, int maxBytes) {
+    final maxMb = maxBytes ~/ (1024 * 1024);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('$label is too large. Max size is ${maxMb}MB.'), backgroundColor: Colors.red),
+    );
+  }
+
   Future<void> _pickAudio() async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.audio,
     );
 
     if (result != null && result.files.single.path != null) {
+      final file = result.files.single;
+      if (file.size > _maxAudioBytes) {
+        _showFileTooLarge('Audio file', _maxAudioBytes);
+        return;
+      }
       setState(() {
-        _selectedFile = File(result.files.single.path!);
+        _selectedFile = File(file.path!);
       });
     }
   }
@@ -121,6 +140,11 @@ class _UploadTrackScreenState extends State<UploadTrackScreen> {
     final image = await picker.pickImage(source: ImageSource.gallery);
 
     if (image != null) {
+      final size = await image.length();
+      if (size > _maxImageBytes) {
+        _showFileTooLarge('Cover image', _maxImageBytes);
+        return;
+      }
       setState(() {
         _selectedCover = File(image.path);
       });
@@ -130,7 +154,12 @@ class _UploadTrackScreenState extends State<UploadTrackScreen> {
   Future<void> _pickVideo() async {
     final result = await FilePicker.platform.pickFiles(type: FileType.video);
     if (result != null) {
-      setState(() => _selectedVideo = result.files.first);
+      final file = result.files.first;
+      if (file.size > _maxVideoBytes) {
+        _showFileTooLarge('Video', _maxVideoBytes);
+        return;
+      }
+      setState(() => _selectedVideo = file);
     }
   }
 

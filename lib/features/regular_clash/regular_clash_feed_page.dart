@@ -276,6 +276,7 @@ class MatchupCard extends StatelessWidget {
     'ice': Color(0xFF00BFFF),
     'reggae': Color(0xFF00C853),
     'dancehall': Color(0xFFFFD700),
+    'singjay': Color(0xFF7C4DFF),
     'hiphop': Color(0xFF9C27B0),
     'rnb': Color(0xFFE91E63),
     'afrobeats': Color(0xFFFF9800),

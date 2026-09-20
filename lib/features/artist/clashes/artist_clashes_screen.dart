@@ -8,23 +8,34 @@ import '../../../data/services/regular_clash_service.dart';
 import '../../regular_clash/regular_clash_detail_page.dart';
 
 // ── realm helpers ──────────────────────────────────────────────────────────
+// Matches the backend's real Clash realm enum (regularClashModel.js /
+// clashPoolModel.js) — this used to be a stale fire/water/earth/air set
+// that didn't match any real realm except 'fire'.
 Color _realmColor(String realm) {
   switch (realm.toLowerCase()) {
-    case 'fire':   return const Color(0xFFFF4500);
-    case 'water':  return const Color(0xFF00BFFF);
-    case 'earth':  return const Color(0xFF7CFC00);
-    case 'air':    return const Color(0xFFE0E0E0);
-    default:       return AppColors.primary;
+    case 'fire':      return const Color(0xFFFF4500);
+    case 'ice':       return const Color(0xFF00BFFF);
+    case 'reggae':    return const Color(0xFF00C853);
+    case 'dancehall': return const Color(0xFFFFD700);
+    case 'singjay':   return const Color(0xFF7C4DFF);
+    case 'hiphop':    return const Color(0xFF9C27B0);
+    case 'rnb':       return const Color(0xFFE91E63);
+    case 'afrobeats': return const Color(0xFFFF9800);
+    default:          return AppColors.primary;
   }
 }
 
 String _realmEmoji(String realm) {
   switch (realm.toLowerCase()) {
-    case 'fire':  return '🔥';
-    case 'water': return '💧';
-    case 'earth': return '🌍';
-    case 'air':   return '💨';
-    default:      return '⚡';
+    case 'fire':      return '🔥';
+    case 'ice':       return '❄️';
+    case 'reggae':    return '🌴';
+    case 'dancehall': return '💃';
+    case 'singjay':   return '🎤';
+    case 'hiphop':    return '🎧';
+    case 'rnb':       return '💜';
+    case 'afrobeats': return '🥁';
+    default:          return '⚡';
   }
 }
 
