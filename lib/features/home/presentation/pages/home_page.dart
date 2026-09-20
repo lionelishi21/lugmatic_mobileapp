@@ -51,7 +51,6 @@ import 'package:lugmatic_flutter/data/services/socket_service.dart';
 import 'package:lugmatic_flutter/core/network/token_storage.dart';
 import 'package:lugmatic_flutter/data/models/genre_model.dart';
 import 'package:lugmatic_flutter/features/music/presentation/pages/genre_music_page.dart';
-import 'package:lugmatic_flutter/shared/widgets/brand_gradient_fallback.dart';
 import 'package:lugmatic_flutter/features/home/presentation/widgets/billboard_list_item.dart';
 import 'package:lugmatic_flutter/features/live_stream/presentation/pages/recorded_streams_page.dart';
 import 'package:lugmatic_flutter/data/providers/message_provider.dart';
@@ -1323,7 +1322,9 @@ class _HomePageState extends State<HomePage> {
             podcast: podcast,
             onTap: () => _openPodcastPlayer(podcast),
             onPlay: () => _openPodcastPlayer(podcast),
-            onLike: () => print('Like ${podcast.title}'),
+            onLike: () => ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Liking podcasts is coming soon')),
+            ),
           );
         },
       ),
@@ -1556,214 +1557,6 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-
-
-  Widget _buildTikTokLiveStreams() {
-    return SizedBox(
-      height: 280,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: _featuredArtists.length,
-        itemBuilder: (context, index) {
-          final artist = _featuredArtists[index];
-          return Container(
-            width: 160,
-            margin: const EdgeInsets.only(right: 12),
-            child: _buildLiveStreamCard(artist, index),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildLiveStreamCard(ArtistModel artist, int index) {
-    final isLive = index < 2; // First two artists are "live"
-    final viewerCount = isLive ? (1200 + index * 500) : 0;
-    
-    return GestureDetector(
-      onTap: () {
-        if (isLive) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const TikTokLivePage(),
-            ),
-          );
-        }
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          border: isLive ? Border.all(color: Colors.red, width: 2) : null,
-        ),
-        child: Stack(
-          children: [
-            // Background image
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Colors.green.withValues(alpha: 0.8),
-                    Colors.blue.withValues(alpha: 0.8),
-                    Colors.black.withValues(alpha: 0.9),
-                  ],
-                ),
-              ),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 60,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 2),
-                      ),
-                      child: ClipOval(
-                        child: artist.imageUrl.isNotEmpty
-                            ? Image.network(
-                                artist.imageUrl,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => const BrandGradientFallback(iconSize: 24, borderRadius: BorderRadius.zero),
-                              )
-                            : const BrandGradientFallback(iconSize: 24, borderRadius: BorderRadius.zero),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      artist.name,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (isLive) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        'Now Playing',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.8),
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-            
-            // Live indicator
-            if (isLive)
-              Positioned(
-                top: 8,
-                left: 8,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.red,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 6,
-                        height: 6,
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      const Text(
-                        'LIVE',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            
-            // Viewer count
-            if (isLive)
-              Positioned(
-                top: 8,
-                right: 8,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.6),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.remove_red_eye,
-                        color: Colors.white,
-                        size: 12,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${viewerCount.toString()}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            
-            // Offline overlay
-            if (!isLive)
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  color: Colors.black.withValues(alpha: 0.5),
-                ),
-                child: const Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.play_circle_outline,
-                        color: Colors.white,
-                        size: 40,
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Offline',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-          ],
-        ),
       ),
     );
   }

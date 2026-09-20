@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:video_player/video_player.dart';
 import '../../core/config/api_config.dart';
 import '../../core/constants/app_colors.dart';
@@ -385,7 +386,10 @@ class _RegularClashDetailPageState extends State<RegularClashDetailPage> {
         const SizedBox(width: 24),
         IconButton(
           onPressed: () {
-            // Share functionality
+            final url = 'https://lumatixmusic.com/regular-clash/${clash.id}';
+            Share.share(
+              '${clash.challenger.name} vs ${clash.opponent.name} — vote now on Lumatix!\n$url',
+            );
           },
           icon: const Icon(Icons.share, color: Colors.white54),
         ),
@@ -403,6 +407,7 @@ class _RealmBadge extends StatelessWidget {
     'ice': Color(0xFF00BFFF),
     'reggae': Color(0xFF00C853),
     'dancehall': Color(0xFFFFD700),
+    'singjay': Color(0xFF7C4DFF),
     'hiphop': Color(0xFF9C27B0),
     'rnb': Color(0xFFE91E63),
     'afrobeats': Color(0xFFFF9800),

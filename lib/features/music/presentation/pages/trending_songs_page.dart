@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../data/models/music_model.dart';
 import '../../../../data/services/music_service.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../data/providers/audio_provider.dart';
+import '../../../../shared/widgets/playlist_selection_bottom_sheet.dart';
 import '../../../../ui/widgets/player_screen.dart';
 
 class TrendingSongsPage extends StatefulWidget {
@@ -208,9 +210,7 @@ class _TrendingSongsPageState extends State<TrendingSongsPage> {
                 Icons.more_vert_rounded,
                 color: Colors.white.withValues(alpha: 0.5),
               ),
-              onPressed: () {
-                // Show options menu
-              },
+              onPressed: () => _showSongOptions(song),
             ),
           ],
         ),
@@ -225,6 +225,51 @@ class _TrendingSongsPageState extends State<TrendingSongsPage> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => PlayerScreen(music: music),
+    );
+  }
+
+  void _showSongOptions(MusicModel song) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1F2937),
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.playlist_add, color: Colors.white),
+              title: const Text('Add to Playlist', style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(context);
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (_) => PlaylistSelectionBottomSheet(song: song),
+                );
+              },
+            ),
+            if (song.artistId.isNotEmpty)
+              ListTile(
+                leading: const Icon(Icons.person_outline, color: Colors.white),
+                title: const Text('Go to Artist', style: TextStyle(color: Colors.white)),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/artist', arguments: {'id': song.artistId});
+                },
+              ),
+            ListTile(
+              leading: const Icon(Icons.share_outlined, color: Colors.white),
+              title: const Text('Share', style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(context);
+                final url = 'https://lumatixmusic.com/public/song-share/${song.id}';
+                Share.share('Check out "${song.title}" by ${song.artist} on Lumatix!\n$url');
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

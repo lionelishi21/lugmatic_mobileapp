@@ -125,7 +125,13 @@ class _StreamPageState extends State<StreamPage> {
       actions: [
         IconButton(
           icon: const Icon(Icons.search, color: Colors.white),
-          onPressed: () => print('Search streams'),
+          onPressed: () => showSearch(
+            context: context,
+            delegate: _StreamSearchDelegate(
+              streams: [..._liveStreams, ..._upcomingStreams, ..._pastStreams],
+              onSelected: (stream) => _openLiveStream(streamId: stream.id),
+            ),
+          ),
         ),
       ],
     );
@@ -514,5 +520,73 @@ class _StreamPageState extends State<StreamPage> {
       return '${hours}h ${minutes}m';
     }
     return '${minutes}m';
+  }
+}
+
+class _StreamSearchDelegate extends SearchDelegate<LiveStreamModel?> {
+  final List<LiveStreamModel> streams;
+  final ValueChanged<LiveStreamModel> onSelected;
+
+  _StreamSearchDelegate({required this.streams, required this.onSelected});
+
+  @override
+  ThemeData appBarTheme(BuildContext context) {
+    return Theme.of(context).copyWith(
+      scaffoldBackgroundColor: const Color(0xFF111827),
+      appBarTheme: const AppBarTheme(backgroundColor: Color(0xFF111827), elevation: 0),
+      inputDecorationTheme: const InputDecorationTheme(
+        hintStyle: TextStyle(color: Colors.white38),
+      ),
+      textTheme: const TextTheme(titleLarge: TextStyle(color: Colors.white, fontSize: 18)),
+    );
+  }
+
+  @override
+  List<Widget> buildActions(BuildContext context) => [
+        if (query.isNotEmpty)
+          IconButton(icon: const Icon(Icons.clear, color: Colors.white), onPressed: () => query = ''),
+      ];
+
+  @override
+  Widget buildLeading(BuildContext context) => IconButton(
+        icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+        onPressed: () => close(context, null),
+      );
+
+  @override
+  Widget buildResults(BuildContext context) => _buildList(context);
+
+  @override
+  Widget buildSuggestions(BuildContext context) => _buildList(context);
+
+  Widget _buildList(BuildContext context) {
+    final results = query.isEmpty
+        ? streams
+        : streams.where((s) => s.title.toLowerCase().contains(query.toLowerCase())).toList();
+
+    if (results.isEmpty) {
+      return const Center(
+        child: Text('No streams found', style: TextStyle(color: Colors.white54)),
+      );
+    }
+
+    return Container(
+      color: const Color(0xFF111827),
+      child: ListView.builder(
+        itemCount: results.length,
+        itemBuilder: (context, index) {
+          final stream = results[index];
+          return ListTile(
+            leading: const Icon(Icons.sensors_rounded, color: Colors.white54),
+            title: Text(stream.title, style: const TextStyle(color: Colors.white)),
+            subtitle: Text(stream.category, style: const TextStyle(color: Colors.white54)),
+            onTap: () {
+              onSelected(stream);
+              close(context, stream);
+            },
+          );
+        },
+      ),
+    );
   }
 }
