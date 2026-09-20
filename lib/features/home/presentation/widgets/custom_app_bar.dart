@@ -8,6 +8,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onMessageTap;
   final VoidCallback? onStoreTap;
   final VoidCallback? onLibraryTap;
+  final VoidCallback? onExploreTap;
   final int unreadCount;
   final int unreadMessageCount;
 
@@ -19,6 +20,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.onMessageTap,
     this.onStoreTap,
     this.onLibraryTap,
+    this.onExploreTap,
     this.unreadCount = 0,
     this.unreadMessageCount = 0,
   }) : super(key: key);
@@ -47,6 +49,32 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
               Row(
                 children: [
+                  if (onExploreTap != null) ...[
+                    GestureDetector(
+                      onTap: onExploreTap,
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: AppColors.darkBackground,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.3),
+                              offset: const Offset(4, 4),
+                              blurRadius: 8,
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.explore_outlined,
+                          color: Colors.white70,
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                  ],
                   if (onStoreTap != null) ...[
                     GestureDetector(
                       onTap: onStoreTap,

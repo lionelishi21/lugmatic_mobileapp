@@ -24,6 +24,7 @@ import 'package:lugmatic_flutter/shared/widgets/demand_artist_dialog.dart';
 import 'package:lugmatic_flutter/shared/widgets/role_switcher_button.dart';
 import 'package:lugmatic_flutter/data/services/notification_service.dart';
 import 'package:lugmatic_flutter/features/home/presentation/pages/create_playlist_screen.dart';
+import 'package:lugmatic_flutter/features/home/presentation/pages/explore_hub_page.dart';
 import 'package:lugmatic_flutter/features/home/presentation/pages/for_you_feed_page.dart';
 import 'package:lugmatic_flutter/features/home/presentation/pages/home_page.dart';
 import 'package:lugmatic_flutter/features/home/presentation/pages/library_page.dart';
@@ -436,6 +437,7 @@ class _HomePageState extends State<HomePage> {
                 onMessageTap: () => Navigator.pushNamed(context, '/messages'),
                 onProfileTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen())),
                 onStoreTap: () => Navigator.pushNamed(context, '/store'),
+                onExploreTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ExploreHubPage())),
               )
             : null,
         body: Row(
@@ -514,6 +516,9 @@ class _HomePageState extends State<HomePage> {
               },
               onLibraryTap: () {
                 setState(() => _currentIndex = 4);
+              },
+              onExploreTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const ExploreHubPage()));
               },
             )
           : null,
