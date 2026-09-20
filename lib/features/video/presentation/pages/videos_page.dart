@@ -543,10 +543,9 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Column(
+      body: SafeArea(
+        child: Column(
         children: [
-          // Status bar spacer
-          SizedBox(height: MediaQuery.of(context).padding.top),
           // Top bar
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -658,6 +657,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
             ),
           ),
         ],
+        ),
       ),
     );
   }

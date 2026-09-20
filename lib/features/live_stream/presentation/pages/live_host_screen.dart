@@ -429,7 +429,7 @@ class _LiveHostScreenState extends State<LiveHostScreen>
 
                     // Input field
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                      padding: EdgeInsets.fromLTRB(16, 8, 16, 8 + MediaQuery.of(context).padding.bottom),
                       child: Row(
                         children: [
                           Expanded(

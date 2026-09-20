@@ -1118,7 +1118,10 @@ class _TikTokLivePageState extends State<TikTokLivePage>
       left: 0,
       right: 88, // Prevent touch intercept overlap with right-side buttons
       child: Container(
-        padding: const EdgeInsets.all(16),
+        // Gradient stays flush with the true screen edge; only the
+        // interactive content (Follow button, comment box) below is
+        // inset from the device's gesture bar / home indicator.
+        padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + MediaQuery.of(context).padding.bottom),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
@@ -1317,8 +1320,14 @@ class _TikTokLivePageState extends State<TikTokLivePage>
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
+      isScrollControlled: true,
       builder: (context) => Container(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.fromLTRB(
+          16,
+          16,
+          16,
+          16 + MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom,
+        ),
         decoration: const BoxDecoration(
           color: Colors.black,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
