@@ -51,6 +51,23 @@ class _EarningsScreenState extends State<EarningsScreen> {
         builder: (context, provider, _) {
           final earnings = provider.artistEarnings;
           if (earnings == null) {
+            if (!provider.isLoading && provider.error != null) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.error_outline, color: Colors.redAccent, size: 40),
+                      const SizedBox(height: 12),
+                      Text(provider.error!, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.mutedForeground)),
+                      const SizedBox(height: 16),
+                      TextButton(onPressed: _load, child: const Text('Retry', style: TextStyle(color: AppColors.primary))),
+                    ],
+                  ),
+                ),
+              );
+            }
             return const Center(child: CircularProgressIndicator(color: AppColors.primary));
           }
 
@@ -114,7 +131,7 @@ class _EarningsScreenState extends State<EarningsScreen> {
             children: [
               _buildMiniStat('Monthly', currency.format(earnings.monthlyEarnings)),
               const Spacer(),
-              _buildMiniStat('Status', 'Active'),
+              _buildMiniStat('Available', currency.format(earnings.availableBalance)),
             ],
           ),
         ],
@@ -158,10 +175,16 @@ class _EarningsScreenState extends State<EarningsScreen> {
     );
   }
 
+  /// Cumulative balance over time, derived from real transaction history
+  /// (oldest to newest) rather than a hardcoded placeholder series.
   List<FlSpot> _generateSpots(ArtistEarnings earnings) {
     if (earnings.history.isEmpty) return [const FlSpot(0, 0)];
-    // Simple mock for chart visualization
-    return List.generate(7, (i) => FlSpot(i.toDouble(), 10.0 + (i * 5)));
+    final chronological = earnings.history.reversed.toList(); // history arrives newest-first
+    double running = 0;
+    return List.generate(chronological.length, (i) {
+      running += chronological[i].amount;
+      return FlSpot(i.toDouble(), running);
+    });
   }
 
   Widget _buildTransactionItem(Transaction t, NumberFormat currency) {
@@ -227,7 +250,11 @@ class _EarningsScreenState extends State<EarningsScreen> {
   }
 
   void _showPayoutDialog() {
+    final availableBalance = context.read<DashboardProvider>().artistEarnings?.availableBalance ?? 0.0;
+    final currency = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+    final canRequest = availableBalance >= 50.0;
     bool isRequesting = false;
+
     showModalBottomSheet(
       context: context,
       backgroundColor: AppColors.card,
@@ -241,10 +268,12 @@ class _EarningsScreenState extends State<EarningsScreen> {
               children: [
                 const Text('Request Payout', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 16),
-                const Text(
-                  'Your earnings will be transferred to your linked payout method. Minimum payout is \$50.00.',
+                Text(
+                  canRequest
+                      ? 'Your available balance of ${currency.format(availableBalance)} will be transferred to your linked payout method.'
+                      : 'Your available balance is ${currency.format(availableBalance)}. Minimum payout is \$50.00.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: AppColors.mutedForeground),
+                  style: const TextStyle(color: AppColors.mutedForeground),
                 ),
                 const SizedBox(height: 16),
                 TextButton.icon(
@@ -260,18 +289,20 @@ class _EarningsScreenState extends State<EarningsScreen> {
                   width: double.infinity,
                   height: 56,
                   child: ElevatedButton(
-                    onPressed: isRequesting ? null : () async {
+                    onPressed: (!canRequest || isRequesting) ? null : () async {
                       setState(() => isRequesting = true);
                       final provider = context.read<DashboardProvider>();
-                      // totalEarnings is in dollars (see dashboard_models.dart);
-                      // the backend expects cents.
-                      final amountCents = (provider.artistEarnings?.totalEarnings ?? 0.0) * 100;
+                      // availableBalance is in dollars (see dashboard_models.dart);
+                      // the backend expects cents. Using totalEarnings here would
+                      // resubmit the artist's full lifetime earnings on every
+                      // request, which fails after the first successful payout.
+                      final amountCents = availableBalance * 100;
                       final success = await provider.requestPayout(amountCents);
-                      
+
                       if (bottomSheetContext.mounted) {
                         Navigator.pop(bottomSheetContext);
                       }
-                      
+
                       if (this.context.mounted) {
                         if (success) {
                           ScaffoldMessenger.of(this.context).showSnackBar(
@@ -289,6 +320,7 @@ class _EarningsScreenState extends State<EarningsScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: Colors.black,
+                      disabledBackgroundColor: AppColors.primary.withValues(alpha: 0.3),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     ),
                     child: isRequesting

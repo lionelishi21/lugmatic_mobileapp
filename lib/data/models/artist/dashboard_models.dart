@@ -53,11 +53,13 @@ class Transaction {
 class ArtistEarnings {
   final double totalEarnings;
   final double monthlyEarnings;
+  final double availableBalance;
   final List<Transaction> history;
 
   ArtistEarnings({
     required this.totalEarnings,
     required this.monthlyEarnings,
+    required this.availableBalance,
     required this.history,
   });
 
@@ -67,6 +69,10 @@ class ArtistEarnings {
       // Backend amounts are always in cents (matches webapp/admin parsing).
       totalEarnings: (json['totalEarnings'] ?? 0).toDouble() / 100,
       monthlyEarnings: (json['monthlyEarnings'] ?? 0).toDouble() / 100,
+      // What's actually payable right now — totalEarnings minus payouts
+      // already requested/paid. Payout requests must use this, not
+      // totalEarnings, or every payout after the first one fails.
+      availableBalance: (json['availableBalance'] ?? 0).toDouble() / 100,
       history: historyList.map((i) => Transaction.fromJson(i)).toList(),
     );
   }
