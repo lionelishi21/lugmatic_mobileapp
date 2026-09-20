@@ -10,6 +10,7 @@ import 'package:lugmatic_flutter/data/providers/audio_provider.dart';
 import 'package:lugmatic_flutter/data/services/home_service.dart';
 import 'package:lugmatic_flutter/data/services/music_service.dart';
 import 'package:lugmatic_flutter/features/music/presentation/pages/genre_music_page.dart';
+import 'package:lugmatic_flutter/features/home/presentation/pages/meet_artist_page.dart';
 import '../../../home/presentation/widgets/music_card.dart';
 import '../../../../ui/widgets/player_screen.dart';
 
@@ -308,6 +309,8 @@ class _DiscoverPageState extends State<DiscoverPage> {
                   Navigator.pushNamed(context, '/trending');
                 } else if (title == 'New Releases') {
                   Navigator.pushNamed(context, '/new_releases');
+                } else if (title == 'Featured Artists') {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const MeetArtistPage()));
                 }
               },
               child: Text(
