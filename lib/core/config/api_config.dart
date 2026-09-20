@@ -58,7 +58,6 @@ class ApiConfig {
 
   static const String gifts = '/gift';
   static const String sendGift = '/gift/send';
-  static const String purchaseCoins = '/gift/purchase-coins';
   static const String createPaymentIntent = '/gift/create-payment-intent';
   static const String verifyPurchase = '/gift/verify-purchase';
   static const String coinBalance = '/gift/balance';

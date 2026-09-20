@@ -74,27 +74,40 @@ class GiftService {
     return [];
   }
 
-  /// Purchase coins using RevenueCat
-  Future<CustomerInfo?> purchaseCoins(Package package) async {
-    final customerInfo = await _revenueCatService.purchasePackage(package);
-    
-    // If purchase was successful, notify the backend to grant the coins
-    if (customerInfo != null && customerInfo.entitlements.all.isNotEmpty) {
+  /// Purchase coins using RevenueCat. Coins are credited server-side by the
+  /// RevenueCat webhook (NON_RENEWING_PURCHASE event) once it fires — there
+  /// is no separate client-driven sync call. (There used to be one here,
+  /// but it posted to ApiConfig.purchaseCoins, which is actually the
+  /// PayPal-order-creation endpoint — a completely different shape and
+  /// purpose — so it always failed and was silently swallowed.) Callers
+  /// should poll getCoinBalance() after this resolves; see
+  /// pollForBalanceIncrease below.
+  Future<CustomerInfo?> purchaseCoins(Package package) {
+    return _revenueCatService.purchasePackage(package);
+  }
+
+  /// Polls the coin balance a few times after a purchase, since crediting
+  /// happens async via webhook and isn't guaranteed to have landed the
+  /// instant the store confirms the charge. Returns the new balance once it
+  /// increases past [previousBalance], or null if it hasn't landed within
+  /// the polling window (the purchase still succeeded — the balance will
+  /// catch up once the webhook lands; callers should say so, not claim
+  /// failure).
+  Future<int?> pollForBalanceIncrease(
+    int previousBalance, {
+    int attempts = 5,
+    Duration interval = const Duration(seconds: 2),
+  }) async {
+    for (var i = 0; i < attempts; i++) {
+      await Future.delayed(interval);
       try {
-        await _apiClient.dio.post(
-          ApiConfig.purchaseCoins,
-          data: {
-            'packageId': package.identifier,
-            'rcUserId': customerInfo.originalAppUserId,
-          },
-        );
-      } catch (e) {
-        // Log the error but don't fail the whole flow if the backend sync is delayed.
-        // In a production app, you might want a retry queue for this.
-        print('Backend sync for coin purchase failed: $e');
+        final balanceData = await getCoinBalance();
+        final coins = balanceData['coins'] as int?;
+        if (coins != null && coins > previousBalance) return coins;
+      } catch (_) {
+        // Keep polling — a transient failure here shouldn't abort the wait.
       }
     }
-    
-    return customerInfo;
+    return null;
   }
 }

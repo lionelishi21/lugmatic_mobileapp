@@ -611,22 +611,34 @@ class TopUpDialogState extends State<TopUpDialog> {
     });
     try {
       final giftService = context.read<GiftService>();
+      final balanceBeforeData = await giftService.getCoinBalance();
+      final balanceBefore = balanceBeforeData['coins'] as int? ?? 0;
+
       final customerInfo = await giftService.purchaseCoins(package);
       if (!mounted) return;
 
       if (customerInfo != null) {
-        // Wait a brief moment for the webhook to hit our backend
-        await Future.delayed(const Duration(seconds: 2));
-        
-        final balanceData = await giftService.getCoinBalance();
-        final newBalance = balanceData['coins'] as int? ?? 0;
-        
+        // Coins are credited by the RevenueCat webhook async, not by this
+        // call — poll for the real new balance instead of guessing a fixed
+        // delay and reporting success regardless of whether it landed.
+        final newBalance = await giftService.pollForBalanceIncrease(balanceBefore);
         if (!mounted) return;
-        widget.onSuccess(newBalance);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Coins added to your wallet!'), backgroundColor: Color(0xFF10B981)),
-        );
-        Navigator.pop(context);
+
+        if (newBalance != null) {
+          widget.onSuccess(newBalance);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Coins added to your wallet!'), backgroundColor: Color(0xFF10B981)),
+          );
+          Navigator.pop(context);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Payment received — it's taking longer than usual to reflect in your balance. Check back shortly."),
+              backgroundColor: Color(0xFFF59E0B),
+            ),
+          );
+          Navigator.pop(context);
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Purchase cancelled or failed'), backgroundColor: Color(0xFFEF4444)),

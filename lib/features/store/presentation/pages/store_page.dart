@@ -80,20 +80,35 @@ class _StorePageState extends State<StorePage> {
     setState(() => _purchasingAmount = package.identifier);
     try {
       final giftService = context.read<GiftService>();
+      final balanceBefore = _balance ?? 0;
       final customerInfo = await giftService.purchaseCoins(package);
 
       if (!mounted) return;
 
       if (customerInfo != null) {
-        // Wait a brief moment for the webhook to hit our backend
-        await Future.delayed(const Duration(seconds: 2));
-        await _fetchBalance();
-        _showDialog(
-          icon: Icons.check_circle,
-          iconColor: Colors.green,
-          title: 'Purchase Complete!',
-          message: 'Your purchase is complete. Coins will appear in your wallet shortly.',
-        );
+        // Coins are credited by the RevenueCat webhook async, not by this
+        // call — poll for the real new balance instead of guessing a fixed
+        // delay and declaring success regardless of whether it landed.
+        final newBalance = await giftService.pollForBalanceIncrease(balanceBefore);
+        if (!mounted) return;
+
+        if (newBalance != null) {
+          setState(() => _balance = newBalance);
+          _showDialog(
+            icon: Icons.check_circle,
+            iconColor: Colors.green,
+            title: 'Purchase Complete!',
+            message: 'Coins added to your wallet.',
+          );
+        } else {
+          await _fetchBalance();
+          _showDialog(
+            icon: Icons.hourglass_top,
+            iconColor: Colors.amber,
+            title: 'Purchase Received',
+            message: "Your payment went through, but it's taking longer than usual to reflect in your balance. Pull to refresh in a moment — contact support if it hasn't updated in a few minutes.",
+          );
+        }
       } else {
         _showDialog(
           icon: Icons.error_outline,
