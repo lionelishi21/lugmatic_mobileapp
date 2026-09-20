@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import '../../core/config/api_config.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/api_exception.dart';
 import '../models/subscription_plan_model.dart';
@@ -10,6 +11,21 @@ class SubscriptionService {
   final RevenueCatService _revenueCatService = RevenueCatService();
 
   SubscriptionService({required ApiClient apiClient}) : _apiClient = apiClient;
+
+  /// The account's real, server-verified premium status — driven by the
+  /// RevenueCat webhook (mobile) or Stripe webhook (web), whichever was
+  /// used. This is the source of truth, not RevenueCat's local entitlement
+  /// cache, which can't reflect a subscription bought on the other platform.
+  Future<bool> isPremium() async {
+    try {
+      final response = await _apiClient.dio.get(ApiConfig.subscriptionMe);
+      final body = response.data;
+      final data = body is Map ? (body['data'] ?? body) : null;
+      return data?['isPremium'] == true;
+    } catch (e) {
+      return false;
+    }
+  }
 
   /// Fetch available subscription plans from RevenueCat.
   Future<List<SubscriptionPlan>> getSubscriptionPlans() async {
@@ -49,6 +65,9 @@ class SubscriptionService {
     }
     return await _revenueCatService.purchasePackage(plan.rcPackage);
   }
+
+  /// App Store / Play Store subscription management URL, if any.
+  Future<String?> getManagementUrl() => _revenueCatService.getManagementUrl();
 
   List<SubscriptionPlan> _getHardcodedPlans() {
     return [

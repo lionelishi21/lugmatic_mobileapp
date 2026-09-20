@@ -3,6 +3,7 @@ import '../../core/network/api_exception.dart';
 import '../../core/network/token_storage.dart';
 import '../services/auth_service.dart';
 import '../services/fcm_service.dart';
+import '../services/revenuecat_service.dart';
 import '../services/auth_service.dart' show User; // If User model is there
 
 enum AuthStatus { initial, loading, authenticated, unauthenticated, error }
@@ -55,6 +56,7 @@ class AuthProvider extends ChangeNotifier {
       _status = AuthStatus.authenticated;
       // Register FCM token once authenticated
       _fcmService?.registerToken();
+      RevenueCatService().login(user.id);
     } else {
       await _tokenStorage.clearTokens();
       _status = AuthStatus.unauthenticated;
@@ -75,6 +77,7 @@ class AuthProvider extends ChangeNotifier {
       _user = await _authService.login(email: email, password: password);
       _status = AuthStatus.authenticated;
       _fcmService?.registerToken();
+      RevenueCatService().login(_user!.id);
       notifyListeners();
       return true;
     } on ApiException catch (e) {
@@ -110,6 +113,7 @@ class AuthProvider extends ChangeNotifier {
       );
       _status = AuthStatus.authenticated;
       _fcmService?.registerToken();
+      RevenueCatService().login(_user!.id);
       notifyListeners();
       return true;
     } on ApiException catch (e) {
@@ -135,6 +139,7 @@ class AuthProvider extends ChangeNotifier {
       _user = await _authService.loginWithGoogle(idToken: idToken);
       _status = AuthStatus.authenticated;
       _fcmService?.registerToken();
+      RevenueCatService().login(_user!.id);
       notifyListeners();
       return true;
     } on ApiException catch (e) {
@@ -153,6 +158,7 @@ class AuthProvider extends ChangeNotifier {
   /// Log out and clear session.
   Future<void> logout() async {
     await _authService.logout();
+    await RevenueCatService().logout();
     _user = null;
     _status = AuthStatus.unauthenticated;
     _errorMessage = null;
@@ -164,6 +170,7 @@ class AuthProvider extends ChangeNotifier {
   /// so the user isn't logged out without knowing their account is gone.
   Future<void> deleteAccount() async {
     await _authService.requestAccountDeletion();
+    await RevenueCatService().logout();
     _user = null;
     _status = AuthStatus.unauthenticated;
     _errorMessage = null;

@@ -110,4 +110,12 @@ class RevenueCatService {
     if (customerInfo == null) return false;
     return customerInfo.entitlements.all[entitlementId]?.isActive == true;
   }
+
+  /// App Store / Play Store subscription management URL for the current
+  /// subscriber, if any — IAP subscriptions can only be cancelled/changed
+  /// through the platform's own subscription settings, never in-app.
+  Future<String?> getManagementUrl() async {
+    final customerInfo = await getCustomerInfo();
+    return customerInfo?.managementURL;
+  }
 }

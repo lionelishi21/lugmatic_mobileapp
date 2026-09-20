@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../data/models/subscription_plan_model.dart';
 import '../../../../data/services/subscription_service.dart';
 
@@ -14,6 +15,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   bool _isLoading = true;
   List<SubscriptionPlan> _plans = [];
   String? _error;
+  bool _isPremium = false;
 
   @override
   void initState() {
@@ -24,10 +26,14 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   Future<void> _loadPlans() async {
     try {
       final subscriptionService = context.read<SubscriptionService>();
-      final plans = await subscriptionService.getSubscriptionPlans();
+      final results = await Future.wait([
+        subscriptionService.getSubscriptionPlans(),
+        subscriptionService.isPremium(),
+      ]);
       if (mounted) {
         setState(() {
-          _plans = plans;
+          _plans = results[0] as List<SubscriptionPlan>;
+          _isPremium = results[1] as bool;
           _isLoading = false;
         });
       }
@@ -59,6 +65,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       
       if (customerInfo != null && customerInfo.entitlements.active.isNotEmpty) {
         if (mounted) {
+          setState(() => _isPremium = true);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Successfully subscribed to ${plan.name}!')),
           );
@@ -79,6 +86,33 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _manageSubscription() async {
+    final subscriptionService = context.read<SubscriptionService>();
+    final url = await subscriptionService.getManagementUrl();
+    if (url != null && await canLaunchUrl(Uri.parse(url))) {
+      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    } else if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Manage your subscription from your device\'s App Store / Play Store settings.')),
+      );
+    }
+  }
+
+  Future<void> _contactSupport() async {
+    final uri = Uri(
+      scheme: 'mailto',
+      path: 'support@lugmaticmusic.com',
+      query: 'subject=Subscription support',
+    );
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Email us at support@lugmaticmusic.com')),
+      );
     }
   }
 
@@ -158,8 +192,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   }
 
   Widget _buildPlanCard(SubscriptionPlan plan) {
-    final isPremium = plan.price > 0;
-    
+    final isFreePlan = plan.price == 0;
+    final isCurrentPaidPlan = _isPremium && !isFreePlan;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
@@ -257,15 +292,29 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                   width: double.infinity,
                   height: 56,
                   child: ElevatedButton(
-                    onPressed: () => _subscribe(plan),
+                    onPressed: isFreePlan
+                        ? null
+                        : isCurrentPaidPlan
+                            ? _manageSubscription
+                            : _isPremium
+                                ? null // already on a different paid plan — manage/switch via the store instead
+                                : () => _subscribe(plan),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: plan.isPopular ? Colors.white : const Color(0xFF10B981),
                       foregroundColor: plan.isPopular ? const Color(0xFF065F46) : Colors.white,
+                      disabledBackgroundColor: Colors.white.withValues(alpha: 0.1),
+                      disabledForegroundColor: Colors.white.withValues(alpha: 0.4),
                       elevation: 0,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     ),
                     child: Text(
-                      plan.price == 0 ? 'Current Plan' : 'Subscribe Now',
+                      isFreePlan
+                          ? 'Current Plan'
+                          : isCurrentPaidPlan
+                              ? 'Manage Subscription'
+                              : _isPremium
+                                  ? 'Switch via App Store'
+                                  : 'Subscribe Now',
                       style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                   ),
@@ -314,7 +363,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           ),
           const SizedBox(height: 20),
           TextButton(
-            onPressed: () {},
+            onPressed: _contactSupport,
             child: const Text('Contact Support', style: TextStyle(color: Color(0xFF10B981), fontWeight: FontWeight.bold)),
           ),
         ],
