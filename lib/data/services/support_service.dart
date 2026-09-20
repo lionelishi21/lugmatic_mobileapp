@@ -13,7 +13,7 @@ class SupportService {
     required String message,
   }) async {
     try {
-      final response = await _apiClient.dio.post('/support/tickets', data: {
+      final response = await _apiClient.dio.post('/user/support/tickets', data: {
         'subject': subject,
         'category': category,
         'message': message,
@@ -26,7 +26,7 @@ class SupportService {
 
   Future<List<dynamic>> getTicketHistory() async {
     try {
-      final response = await _apiClient.dio.get('/support/tickets');
+      final response = await _apiClient.dio.get('/user/support/tickets');
       final data = response.data;
       return (data['data'] ?? data) as List<dynamic>;
     } catch (e) {

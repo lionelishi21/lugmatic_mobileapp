@@ -8,7 +8,7 @@ class ContributorService {
   /// Fetch dashboard stats and songs list for contributor.
   Future<Map<String, dynamic>> getContributorDashboard() async {
     try {
-      final response = await _apiClient.dio.get('/users/contributor/dashboard');
+      final response = await _apiClient.dio.get('/user/contributor/dashboard');
       final data = response.data;
       return (data['data'] ?? data) as Map<String, dynamic>;
     } catch (e) {
@@ -44,7 +44,7 @@ class ContributorService {
   Future<Map<String, dynamic>> acceptTerms(String version) async {
     try {
       final response = await _apiClient.dio.post(
-        '/users/contributor/accept-terms',
+        '/user/contributor/accept-terms',
         data: {'version': version},
       );
       final data = response.data;

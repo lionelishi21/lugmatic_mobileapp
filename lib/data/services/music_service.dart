@@ -125,7 +125,7 @@ class MusicService {
   /// Fetch the current user's unified artist catalog (owned & collaborations).
   Future<List<MusicModel>> getArtistCatalog() async {
     try {
-      final response = await _apiClient.dio.get('/users/contributor/dashboard');
+      final response = await _apiClient.dio.get('/user/contributor/dashboard');
       final body = response.data;
       final resultData = body['data'] ?? body;
       final items = resultData['songs'] ?? [];
