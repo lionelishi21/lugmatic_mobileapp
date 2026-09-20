@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'core/config/api_config.dart';
 import 'firebase_options.dart';
 import 'core/navigation/app_navigator_key.dart';
 import 'data/services/fcm_service.dart';
@@ -63,12 +65,23 @@ void main() async {
   try {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await JustAudioBackground.init(
-    androidNotificationChannelId: 'com.lugmatic.music.channel.audio',
-    androidNotificationChannelName: 'Audio playback',
-    androidNotificationOngoing: true,
-  );
-    
+  // Same timeout/try-catch guard as every other init step below — this one
+  // used to be a bare await with neither, so a platform-channel hang here
+  // (e.g. a first-run permission dialog on some Android OEM skins) could
+  // block the entire app on the splash screen indefinitely, the same
+  // failure class the FCM init hang (now fixed) used to cause.
+  try {
+    appStatus.value = "Initializing audio...";
+    await JustAudioBackground.init(
+      androidNotificationChannelId: 'com.lugmatic.music.channel.audio',
+      androidNotificationChannelName: 'Audio playback',
+      androidNotificationOngoing: true,
+    ).timeout(const Duration(seconds: 10));
+  } catch (e) {
+    appStatus.value = "Audio init error: $e";
+    debugPrint("JustAudioBackground init error: $e");
+  }
+
     // Initialize Firebase
     try {
       appStatus.value = "Initializing Firebase...";
@@ -87,6 +100,21 @@ void main() async {
     } catch (e) {
       appStatus.value = "RevenueCat Error: $e";
       debugPrint("RevenueCat init error: $e");
+    }
+
+    // Initialize Google Sign-In. Must be called exactly once, before any
+    // other GoogleSignIn method, per the v7 SDK's own requirement — this
+    // was missing entirely, so every sign-in attempt threw.
+    try {
+      appStatus.value = "Initializing Google Sign-In...";
+      await GoogleSignIn.instance.initialize(
+        serverClientId: ApiConfig.googleServerClientId.isNotEmpty
+            ? ApiConfig.googleServerClientId
+            : null,
+      ).timeout(const Duration(seconds: 10));
+    } catch (e) {
+      appStatus.value = "Google Sign-In init error: $e";
+      debugPrint("GoogleSignIn init error: $e");
     }
     
     appStatus.value = "Setting orientations...";

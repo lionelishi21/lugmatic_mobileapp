@@ -155,6 +155,18 @@ class ApiConfig {
     defaultValue: 'goog_PiidSiLKLTEkGXqYUvpAETuiBGl',
   );
 
+  // ── Google Sign-In ─────────────────────────────────────────────
+  // The Web OAuth client id from Firebase Console (Authentication >
+  // Sign-in method > Google) — required so the ID token Google issues can
+  // be verified server-side. Google Sign-In has never been enabled for
+  // this Firebase project (google-services.json's oauth_client list is
+  // empty), so this is blank until that's turned on there; the feature
+  // cannot work until it is, regardless of the client-side code.
+  static const String googleServerClientId = String.fromEnvironment(
+    'GOOGLE_SERVER_CLIENT_ID',
+    defaultValue: '',
+  );
+
   // ── Socket.io URL ───────────────────────────────────────────────
   static const String socketUrl = String.fromEnvironment(
     'SOCKET_URL',
