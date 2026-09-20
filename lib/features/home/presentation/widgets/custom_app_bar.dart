@@ -49,81 +49,11 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
               Row(
                 children: [
-                  if (onExploreTap != null) ...[
-                    GestureDetector(
-                      onTap: onExploreTap,
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: AppColors.darkBackground,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.3),
-                              offset: const Offset(4, 4),
-                              blurRadius: 8,
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.explore_outlined,
-                          color: Colors.white70,
-                          size: 20,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                  ],
-                  if (onStoreTap != null) ...[
-                    GestureDetector(
-                      onTap: onStoreTap,
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: AppColors.darkBackground,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.3),
-                              offset: const Offset(4, 4),
-                              blurRadius: 8,
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.monetization_on,
-                          color: Color(0xFFFFD700),
-                          size: 20,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                  ],
-                  if (onLibraryTap != null) ...[
-                    GestureDetector(
-                      onTap: onLibraryTap,
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: AppColors.darkBackground,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.3),
-                              offset: const Offset(4, 4),
-                              blurRadius: 8,
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.library_music_outlined,
-                          color: Colors.white70,
-                          size: 20,
-                        ),
-                      ),
+                  if (onExploreTap != null || onStoreTap != null || onLibraryTap != null) ...[
+                    _OverflowMenu(
+                      onExploreTap: onExploreTap,
+                      onStoreTap: onStoreTap,
+                      onLibraryTap: onLibraryTap,
                     ),
                     const SizedBox(width: 12),
                   ],
@@ -267,4 +197,71 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Size get preferredSize => const Size.fromHeight(80);
+}
+
+/// Collapses the lower-frequency actions (Explore, Store, Library) behind a
+/// single overflow icon, instead of showing every action inline — the app
+/// bar was showing up to 6 icons at once (crowded on narrower phones).
+/// Notifications/Messages/Profile stay directly visible since they carry
+/// unread badges and are tapped far more often.
+class _OverflowMenu extends StatelessWidget {
+  final VoidCallback? onExploreTap;
+  final VoidCallback? onStoreTap;
+  final VoidCallback? onLibraryTap;
+
+  const _OverflowMenu({this.onExploreTap, this.onStoreTap, this.onLibraryTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton<VoidCallback>(
+      color: AppColors.card,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      onSelected: (callback) => callback(),
+      itemBuilder: (context) => [
+        if (onExploreTap != null)
+          PopupMenuItem(
+            value: onExploreTap,
+            child: const Row(children: [
+              Icon(Icons.explore_outlined, color: Colors.white70, size: 18),
+              SizedBox(width: 12),
+              Text('Explore', style: TextStyle(color: Colors.white)),
+            ]),
+          ),
+        if (onStoreTap != null)
+          PopupMenuItem(
+            value: onStoreTap,
+            child: const Row(children: [
+              Icon(Icons.monetization_on, color: Color(0xFFFFD700), size: 18),
+              SizedBox(width: 12),
+              Text('Get Coins', style: TextStyle(color: Colors.white)),
+            ]),
+          ),
+        if (onLibraryTap != null)
+          PopupMenuItem(
+            value: onLibraryTap,
+            child: const Row(children: [
+              Icon(Icons.library_music_outlined, color: Colors.white70, size: 18),
+              SizedBox(width: 12),
+              Text('Library', style: TextStyle(color: Colors.white)),
+            ]),
+          ),
+      ],
+      child: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: AppColors.darkBackground,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.3),
+              offset: const Offset(4, 4),
+              blurRadius: 8,
+            ),
+          ],
+        ),
+        child: const Icon(Icons.more_vert, color: Colors.white70, size: 20),
+      ),
+    );
+  }
 }
