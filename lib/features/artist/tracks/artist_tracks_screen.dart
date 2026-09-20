@@ -8,6 +8,7 @@ import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/track_provider.dart';
 import '../../../data/models/artist/track_model.dart';
 import '../dashboard/track_analytics_screen.dart';
+import 'edit_track_screen.dart';
 
 class ArtistTracksScreen extends StatefulWidget {
   const ArtistTracksScreen({super.key});
@@ -163,6 +164,8 @@ class _TrackItem extends StatelessWidget {
               onSelected: (value) async {
                 if (value == 'analytics') {
                   Navigator.push(context, MaterialPageRoute(builder: (_) => TrackAnalyticsScreen(track: track)));
+                } else if (value == 'edit') {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => EditTrackScreen(track: track)));
                 } else if (value == 'share') {
                   Share.share('Listen to "${track.name}" on Lumatix 🎵\nhttps://lugmaticmusic.com/song/${track.id}', subject: track.name);
                 } else if (value == 'delete') {
@@ -185,10 +188,14 @@ class _TrackItem extends StatelessWidget {
                   }
                 }
               },
-              itemBuilder: (_) => const [
-                PopupMenuItem(value: 'analytics', child: Row(children: [Icon(Icons.bar_chart, size: 16, color: Colors.white70), SizedBox(width: 10), Text('Analytics', style: TextStyle(color: Colors.white, fontSize: 13))])),
-                PopupMenuItem(value: 'share', child: Row(children: [Icon(Icons.share_rounded, size: 16, color: Color(0xFF10B981)), SizedBox(width: 10), Text('Share', style: TextStyle(color: Colors.white, fontSize: 13))])),
-                PopupMenuItem(value: 'delete', child: Row(children: [Icon(Icons.delete_outline, size: 16, color: Colors.redAccent), SizedBox(width: 10), Text('Delete', style: TextStyle(color: Colors.redAccent, fontSize: 13))])),
+              itemBuilder: (_) => [
+                const PopupMenuItem(value: 'analytics', child: Row(children: [Icon(Icons.bar_chart, size: 16, color: Colors.white70), SizedBox(width: 10), Text('Analytics', style: TextStyle(color: Colors.white, fontSize: 13))])),
+                // Editing is only allowed on rejected tracks — the backend
+                // blocks metadata edits on approved/pending tracks.
+                if (track.status.toLowerCase() == 'rejected')
+                  const PopupMenuItem(value: 'edit', child: Row(children: [Icon(Icons.edit_outlined, size: 16, color: Colors.white70), SizedBox(width: 10), Text('Edit', style: TextStyle(color: Colors.white, fontSize: 13))])),
+                const PopupMenuItem(value: 'share', child: Row(children: [Icon(Icons.share_rounded, size: 16, color: Color(0xFF10B981)), SizedBox(width: 10), Text('Share', style: TextStyle(color: Colors.white, fontSize: 13))])),
+                const PopupMenuItem(value: 'delete', child: Row(children: [Icon(Icons.delete_outline, size: 16, color: Colors.redAccent), SizedBox(width: 10), Text('Delete', style: TextStyle(color: Colors.redAccent, fontSize: 13))])),
               ],
             ),
           ]),

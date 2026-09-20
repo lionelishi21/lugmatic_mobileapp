@@ -42,6 +42,41 @@ class Track {
       );
 }
 
+/// Full track detail used by the (rejected-tracks-only) edit form — richer
+/// than [Track], which only carries the lean dashboard-list summary.
+class TrackEditDetail {
+  final String id;
+  final String name;
+  final String? genreId;
+  final String? genreName;
+  final String? coverArtUrl;
+  final String status;
+  final String? rejectionReason;
+
+  TrackEditDetail({
+    required this.id,
+    required this.name,
+    this.genreId,
+    this.genreName,
+    this.coverArtUrl,
+    required this.status,
+    this.rejectionReason,
+  });
+
+  factory TrackEditDetail.fromJson(Map<String, dynamic> json) {
+    final genre = json['genre'];
+    return TrackEditDetail(
+      id: json['_id']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      genreId: genre is Map ? genre['_id']?.toString() : genre?.toString(),
+      genreName: genre is Map ? genre['name']?.toString() : null,
+      coverArtUrl: json['coverArtUrl']?.toString(),
+      status: json['status']?.toString() ?? 'pending',
+      rejectionReason: json['rejectionReason']?.toString(),
+    );
+  }
+}
+
 class DailyStat {
   final String date;
   final int plays;
