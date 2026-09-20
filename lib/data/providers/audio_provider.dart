@@ -161,7 +161,7 @@ class AudioProvider extends ChangeNotifier {
       _safeParseUri(music.audioUrl),
       tag: MediaItem(
         id: music.id,
-        album: music.album.isNotEmpty ? music.album : "Lugmatic",
+        album: music.album.isNotEmpty ? music.album : "Lumatix Music",
         title: music.title,
         artist: music.artist,
         artUri: music.imageUrl.isNotEmpty ? _safeParseUri(music.imageUrl) : null,

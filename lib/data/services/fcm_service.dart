@@ -28,7 +28,7 @@ class FcmService {
       final notification = message.notification;
       if (notification == null) return;
       _showInAppBanner(
-        title: notification.title ?? 'Lugmatic',
+        title: notification.title ?? 'Lumatix Music',
         body: notification.body ?? '',
         data: message.data,
       );

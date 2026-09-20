@@ -258,7 +258,7 @@ class LumatixApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Lugmatic',
+      title: 'Lumatix Music',
       debugShowCheckedModeBanner: false,
       navigatorKey: appNavigatorKey,
       theme: AppTheme.lightTheme,

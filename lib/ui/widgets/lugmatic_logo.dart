@@ -19,10 +19,10 @@ class LumatixLogo extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<LugmaticLogo> createState() => _LugmaticLogoState();
+  State<LumatixLogo> createState() => _LumatixLogoState();
 }
 
-class _LugmaticLogoState extends State<LugmaticLogo> with TickerProviderStateMixin {
+class _LumatixLogoState extends State<LumatixLogo> with TickerProviderStateMixin {
   late List<AnimationController> _controllers;
 
   final List<double> _barHeights = [18.0, 34.0, 26.0, 14.0, 30.0, 20.0, 10.0];
@@ -95,7 +95,7 @@ class _LugmaticLogoState extends State<LugmaticLogo> with TickerProviderStateMix
                     shape: BoxShape.circle,
                   ),
             child: Image.asset(
-              'assets/images/iriewave.png',
+              'assets/images/icon_foreground.png',
               fit: BoxFit.contain,
             ),
           ),
@@ -145,7 +145,7 @@ class _LugmaticLogoState extends State<LugmaticLogo> with TickerProviderStateMix
       children: [
         if (stacked)
           Text(
-            'LUGMATIC',
+            'LUMATIX',
             style: GoogleFonts.unbounded(
               fontWeight: FontWeight.w800,
               fontSize: 26,
@@ -180,7 +180,7 @@ class _LugmaticLogoState extends State<LugmaticLogo> with TickerProviderStateMix
                 color: textColor,
               ),
               children: [
-                const TextSpan(text: 'Lugmatic'),
+                const TextSpan(text: 'Lumatix'),
                 WidgetSpan(
                   alignment: PlaceholderAlignment.baseline,
                   baseline: TextBaseline.alphabetic,
