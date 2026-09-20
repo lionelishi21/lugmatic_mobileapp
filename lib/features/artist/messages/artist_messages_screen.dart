@@ -2,94 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/network/api_client.dart';
+import '../../../core/config/api_config.dart';
 import '../../../core/theme/neumorphic_theme.dart';
-import '../../../data/providers/auth_provider.dart';
-import 'message_thread_screen.dart';
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Data models
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _Participant {
-  final String id;
-  final String firstName;
-  final String lastName;
-
-  const _Participant({required this.id, required this.firstName, required this.lastName});
-
-  factory _Participant.fromJson(Map<String, dynamic> json) => _Participant(
-        id: json['_id'] ?? '',
-        firstName: json['firstName'] ?? '',
-        lastName: json['lastName'] ?? '',
-      );
-
-  String get fullName => '$firstName $lastName'.trim();
-
-  String get initials {
-    final f = firstName.isNotEmpty ? firstName[0] : '';
-    final l = lastName.isNotEmpty ? lastName[0] : '';
-    return '$f$l'.toUpperCase();
-  }
-}
-
-class _LastMessage {
-  final String content;
-  final DateTime createdAt;
-
-  const _LastMessage({required this.content, required this.createdAt});
-
-  factory _LastMessage.fromJson(Map<String, dynamic> json) => _LastMessage(
-        content: json['content'] ?? '',
-        createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
-      );
-}
-
-class _Conversation {
-  final String id;
-  final List<_Participant> participants;
-  final _LastMessage? lastMessage;
-  final Map<String, int> unreadCounts;
-  final DateTime updatedAt;
-
-  const _Conversation({
-    required this.id,
-    required this.participants,
-    this.lastMessage,
-    required this.unreadCounts,
-    required this.updatedAt,
-  });
-
-  factory _Conversation.fromJson(Map<String, dynamic> json) {
-    final rawParticipants = json['participants'] as List? ?? [];
-    final rawUnread = json['unreadCounts'] as Map<String, dynamic>? ?? {};
-    return _Conversation(
-      id: json['_id'] ?? '',
-      participants: rawParticipants
-          .map((p) => _Participant.fromJson(p as Map<String, dynamic>))
-          .toList(),
-      lastMessage: json['lastMessage'] != null
-          ? _LastMessage.fromJson(json['lastMessage'])
-          : null,
-      unreadCounts: rawUnread.map((k, v) => MapEntry(k, (v as num).toInt())),
-      updatedAt: DateTime.tryParse(json['updatedAt'] ?? '') ?? DateTime.now(),
-    );
-  }
-
-  _Participant? otherParticipant(String myId) {
-    try {
-      return participants.firstWhere((p) => p.id != myId);
-    } catch (_) {
-      return participants.isNotEmpty ? participants.first : null;
-    }
-  }
-
-  int unreadFor(String userId) => unreadCounts[userId] ?? 0;
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Screen
-// ─────────────────────────────────────────────────────────────────────────────
+import '../../../data/models/conversation_model.dart';
+import '../../../data/providers/message_provider.dart';
+import '../../messages/presentation/pages/chat_page.dart';
 
 class ArtistMessagesScreen extends StatefulWidget {
   const ArtistMessagesScreen({super.key});
@@ -99,62 +16,24 @@ class ArtistMessagesScreen extends StatefulWidget {
 }
 
 class _ArtistMessagesScreenState extends State<ArtistMessagesScreen> {
-  late ApiClient _api;
   final TextEditingController _searchController = TextEditingController();
-
-  List<_Conversation> _conversations = [];
-  List<_Conversation> _filtered = [];
-  bool _loading = true;
-  String? _error;
+  String _query = '';
 
   @override
   void initState() {
     super.initState();
-    _api = context.read<ApiClient>();
-    _fetchConversations();
-    _searchController.addListener(_onSearch);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<MessageProvider>().fetchConversations();
+    });
+    _searchController.addListener(() {
+      setState(() => _query = _searchController.text.toLowerCase());
+    });
   }
 
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
-  }
-
-  void _onSearch() {
-    final query = _searchController.text.toLowerCase();
-    final myId = _myId();
-    setState(() {
-      if (query.isEmpty) {
-        _filtered = List.from(_conversations);
-      } else {
-        _filtered = _conversations.where((c) {
-          final other = c.otherParticipant(myId);
-          return other != null && other.fullName.toLowerCase().contains(query);
-        }).toList();
-      }
-    });
-  }
-
-  String _myId() => context.read<AuthProvider>().user?.id ?? '';
-
-  Future<void> _fetchConversations() async {
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
-    try {
-      final res = await _api.dio.get('/messages');
-      final raw = res.data;
-      final list = (raw['data'] ?? raw) as List;
-      _conversations =
-          list.map((e) => _Conversation.fromJson(e as Map<String, dynamic>)).toList();
-      _filtered = List.from(_conversations);
-    } catch (e) {
-      _error = 'Failed to load messages: $e';
-    } finally {
-      if (mounted) setState(() => _loading = false);
-    }
   }
 
   @override
@@ -202,75 +81,64 @@ class _ArtistMessagesScreenState extends State<ArtistMessagesScreen> {
   }
 
   Widget _buildBody() {
-    if (_loading) {
-      return const Center(child: CircularProgressIndicator(color: AppColors.primary));
-    }
+    return Consumer<MessageProvider>(
+      builder: (context, provider, _) {
+        if (provider.isLoading && provider.conversations.isEmpty) {
+          return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+        }
 
-    if (_error != null) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.error_outline, color: Colors.redAccent, size: 48),
-            const SizedBox(height: 12),
-            Text(_error!, style: const TextStyle(color: Colors.redAccent), textAlign: TextAlign.center),
-            const SizedBox(height: 16),
-            TextButton(onPressed: _fetchConversations, child: const Text('Retry')),
-          ],
-        ),
-      );
-    }
+        final filtered = _query.isEmpty
+            ? provider.conversations
+            : provider.conversations
+                .where((c) => c.otherParticipantName.toLowerCase().contains(_query))
+                .toList();
 
-    if (_filtered.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.forum_outlined, size: 72, color: AppColors.mutedForeground.withValues(alpha: 0.3)),
-            const SizedBox(height: 20),
-            const Text('No messages yet.',
-                style: TextStyle(
-                    color: AppColors.foreground, fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            const Text('Fans who message you will appear here.',
-                style: TextStyle(color: AppColors.mutedForeground, fontSize: 14),
-                textAlign: TextAlign.center),
-          ],
-        ),
-      );
-    }
+        if (filtered.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.forum_outlined, size: 72, color: AppColors.mutedForeground.withValues(alpha: 0.3)),
+                const SizedBox(height: 20),
+                const Text('No messages yet.',
+                    style: TextStyle(
+                        color: AppColors.foreground, fontSize: 18, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                const Text('Fans who message you will appear here.',
+                    style: TextStyle(color: AppColors.mutedForeground, fontSize: 14),
+                    textAlign: TextAlign.center),
+              ],
+            ),
+          );
+        }
 
-    final myId = _myId();
-    return RefreshIndicator(
-      onRefresh: _fetchConversations,
-      color: AppColors.primary,
-      child: ListView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: _filtered.length,
-        itemBuilder: (context, index) => _buildConversationTile(_filtered[index], myId),
-      ),
+        return RefreshIndicator(
+          onRefresh: provider.fetchConversations,
+          color: AppColors.primary,
+          child: ListView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: filtered.length,
+            itemBuilder: (context, index) => _buildConversationTile(filtered[index]),
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildConversationTile(_Conversation conv, String myId) {
-    final other = conv.otherParticipant(myId);
-    final unread = conv.unreadFor(myId);
-    final hasUnread = unread > 0;
-    final lastText = conv.lastMessage?.content ?? '';
-    final lastTime = conv.lastMessage?.createdAt ?? conv.updatedAt;
+  Widget _buildConversationTile(ConversationModel conv) {
+    final hasUnread = conv.unreadCount > 0;
+    final lastText = conv.lastMessage?['content']?.toString() ?? '';
+    final lastTime = conv.lastMessage?['createdAt'] != null
+        ? DateTime.tryParse(conv.lastMessage!['createdAt'].toString()) ?? conv.updatedAt
+        : conv.updatedAt;
+    final profilePic = ApiConfig.resolveUrl(conv.otherParticipantProfilePicture);
 
     return GestureDetector(
-      onTap: () async {
-        await Navigator.push(
+      onTap: () {
+        Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (_) => MessageThreadScreen(
-              conversationId: conv.id,
-              otherName: other?.fullName ?? 'Unknown',
-            ),
-          ),
+          MaterialPageRoute(builder: (_) => ChatPage(conversation: conv)),
         );
-        _fetchConversations();
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
@@ -281,11 +149,14 @@ class _ArtistMessagesScreenState extends State<ArtistMessagesScreen> {
             CircleAvatar(
               radius: 26,
               backgroundColor: AppColors.primary.withValues(alpha: 0.15),
-              child: Text(
-                other?.initials ?? '??',
-                style: const TextStyle(
-                    color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 15),
-              ),
+              backgroundImage: profilePic.isNotEmpty ? NetworkImage(profilePic) : null,
+              child: profilePic.isEmpty
+                  ? Text(
+                      conv.otherParticipantName.isNotEmpty ? conv.otherParticipantName[0] : '?',
+                      style: const TextStyle(
+                          color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 15),
+                    )
+                  : null,
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -293,7 +164,7 @@ class _ArtistMessagesScreenState extends State<ArtistMessagesScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    other?.fullName ?? 'Unknown',
+                    conv.otherParticipantName,
                     style: TextStyle(
                       color: AppColors.foreground,
                       fontWeight: hasUnread ? FontWeight.bold : FontWeight.w500,
@@ -333,7 +204,7 @@ class _ArtistMessagesScreenState extends State<ArtistMessagesScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      unread > 99 ? '99+' : '$unread',
+                      conv.unreadCount > 99 ? '99+' : '${conv.unreadCount}',
                       style: const TextStyle(
                           color: Colors.black, fontSize: 11, fontWeight: FontWeight.bold),
                     ),
