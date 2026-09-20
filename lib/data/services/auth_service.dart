@@ -252,12 +252,28 @@ class AuthService {
     }
   }
 
-  /// Verify email with code/token.
+  /// Verify email with the token from the verification link (a long,
+  /// randomly-generated value meant for a link, not something a user types
+  /// in — used when catching the link via a deep link, not by a form).
+  /// The backend route is GET-only and reads the token from the query
+  /// string, not a POST body.
   Future<void> verifyEmail(String token) async {
     try {
-      await _apiClient.dio.post(
+      await _apiClient.dio.get(
         ApiConfig.verifyEmail,
-        data: {'token': token},
+        queryParameters: {'token': token},
+      );
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// Ask the backend to send a new verification email.
+  Future<void> resendVerification(String email) async {
+    try {
+      await _apiClient.dio.post(
+        ApiConfig.resendVerification,
+        data: {'email': email},
       );
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);

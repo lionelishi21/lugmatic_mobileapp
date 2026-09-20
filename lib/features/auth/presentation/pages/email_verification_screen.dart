@@ -3,8 +3,6 @@ import 'package:provider/provider.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../data/services/auth_service.dart';
 import '../widgets/auth_header.dart';
-import '../widgets/auth_button.dart';
-import '../widgets/custom_text_field.dart';
 
 class EmailVerificationScreen extends StatefulWidget {
   final String email;
@@ -15,48 +13,36 @@ class EmailVerificationScreen extends StatefulWidget {
 }
 
 class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
-  final _codeController = TextEditingController();
-  bool _isLoading = false;
+  bool _isResending = false;
 
-  @override
-  void dispose() {
-    _codeController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _verify() async {
-    if (_codeController.text.isEmpty) return;
-    
-    setState(() => _isLoading = true);
+  // There's no short code to type in — the verification email contains a
+  // link with a long, randomly-generated token meant to be tapped, not
+  // copied by hand. This screen just confirms that and offers a resend;
+  // the actual verification happens when the user taps the link (opens in
+  // their browser today, since the app doesn't yet catch it as a deep link)
+  // and then logs in normally.
+  Future<void> _resend() async {
+    setState(() => _isResending = true);
     try {
       final authService = context.read<AuthService>();
-      await authService.verifyEmail(_codeController.text.trim());
-      
+      await authService.resendVerification(widget.email);
       if (mounted) {
-        setState(() => _isLoading = false);
-        _showSuccessAndGoBack();
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Colors.redAccent,
+          const SnackBar(
+            content: Text('Verification email sent — check your inbox.'),
+            backgroundColor: AppColors.primaryGreen,
           ),
         );
       }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString()), backgroundColor: Colors.redAccent),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isResending = false);
     }
-  }
-
-  void _showSuccessAndGoBack() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Email verified successfully! You can now log in.'),
-        backgroundColor: AppColors.primaryGreen,
-      ),
-    );
-    Navigator.pop(context); // Go back to Login
   }
 
   @override
@@ -78,43 +64,50 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               AuthHeader(
-                title: "Verify Email",
-                subtitle: "We've sent a verification code to ${widget.email}. Please enter it below to continue.",
+                title: "Verify Your Email",
+                subtitle: "We've sent a verification link to ${widget.email}. Open your inbox and tap the link to verify — then come back and log in.",
               ),
-              const SizedBox(height: 48),
-              CustomTextField(
-                label: "Verification Code",
-                hint: "Enter the code from your email",
-                controller: _codeController,
-                prefixIcon: Icons.verified_user_outlined,
+              const SizedBox(height: 40),
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(Icons.mark_email_unread_outlined, color: AppColors.primaryGreen, size: 28),
+                    SizedBox(width: 16),
+                    Expanded(
+                      child: Text(
+                        "Didn't get the email? Check your spam folder, or request a new one below.",
+                        style: TextStyle(color: Colors.white70),
+                      ),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 32),
-              AuthButton(
-                text: "Verify Now",
-                onPressed: _verify,
-                isLoading: _isLoading,
+              SizedBox(
+                height: 52,
+                child: ElevatedButton(
+                  onPressed: _isResending ? null : _resend,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryGreen,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  ),
+                  child: _isResending
+                      ? const SizedBox(height: 22, width: 22, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
+                      : const Text("Resend Verification Email", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 15)),
+                ),
               ),
-              const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                   const Text(
-                    "Didn't receive code? ",
-                    style: TextStyle(color: Colors.white70),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      // Optionally implement resend logic
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Verification email resent!')),
-                      );
-                    },
-                    child: const Text(
-                      "Resend",
-                      style: TextStyle(color: AppColors.primaryGreen, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ],
+              const SizedBox(height: 16),
+              Center(
+                child: TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Back to Login", style: TextStyle(color: Colors.white70)),
+                ),
               ),
             ],
           ),
