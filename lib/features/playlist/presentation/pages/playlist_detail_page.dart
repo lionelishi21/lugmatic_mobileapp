@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:lugmatic_flutter/data/models/music_model.dart';
-import 'package:lugmatic_flutter/data/models/artist_model.dart';
 import 'package:lugmatic_flutter/data/models/playlist_model.dart';
 import 'package:lugmatic_flutter/data/providers/audio_provider.dart';
 import 'package:lugmatic_flutter/data/providers/favorite_provider.dart';
@@ -29,10 +29,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
   bool _isLoading = true;
   PlaylistModel? _playlist;
   late PlaylistService _playlistService;
-
-  final List<MusicModel> _songs = [];
-
-  final List<ArtistModel> _contributors = [];
+  String _sortBy = 'Order Added';
 
   @override
   void initState() {
@@ -247,8 +244,6 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                 const SizedBox(height: 16),
                 _buildSongsList(),
                 const SizedBox(height: 32),
-                _buildContributors(),
-                const SizedBox(height: 32),
                 _buildPlaylistInfo(),
                 const SizedBox(height: 48),
                 CommentSectionWidget(
@@ -383,7 +378,8 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
   }
 
   Widget _buildPlaylistStats() {
-    final totalDuration = _songs.fold<Duration>(
+    final songs = _playlist!.songs;
+    final totalDuration = songs.fold<Duration>(
       Duration.zero,
       (sum, song) => sum + song.duration,
     );
@@ -392,7 +388,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          '${_songs.length} songs',
+          '${songs.length} songs',
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.7),
             fontSize: 14,
@@ -600,7 +596,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                   Icons.sort,
                   color: Colors.white.withValues(alpha: 0.7),
                 ),
-                onSelected: (value) => print('Sort by: $value'),
+                onSelected: (value) => setState(() => _sortBy = value),
                 itemBuilder: (context) => [
                   const PopupMenuItem(
                     value: 'Order Added',
@@ -634,6 +630,25 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
     );
   }
 
+  List<MusicModel> _sortedSongs() {
+    final songs = List<MusicModel>.from(_playlist!.songs);
+    switch (_sortBy) {
+      case 'Title':
+        songs.sort((a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
+        break;
+      case 'Artist':
+        songs.sort((a, b) => a.artist.toLowerCase().compareTo(b.artist.toLowerCase()));
+        break;
+      case 'Duration':
+        songs.sort((a, b) => a.duration.compareTo(b.duration));
+        break;
+      case 'Order Added':
+      default:
+        break;
+    }
+    return songs;
+  }
+
   Widget _buildSongsList() {
     if (_playlist == null || _playlist!.songs.isEmpty) {
       return Center(
@@ -650,7 +665,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
-        children: _playlist!.songs.asMap().entries.map((entry) {
+        children: _sortedSongs().asMap().entries.map((entry) {
           final index = entry.key;
           final song = entry.value;
           return _buildSongItem(song, index + 1);
@@ -796,88 +811,6 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
     );
   }
 
-  Widget _buildContributors() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Contributors',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            height: 80,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: _contributors.length,
-              itemBuilder: (context, index) {
-                final artist = _contributors[index];
-                return Container(
-                  width: 80,
-                  margin: const EdgeInsets.only(right: 12),
-                  child: Column(
-                    children: [
-                      Stack(
-                        children: [
-                          Container(
-                            width: 60,
-                            height: 60,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(30),
-                              image: DecorationImage(
-                                image: NetworkImage(artist.imageUrl),
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                          if (artist.isVerified)
-                            Positioned(
-                              top: 0,
-                              right: 0,
-                              child: Container(
-                                padding: const EdgeInsets.all(2),
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFF10B981),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.verified,
-                                  color: Colors.white,
-                                  size: 10,
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        artist.name,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        textAlign: TextAlign.center,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildPlaylistInfo() {
     if (_playlist == null) return const SizedBox.shrink();
     
@@ -933,9 +866,10 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
   }
 
   void _playPlaylist() {
-    if (_playlist != null && _playlist!.songs.isNotEmpty) {
-      context.read<AudioProvider>().playMusic(_playlist!.songs[0], queue: _playlist!.songs);
-    }
+    if (_playlist == null || _playlist!.songs.isEmpty) return;
+    final queue = List<MusicModel>.from(_playlist!.songs);
+    if (_isShuffled) queue.shuffle();
+    context.read<AudioProvider>().playMusic(queue[0], queue: queue);
   }
 
   void _playSong(MusicModel song) {
@@ -966,32 +900,80 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
   void _showAddToPlaylistDialog(MusicModel song) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         backgroundColor: const Color(0xFF1F2937),
         title: const Text(
           'Add to Playlist',
           style: TextStyle(color: Colors.white),
         ),
-        content: const Text(
-          'Choose a playlist to add this song to.',
-          style: TextStyle(color: Colors.white70),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Added "${song.title}" to playlist'),
-                  backgroundColor: const Color(0xFF10B981),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: FutureBuilder<List<PlaylistModel>>(
+            future: _playlistService.getUserPlaylists(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 24),
+                  child: Center(child: CircularProgressIndicator(color: Color(0xFF10B981))),
+                );
+              }
+              if (snapshot.hasError) {
+                return const Text(
+                  'Failed to load your playlists.',
+                  style: TextStyle(color: Colors.white70),
+                );
+              }
+              final playlists = snapshot.data ?? [];
+              if (playlists.isEmpty) {
+                return const Text(
+                  "You don't have any playlists yet.",
+                  style: TextStyle(color: Colors.white70),
+                );
+              }
+              return SizedBox(
+                height: 300,
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: playlists.length,
+                  itemBuilder: (context, index) {
+                    final target = playlists[index];
+                    return ListTile(
+                      leading: const Icon(Icons.queue_music, color: Colors.white70),
+                      title: Text(target.title, style: const TextStyle(color: Colors.white)),
+                      onTap: () async {
+                        Navigator.pop(dialogContext);
+                        try {
+                          await _playlistService.addSongToPlaylist(
+                            playlistId: target.id,
+                            songId: song.id,
+                          );
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Added "${song.title}" to "${target.title}"'),
+                                backgroundColor: const Color(0xFF10B981),
+                              ),
+                            );
+                          }
+                        } catch (e) {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Failed to add song: $e'), backgroundColor: Colors.red),
+                            );
+                          }
+                        }
+                      },
+                    );
+                  },
                 ),
               );
             },
-            child: const Text('Add'),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
           ),
         ],
       ),
@@ -999,9 +981,11 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
   }
 
   void _removeSongFromPlaylist(MusicModel song) {
+    final playlist = _playlist;
+    if (playlist == null) return;
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         backgroundColor: const Color(0xFF1F2937),
         title: const Text(
           'Remove Song',
@@ -1013,18 +997,33 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Removed "${song.title}" from playlist'),
-                  backgroundColor: Colors.red,
-                ),
-              );
+            onPressed: () async {
+              Navigator.pop(dialogContext);
+              try {
+                await _playlistService.removeSongFromPlaylist(
+                  playlistId: playlist.id,
+                  songId: song.id,
+                );
+                if (mounted) {
+                  setState(() => playlist.songs.removeWhere((s) => s.id == song.id));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Removed "${song.title}" from playlist'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Failed to remove song: $e'), backgroundColor: Colors.red),
+                  );
+                }
+              }
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             child: const Text('Remove'),
@@ -1035,21 +1034,14 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
   }
 
   void _shareSong(MusicModel song) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Shared "${song.title}"'),
-        backgroundColor: const Color(0xFF10B981),
-      ),
-    );
+    final url = 'https://lumatixmusic.com/public/song-share/${song.id}';
+    Share.share('Check out "${song.title}" by ${song.artist} on Lumatix!\n$url');
   }
 
   void _sharePlaylist() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Shared "${widget.playlist.title}" playlist'),
-        backgroundColor: const Color(0xFF10B981),
-      ),
-    );
+    if (_playlist == null) return;
+    final url = 'https://lumatixmusic.com/playlist/${_playlist!.id}';
+    Share.share('Check out the "${_playlist!.title}" playlist on Lumatix!\n$url');
   }
 
   void _showPlaylistOptions() {
@@ -1082,7 +1074,9 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
               title: const Text('Download Playlist', style: TextStyle(color: Colors.white)),
               onTap: () {
                 Navigator.pop(context);
-                print('Download playlist');
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Offline downloads are coming soon')),
+                );
               },
             ),
             ListTile(
