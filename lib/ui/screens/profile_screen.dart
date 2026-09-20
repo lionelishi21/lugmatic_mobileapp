@@ -11,6 +11,7 @@ import '../../features/home/presentation/pages/artist_detail_page.dart';
 import '../../features/live_stream/presentation/pages/go_live_setup_page.dart';
 import '../../features/live_stream/presentation/pages/live_host_screen.dart';
 import '../../features/onboarding/presentation/pages/onboarding_screen.dart';
+import '../../features/auth/presentation/pages/change_password_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -160,6 +161,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ],
             const SizedBox(height: 32),
             const Divider(color: Colors.white24),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Change Password', style: TextStyle(color: Colors.white70, fontSize: 14)),
+              trailing: const Icon(Icons.arrow_forward_ios, color: Colors.white24, size: 16),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ChangePasswordScreen())),
+            ),
             _buildLegalLink(context, 'Privacy Policy', '/privacy'),
             _buildLegalLink(context, 'Terms of Service', '/terms'),
             const SizedBox(height: 32),

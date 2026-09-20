@@ -201,6 +201,21 @@ class AuthService {
     await _tokenStorage.clearTokens();
   }
 
+  /// Change the current user's password (requires the current one).
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      await _apiClient.dio.post(ApiConfig.changePassword, data: {
+        'currentPassword': currentPassword,
+        'newPassword': newPassword,
+      });
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
   /// Fetch the currently authenticated user profile.
   Future<User?> getCurrentUser() async {
     try {

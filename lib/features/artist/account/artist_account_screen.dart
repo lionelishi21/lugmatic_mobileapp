@@ -6,6 +6,7 @@ import '../../../data/providers/auth_provider.dart';
 import 'profile_editor_screen.dart';
 import 'payout_settings_screen.dart';
 import 'support_screen.dart';
+import '../../auth/presentation/pages/change_password_screen.dart';
 import '../../home/presentation/pages/notifications_page.dart';
 
 class ArtistAccountScreen extends StatelessWidget {
@@ -121,6 +122,14 @@ class ArtistAccountScreen extends StatelessWidget {
                   onTap: () => Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const PayoutSettingsScreen()),
+                  ),
+                ),
+                _buildMenuItem(
+                  icon: Icons.lock_outline,
+                  label: 'Change Password',
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const ChangePasswordScreen()),
                   ),
                 ),
                 _buildMenuItem(
