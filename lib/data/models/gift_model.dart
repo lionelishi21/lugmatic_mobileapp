@@ -1,3 +1,5 @@
+import '../../core/config/api_config.dart';
+
 class GiftModel {
   final String id;
   final String name;
@@ -41,7 +43,7 @@ class GiftModel {
       id: json['_id'] ?? json['id'] ?? '',
       name: json['name'] ?? '',
       description: json['description'] ?? '',
-      imageUrl: json['image'] ?? json['imageUrl'] ?? '',
+      imageUrl: ApiConfig.resolveUrl(json['image'] ?? json['imageUrl'] ?? ''),
       price: (json['coinCost'] ?? json['value'] ?? 0).toDouble(), // Use absolute coin cost
       currency: json['currency'] ?? 'coins',
       category: json['category'] ?? json['type'] ?? 'support',

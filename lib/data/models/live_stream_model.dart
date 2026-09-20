@@ -1,3 +1,5 @@
+import '../../core/config/api_config.dart';
+
 /// Model for live stream data returned by the backend API.
 class LiveStreamModel {
   final String id;
@@ -64,7 +66,7 @@ class LiveStreamModel {
       title: json['title'] ?? '',
       description: json['description'] ?? '',
       category: json['category'] ?? 'music',
-      coverImage: json['coverImage'] ?? '',
+      coverImage: ApiConfig.resolveUrl(json['coverImage'] ?? ''),
       host: json['host'] != null
           ? (json['host'] is Map
               ? LiveStreamHost.fromJson(json['host'])

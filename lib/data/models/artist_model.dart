@@ -1,3 +1,5 @@
+import '../../core/config/api_config.dart';
+
 class ArtistModel {
   final String id;
   final String name;
@@ -98,7 +100,7 @@ class ArtistModel {
     return ArtistModel(
       id: json['_id'] ?? json['id'] ?? '',
       name: json['name'] ?? '',
-      imageUrl: json['image'] ?? json['imageUrl'] ?? json['artwork'] ?? '',
+      imageUrl: ApiConfig.resolveUrl(json['imageUrl'] ?? json['image'] ?? json['artwork'] ?? ''),
       bio: json['bio'] ?? '',
       followers: followerCount,
       genres: List<String>.from(json['genres'] ?? []),

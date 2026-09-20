@@ -1,3 +1,5 @@
+import '../../core/config/api_config.dart';
+
 class CommentModel {
   final String id;
   final String userId;
@@ -37,7 +39,7 @@ class CommentModel {
       name = user['firstName'] != null && user['lastName'] != null 
           ? '${user['firstName']} ${user['lastName']}'.trim()
           : user['name'] ?? 'Unknown';
-      avatar = user['profilePicture'] ?? user['image'] ?? user['avatar'] ?? '';
+      avatar = ApiConfig.resolveUrl(user['profilePicture'] ?? user['image'] ?? user['avatar'] ?? '');
       uId = user['_id'] ?? user['id'] ?? '';
     } else {
       uId = user?.toString() ?? '';
