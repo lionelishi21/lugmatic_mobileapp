@@ -86,19 +86,6 @@ class MusicService {
     }
   }
 
-  /// Toggle favorite status for a song.
-  Future<void> toggleFavorite(String id, bool isFavorite) async {
-    try {
-      if (isFavorite) {
-        await _apiClient.dio.post('${ApiConfig.mobileFavorites}/song/$id');
-      } else {
-        await _apiClient.dio.delete('${ApiConfig.mobileFavorites}/song/$id');
-      }
-    } on DioException catch (e) {
-      throw ApiException.fromDioException(e);
-    }
-  }
-
   /// Fetch related songs for a given song (using genre as a recommendation signal).
   Future<List<MusicModel>> getRelatedSongs(String genre, {String? excludeId}) async {
     try {

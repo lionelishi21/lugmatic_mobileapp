@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../data/models/music_model.dart';
 import '../../data/providers/audio_provider.dart';
-import '../../data/services/music_service.dart';
+import '../../data/providers/favorite_provider.dart';
 import '../../core/theme/neumorphic_theme.dart';
 import 'package:video_player/video_player.dart';
 import 'neumorphic_button.dart';
@@ -26,7 +26,6 @@ class PlayerScreen extends StatefulWidget {
 }
 
 class _PlayerScreenState extends State<PlayerScreen> with TickerProviderStateMixin {
-  bool _isFavorited = false;
   bool _karaokeMode = true;
   bool _lyricsExpanded = true;
   VideoPlayerController? _videoController;
@@ -43,7 +42,7 @@ class _PlayerScreenState extends State<PlayerScreen> with TickerProviderStateMix
   void initState() {
     super.initState();
     _lastVideoUrl = widget.music.videoUrl;
-    _isFavorited = widget.music.isLiked;
+    context.read<FavoriteProvider>().seed('song', widget.music.id, widget.music.isLiked);
     _initVideo(widget.music.videoUrl);
 
     // Slow ambient "breathing" zoom for the blurred album-art background.
@@ -95,11 +94,8 @@ class _PlayerScreenState extends State<PlayerScreen> with TickerProviderStateMix
       _videoController = null;
       _initVideo(newVideoUrl);
     }
-    
-    // Sync favorited status
-    if (_isFavorited != currentMusic.isLiked) {
-      setState(() => _isFavorited = currentMusic.isLiked);
-    }
+
+    context.read<FavoriteProvider>().seed('song', currentMusic.id, currentMusic.isLiked);
   }
 
   void _initVideo(String videoUrl) {
@@ -500,13 +496,18 @@ class _PlayerScreenState extends State<PlayerScreen> with TickerProviderStateMix
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
-                              IconButton(
-                                onPressed: () => _toggleFavorite(currentMusic),
-                                icon: Icon(
-                                  _isFavorited ? Icons.favorite : Icons.favorite_border,
-                                  color: _isFavorited ? Colors.red : Colors.white60,
-                                ),
-                              ),
+                              Builder(builder: (context) {
+                                final isFavorited = context
+                                    .watch<FavoriteProvider>()
+                                    .isFavorited('song', currentMusic.id);
+                                return IconButton(
+                                  onPressed: () => _toggleFavorite(currentMusic),
+                                  icon: Icon(
+                                    isFavorited ? Icons.favorite : Icons.favorite_border,
+                                    color: isFavorited ? Colors.red : Colors.white60,
+                                  ),
+                                );
+                              }),
                               IconButton(
                                 onPressed: () {
                                   showModalBottomSheet(
@@ -891,18 +892,8 @@ class _PlayerScreenState extends State<PlayerScreen> with TickerProviderStateMix
   }
 
   Future<void> _toggleFavorite(MusicModel music) async {
-    final musicService = context.read<MusicService>();
-    final newValue = !_isFavorited;
     try {
-      await musicService.toggleFavorite(music.id, newValue);
-      // Update the provider's cached model, not just local state — the
-      // _onAudioProviderChanged listener fires on every position tick and
-      // was reverting this same local flip because it never saw the
-      // provider's copy change.
-      if (mounted) {
-        context.read<AudioProvider>().updateCurrentMusicLikedState(music.id, newValue);
-        setState(() => _isFavorited = newValue);
-      }
+      await context.read<FavoriteProvider>().toggle('song', music.id);
     } catch (e) {
       debugPrint("Favorite toggle error: $e");
     }

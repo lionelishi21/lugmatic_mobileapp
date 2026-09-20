@@ -9,6 +9,7 @@ import '../../../../data/models/music_model.dart';
 import '../../../../shared/widgets/gift_bottom_sheet.dart';
 import '../../../../shared/widgets/comment_section_widget.dart';
 import '../../../../data/providers/audio_provider.dart';
+import '../../../../data/providers/favorite_provider.dart';
 import '../../../../ui/widgets/player_screen.dart';
 
 class SongDetailPage extends StatefulWidget {
@@ -25,7 +26,6 @@ class _SongDetailPageState extends State<SongDetailPage> {
   MusicModel? _song;
   List<MusicModel> _related = [];
   bool _loading = true;
-  bool _isLiked = false;
   String _tab = 'about'; // 'about' | 'lyrics' | 'video' | 'comments'
   String? _lyrics;
 
@@ -38,6 +38,9 @@ class _SongDetailPageState extends State<SongDetailPage> {
   void initState() {
     super.initState();
     _song = widget.initialData;
+    if (widget.initialData != null) {
+      context.read<FavoriteProvider>().seed('song', widget.songId, widget.initialData!.isLiked);
+    }
     _loadData();
   }
 
@@ -111,6 +114,7 @@ class _SongDetailPageState extends State<SongDetailPage> {
       }
 
       if (mounted) {
+        context.read<FavoriteProvider>().seed('song', widget.songId, song.isLiked);
         setState(() {
           _song = song;
           _related = related;
@@ -286,10 +290,15 @@ class _SongDetailPageState extends State<SongDetailPage> {
                     ),
                     const SizedBox(width: 10),
                     // Like button
-                    _IconActionButton(
-                      onTap: () => setState(() => _isLiked = !_isLiked),
-                      icon: _isLiked ? Icons.favorite : Icons.favorite_border,
-                      color: _isLiked ? const Color(0xFFEF4444) : Colors.white,
+                    Consumer<FavoriteProvider>(
+                      builder: (context, favorites, _) {
+                        final isLiked = favorites.isFavorited('song', widget.songId);
+                        return _IconActionButton(
+                          onTap: () => context.read<FavoriteProvider>().toggle('song', widget.songId),
+                          icon: isLiked ? Icons.favorite : Icons.favorite_border,
+                          color: isLiked ? const Color(0xFFEF4444) : Colors.white,
+                        );
+                      },
                     ),
                     const SizedBox(width: 10),
                     // Gift button

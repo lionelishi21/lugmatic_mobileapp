@@ -24,6 +24,7 @@ import 'data/services/artist_request_service.dart';
 import 'data/services/video_service.dart';
 import 'data/services/gift_service.dart';
 import 'data/services/music_service.dart';
+import 'data/services/favorites_service.dart';
 import 'data/services/subscription_service.dart';
 import 'data/services/revenuecat_service.dart';
 import 'data/services/mixer_service.dart';
@@ -39,6 +40,7 @@ import 'data/services/artist/track_service.dart';
 import 'data/services/socket_service.dart';
 import 'data/services/live_stream_service.dart';
 import 'data/providers/audio_provider.dart';
+import 'data/providers/favorite_provider.dart';
 import 'data/providers/live_streaming_provider.dart';
 import 'core/gifts/gift_pop_overlay.dart';
 import 'data/services/contributor/contributor_service.dart';
@@ -149,6 +151,7 @@ void main() async {
     final contributorService = ContributorService(apiClient: apiClient);
     final supportService = SupportService(apiClient: apiClient);
     final podcastService = PodcastService(apiClient: apiClient);
+    final favoritesService = FavoritesService(apiClient: apiClient);
     
     // Initialize FCM
     final fcmService = FcmService(notificationService: notificationService);
@@ -186,6 +189,10 @@ void main() async {
           Provider<ManagementService>.value(value: managementService),
           Provider<MessageService>.value(value: messageService),
           Provider<PodcastService>.value(value: podcastService),
+          Provider<FavoritesService>.value(value: favoritesService),
+          ChangeNotifierProvider(
+            create: (_) => FavoriteProvider(service: favoritesService),
+          ),
           ChangeNotifierProvider(
             create: (context) => MessageProvider(
               messageService: messageService,

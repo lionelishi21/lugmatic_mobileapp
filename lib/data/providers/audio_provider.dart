@@ -209,6 +209,14 @@ class AudioProvider extends ChangeNotifier {
       _position = Duration.zero;
       _duration = Duration.zero;
 
+      if (_isPlaying) {
+        try {
+          await _audioPlayer.stop();
+        } catch (e) {
+          debugPrint("Error stopping previous playback: $e");
+        }
+      }
+
       if (queue != null && queue.isNotEmpty) {
         _queue = queue.where(_hasParseableAudioUrl).toList();
         _currentIndex = _queue.indexWhere((m) => m.id == music.id);
@@ -300,23 +308,6 @@ class AudioProvider extends ChangeNotifier {
         notifyListeners();
       }
     }
-  }
-
-  /// Updates the liked state on the currently-playing track (and its entry
-  /// in the queue) after a like/unlike call succeeds. Without this, the
-  /// Now Playing screen's own provider-change listener — which fires on
-  /// every position tick — kept seeing its optimistic local toggle as "out
-  /// of sync" with this stale cached model and immediately reverted it,
-  /// making the heart button look like it doesn't do anything.
-  void updateCurrentMusicLikedState(String musicId, bool isLiked) {
-    if (_currentMusic?.id == musicId) {
-      _currentMusic!.isLiked = isLiked;
-    }
-    final idx = _queue.indexWhere((m) => m.id == musicId);
-    if (idx != -1) {
-      _queue[idx].isLiked = isLiked;
-    }
-    notifyListeners();
   }
 
   void pause() {

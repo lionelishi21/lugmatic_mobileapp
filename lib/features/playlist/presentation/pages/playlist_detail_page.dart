@@ -3,6 +3,7 @@ import 'package:lugmatic_flutter/data/models/music_model.dart';
 import 'package:lugmatic_flutter/data/models/artist_model.dart';
 import 'package:lugmatic_flutter/data/models/playlist_model.dart';
 import 'package:lugmatic_flutter/data/providers/audio_provider.dart';
+import 'package:lugmatic_flutter/data/providers/favorite_provider.dart';
 import 'package:lugmatic_flutter/ui/widgets/player_screen.dart';
 import 'package:provider/provider.dart';
 import '../../../../shared/widgets/comment_section_widget.dart';
@@ -24,7 +25,6 @@ class PlaylistDetailPage extends StatefulWidget {
 }
 
 class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
-  bool _isLiked = false;
   bool _isShuffled = false;
   bool _isLoading = true;
   PlaylistModel? _playlist;
@@ -564,10 +564,15 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
             () => setState(() => _isShuffled = !_isShuffled),
           ),
           const SizedBox(width: 12),
-          _buildCircleAction(
-            _isLiked ? Icons.favorite : Icons.favorite_border,
-            _isLiked ? Colors.red : Colors.white.withValues(alpha: 0.8),
-            () => setState(() => _isLiked = !_isLiked),
+          Consumer<FavoriteProvider>(
+            builder: (context, favorites, _) {
+              final isLiked = favorites.isFavorited('playlist', widget.playlist.id);
+              return _buildCircleAction(
+                isLiked ? Icons.favorite : Icons.favorite_border,
+                isLiked ? Colors.red : Colors.white.withValues(alpha: 0.8),
+                () => context.read<FavoriteProvider>().toggle('playlist', widget.playlist.id),
+              );
+            },
           ),
         ],
       ),

@@ -7,6 +7,7 @@ import 'package:lugmatic_flutter/data/services/music_service.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:intl/intl.dart';
 import '../../../../shared/widgets/comment_section_widget.dart';
+import '../../../../data/providers/favorite_provider.dart';
 
 class MusicDetailPage extends StatefulWidget {
   final MusicModel music;
@@ -27,13 +28,13 @@ class _MusicDetailPageState extends State<MusicDetailPage> {
   Duration _duration = Duration.zero;
   Duration _position = Duration.zero;
   List<MusicModel> _relatedSongs = [];
-  bool _isFavorited = false;
   bool _isLoadingRelated = false;
 
   @override
   void initState() {
     super.initState();
     _audioPlayer = AudioPlayer();
+    context.read<FavoriteProvider>().seed('song', widget.music.id, widget.music.isLiked);
     _initPlayer();
     _loadRelatedSongs();
   }
@@ -176,20 +177,25 @@ class _MusicDetailPageState extends State<MusicDetailPage> {
                     ),
                   ),
                   const Spacer(),
-                  GestureDetector(
-                    onTap: _toggleFavorite,
-                    child: Container(
-                      width: 44,
-                      height: 44,
-                      decoration: NeumorphicTheme.neumorphicDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(
-                        _isFavorited ? Icons.favorite : Icons.favorite_border,
-                        color: NeumorphicTheme.primaryAccent,
-                        size: 22,
-                      ),
-                    ),
+                  Consumer<FavoriteProvider>(
+                    builder: (context, favorites, _) {
+                      final isFavorited = favorites.isFavorited('song', widget.music.id);
+                      return GestureDetector(
+                        onTap: _toggleFavorite,
+                        child: Container(
+                          width: 44,
+                          height: 44,
+                          decoration: NeumorphicTheme.neumorphicDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            isFavorited ? Icons.favorite : Icons.favorite_border,
+                            color: NeumorphicTheme.primaryAccent,
+                            size: 22,
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -514,19 +520,16 @@ class _MusicDetailPageState extends State<MusicDetailPage> {
   }
 
   Future<void> _toggleFavorite() async {
-    final musicService = context.read<MusicService>();
-    final newFavoriteStatus = !_isFavorited;
+    final favorites = context.read<FavoriteProvider>();
+    final wasFavorited = favorites.isFavorited('song', widget.music.id);
 
     try {
-      await musicService.toggleFavorite(widget.music.id, newFavoriteStatus);
-      setState(() {
-        _isFavorited = newFavoriteStatus;
-      });
+      await favorites.toggle('song', widget.music.id);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(newFavoriteStatus ? 'Added to favorites' : 'Removed from favorites'),
+            content: Text(wasFavorited ? 'Removed from favorites' : 'Added to favorites'),
             backgroundColor: NeumorphicTheme.primaryAccent,
             duration: const Duration(seconds: 1),
           ),
