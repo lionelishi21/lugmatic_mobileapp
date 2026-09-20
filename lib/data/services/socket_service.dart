@@ -41,6 +41,9 @@ class SocketService {
   final _dmMessageController = StreamController<Map<String, dynamic>>.broadcast();
   final _commentNewController = StreamController<Map<String, dynamic>>.broadcast();
   final _commentLikedController = StreamController<Map<String, dynamic>>.broadcast();
+  final _streamUserTypingController = StreamController<Map<String, dynamic>>.broadcast();
+  final _dmTypingController = StreamController<Map<String, dynamic>>.broadcast();
+  final _dmStopTypingController = StreamController<Map<String, dynamic>>.broadcast();
 
   /// Real-time chat messages.
   Stream<LiveStreamChatMessage> get onChatMessage => _chatController.stream;
@@ -96,6 +99,15 @@ class SocketService {
 
   /// A comment's like count changed in a thread this client has joined.
   Stream<Map<String, dynamic>> get onCommentLiked => _commentLikedController.stream;
+
+  /// Someone else is typing in the current stream's chat.
+  Stream<Map<String, dynamic>> get onStreamUserTyping => _streamUserTypingController.stream;
+
+  /// The other participant started typing in a DM conversation.
+  Stream<Map<String, dynamic>> get onDmTyping => _dmTypingController.stream;
+
+  /// The other participant stopped typing in a DM conversation.
+  Stream<Map<String, dynamic>> get onDmStopTyping => _dmStopTypingController.stream;
 
   SocketService._({required TokenStorage tokenStorage})
       : _tokenStorage = tokenStorage;
@@ -285,6 +297,24 @@ class SocketService {
       }
     });
 
+    _socket!.on('stream:user-typing', (data) {
+      if (data is Map<String, dynamic>) {
+        _streamUserTypingController.add(data);
+      }
+    });
+
+    _socket!.on('dm:typing', (data) {
+      if (data is Map<String, dynamic>) {
+        _dmTypingController.add(data);
+      }
+    });
+
+    _socket!.on('dm:stop-typing', (data) {
+      if (data is Map<String, dynamic>) {
+        _dmStopTypingController.add(data);
+      }
+    });
+
     // ── Comment thread events ───────────────────────────────────────
     _socket!.on('comment:new', (data) {
       if (data is Map<String, dynamic>) {
@@ -369,6 +399,16 @@ class SocketService {
     _socket?.emit('stream:typing', {'streamId': streamId});
   }
 
+  /// Notify the other participant that the user is typing in a DM thread.
+  void sendDmTyping({required String recipientId, required String conversationId}) {
+    _socket?.emit('dm:typing', {'recipientId': recipientId, 'conversationId': conversationId});
+  }
+
+  /// Notify the other participant that the user stopped typing.
+  void sendDmStopTyping({required String recipientId, required String conversationId}) {
+    _socket?.emit('dm:stop-typing', {'recipientId': recipientId, 'conversationId': conversationId});
+  }
+
   /// Raise hand to speak.
   void raiseHand(String streamId) {
     _socket?.emit('stream:raise-hand', {'streamId': streamId});
@@ -394,6 +434,9 @@ class SocketService {
     _notificationController.close();
     _hostSwitchedSessionController.close();
     _dmMessageController.close();
+    _streamUserTypingController.close();
+    _dmTypingController.close();
+    _dmStopTypingController.close();
     _instance = null;
   }
 }

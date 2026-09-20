@@ -63,6 +63,10 @@ class _TikTokLivePageState extends State<TikTokLivePage>
   StreamSubscription? _clashInvitationSub;
   StreamSubscription? _hostSwitchedSessionSub;
   StreamSubscription? _realmChangedSub;
+  StreamSubscription? _streamTypingSub;
+  String? _typingUsername;
+  Timer? _typingClearTimer;
+  Timer? _sendTypingDebounce;
 
   @override
   void initState() {
@@ -72,9 +76,18 @@ class _TikTokLivePageState extends State<TikTokLivePage>
       duration: const Duration(milliseconds: 1500),
     )..repeat(reverse: true);
 
+    _commentController.addListener(_onCommentTyping);
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initServices();
     });
+  }
+
+  void _onCommentTyping() {
+    if (_liveStreams.isEmpty || _commentController.text.trim().isEmpty) return;
+    if (_sendTypingDebounce?.isActive ?? false) return;
+    _socketService?.sendTyping(_liveStreams[_currentStreamIndex].id);
+    _sendTypingDebounce = Timer(const Duration(seconds: 2), () {});
   }
 
   Future<void> _initServices() async {
@@ -186,6 +199,17 @@ class _TikTokLivePageState extends State<TikTokLivePage>
           ),
         );
       }
+    });
+
+    // The backend broadcasts 'stream:user-typing' with no corresponding
+    // stop-typing event for stream chat, so auto-clear after a short pause.
+    _streamTypingSub = _socketService?.onStreamUserTyping.listen((data) {
+      if (!mounted) return;
+      setState(() => _typingUsername = data['username']?.toString());
+      _typingClearTimer?.cancel();
+      _typingClearTimer = Timer(const Duration(seconds: 3), () {
+        if (mounted) setState(() => _typingUsername = null);
+      });
     });
   }
 
@@ -359,11 +383,15 @@ class _TikTokLivePageState extends State<TikTokLivePage>
     _clashInvitationSub?.cancel();
     _hostSwitchedSessionSub?.cancel();
     _realmChangedSub?.cancel();
+    _streamTypingSub?.cancel();
+    _typingClearTimer?.cancel();
+    _sendTypingDebounce?.cancel();
     if (_liveStreams.isNotEmpty) {
       _socketService?.leaveStream(_liveStreams[_currentStreamIndex].id);
     }
     _liveIndicatorController.dispose();
     _pageController.dispose();
+    _commentController.removeListener(_onCommentTyping);
     _commentController.dispose();
     super.dispose();
   }
@@ -1206,6 +1234,18 @@ class _TikTokLivePageState extends State<TikTokLivePage>
                 },
               ),
             ),
+            if (_typingUsername != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  '$_typingUsername is typing…',
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.6),
+                    fontSize: 12,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ),
           ],
         ),
       ),

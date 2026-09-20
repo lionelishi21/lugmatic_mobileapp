@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -6,6 +7,8 @@ import '../../../../data/providers/auth_provider.dart';
 import '../../../../data/models/conversation_model.dart';
 import '../../../../data/models/message_model.dart';
 import '../../../../core/config/api_config.dart';
+import '../../../../core/network/token_storage.dart';
+import '../../../../data/services/socket_service.dart';
 
 class ChatPage extends StatefulWidget {
   final ConversationModel conversation;
@@ -18,6 +21,13 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  late SocketService _socketService;
+  StreamSubscription? _typingSub;
+  StreamSubscription? _stopTypingSub;
+  Timer? _stopTypingTimer;
+  bool _otherIsTyping = false;
+
+  String get _recipientId => widget.conversation.otherParticipant['_id']?.toString() ?? '';
 
   @override
   void initState() {
@@ -25,13 +35,52 @@ class _ChatPageState extends State<ChatPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<MessageProvider>().fetchMessages(widget.conversation.id);
     });
+    _socketService = SocketService.getInstance(tokenStorage: context.read<TokenStorage>());
+    _typingSub = _socketService.onDmTyping.listen((data) {
+      if (data['conversationId'] == widget.conversation.id && mounted) {
+        setState(() => _otherIsTyping = true);
+      }
+    });
+    _stopTypingSub = _socketService.onDmStopTyping.listen((data) {
+      if (data['conversationId'] == widget.conversation.id && mounted) {
+        setState(() => _otherIsTyping = false);
+      }
+    });
+    _controller.addListener(_onTyping);
+  }
+
+  void _onTyping() {
+    if (_recipientId.isEmpty) return;
+    _socketService.sendDmTyping(recipientId: _recipientId, conversationId: widget.conversation.id);
+    _stopTypingTimer?.cancel();
+    _stopTypingTimer = Timer(const Duration(seconds: 2), () {
+      _socketService.sendDmStopTyping(recipientId: _recipientId, conversationId: widget.conversation.id);
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(_onTyping);
+    _typingSub?.cancel();
+    _stopTypingSub?.cancel();
+    _stopTypingTimer?.cancel();
+    if (_recipientId.isNotEmpty) {
+      _socketService.sendDmStopTyping(recipientId: _recipientId, conversationId: widget.conversation.id);
+    }
+    _controller.dispose();
+    _scrollController.dispose();
+    super.dispose();
   }
 
   void _sendMessage() async {
     final content = _controller.text.trim();
     if (content.isEmpty) return;
-    
+
     _controller.clear();
+    _stopTypingTimer?.cancel();
+    if (_recipientId.isNotEmpty) {
+      _socketService.sendDmStopTyping(recipientId: _recipientId, conversationId: widget.conversation.id);
+    }
     try {
       await context.read<MessageProvider>().sendMessage(widget.conversation.id, content);
       _scrollToBottom();
@@ -74,8 +123,17 @@ class _ChatPageState extends State<ChatPage> {
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: Text(widget.conversation.otherParticipantName, 
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(widget.conversation.otherParticipantName,
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                  if (_otherIsTyping)
+                    const Text('typing…',
+                        style: TextStyle(fontSize: 12, color: Color(0xFF10B981), fontStyle: FontStyle.italic)),
+                ],
+              ),
             ),
           ],
         ),
