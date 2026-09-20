@@ -337,7 +337,7 @@ class _LiveClashCard extends StatelessWidget {
     final challengerPct = clash.challengerScore / total;
 
     return GestureDetector(
-      onTap: () => Navigator.pushNamed(context, '/live', arguments: clash.id),
+      onTap: () => Navigator.pushNamed(context, '/clash', arguments: clash.id),
       child: AnimatedBuilder(
         animation: pulseAnim,
         builder: (_, __) => Container(
